@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+  
+  <!-- Servlets -->
+  <servlet>
+    <servlet-name>emistoolbox</servlet-name>
+    <servlet-class>com.emistoolbox.server.EmisToolboxServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>EmisChartServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.EmisChartServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>UploadServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.UploadServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>StopServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.StopServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>ApiUserAuthServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.ApiUserAuthServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>ApiInfoServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.ApiInfoServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>ApiDataServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.ApiDataServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>ApiImportServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.ApiImportServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>ApiPdfServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.ApiPdfServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>OpenLayersServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.OpenLayersServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>ImportStatusServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.ImportStatusServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>RedirectServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.RedirectServlet</servlet-class>
+    <init-param>
+      <param-name>roles</param-name>
+      <param-value>viewer,report</param-value>
+    </init-param>
+    <init-param>
+      <param-name>datasets</param-name>
+      <param-value>zambia</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>emistoolbox</servlet-name>
+    <url-pattern>/emistoolbox/service</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>emistoolbox</servlet-name>
+    <url-pattern>/service</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>EmisChartServlet</servlet-name>
+    <url-pattern>/emistoolbox/content</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>EmisChartServlet</servlet-name>
+    <url-pattern>/content</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>UploadServlet</servlet-name>
+    <url-pattern>/emistoolbox/upload</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>UploadServlet</servlet-name>
+    <url-pattern>/upload</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>StopServlet</servlet-name>
+    <url-pattern>/stop</url-pattern>
+  </servlet-mapping>
+
+  
+  <servlet-mapping>
+    <servlet-name>ApiImportServlet</servlet-name>
+    <url-pattern>/api/import</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>ApiUserAuthServlet</servlet-name>
+    <url-pattern>/api/userauth</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ApiDataServlet</servlet-name>
+    <url-pattern>/api/data</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ApiInfoServlet</servlet-name>
+    <url-pattern>/api/info</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ApiPdfServlet</servlet-name>
+    <url-pattern>/api/pdf</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>OpenLayersServlet</servlet-name>
+    <url-pattern>/map/openLayers</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ImportStatusServlet</servlet-name>
+    <url-pattern>/api/importStatus</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>RedirectServlet</servlet-name>
+    <url-pattern>/show</url-pattern>
+  </servlet-mapping>
+  
+  <!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>EmisToolbox.html</welcome-file>
+  </welcome-file-list>
+
+</web-app>

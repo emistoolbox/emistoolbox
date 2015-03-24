@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="utf-8"?>
+<book xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
+  <info>
+    <title>EMIS Toolbox User Manual</title>
+    <author>
+        <personname>Jorg Bauer</personname>
+        <email>murkhog@googlemail.com</email>
+        <uri>http://emistoolbox.com</uri>
+    </author>
+  </info>
+
+  <chapter>
+    <title>EMIS Toolbox Overview</title>
+    <section>
+        <title>EMIS Toolbox Introduction</title>
+        <para>The EMIS Toolbox is a programme for education planners in government. It helps them to track the performance of the education sector, to decide how to allocate resources, and to share this information with other stakeholders (such as parents, schools or those in government).</para>
+        <para>The EMIS Toolbox works by giving those working in the education sector the tools to show and analyse their data in different ways, e.g. as charts, in maps or sorted as lists.</para>
+        <para>In this way, they can see patterns, e.g. regions that have poor pupil enrolment rates or individual schools that have high teacher absent rates. In this way, they can inform policy-making, and resource allocation. This helps the education sector become more efficient, e.g. as officials can spend money on the poorest schools, or send inspection teams to schools which are performing badly.</para>
+        <para>The EMIS Toolbox also allows its user to easily create report cards with charts and maps about a school or a district. This helps government to be more transparent, because they can easily share information about schools with communities or other government agencies.</para>
+        <para>
+            <mediaobject>
+               <imageobject>
+                  <imagedata fileref="images\intro\overview.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+        </para>
+    </section>
+
+    <section>
+        <title>The EMIS Toolbox Environment</title>
+        <section>
+            <title>How the EMIS Toolbox is organized</title>
+            <para>
+            The EMIS Toolbox has seven main sections - also called modules. You can carry out different tasks using the different modules. The functions of each are explained in these sections.</para>
+            <para>You can move between modules by clicking on the tabs at the top of the screen. 
+              <mediaobject>
+              <imageobject><imagedata fileref="images\intro\mainMenu.png" format="PNG"/></imageobject>
+              </mediaobject>
+            </para>
+            <para>As way of introduction we provide an overview of the the Analysis module. All other modules have their own chapter later in this document.</para>
+        </section>
+        <section>
+            <title>How the Analysis Module is organised</title>
+            <para>The EMIS Toolbox uses educational data from your own country. This data needs to be added to the EMIS Toolbox once and is then ready to be analysised. This is a technical task outside the scope of the user manual. 
+            </para>
+            <para>The Analysis Module provides five functions to analyse data, each of which allow you to show your education data in a different way. The sections are as follows:
+            </para>
+            <para>
+              <informaltable>
+                <tgroup cols="2">
+                  <tbody>
+                    <row>
+                      <entry>Chart</entry>
+                      <entry>
+                        <para>This function allows you to analyse the education data by making charts using education indicators, e.g. school numbers, enrolment rates, or pupil per teacher ratios and many more.</para>
+                        <para>An advanced application also allows you to split the chart into further groups, e.g. to split the enrolment figures into boys and girls or by academic year.</para>
+                      </entry>
+                    </row>
+                    <row>
+                      <entry>Maps</entry>
+                      <entry>
+                        <para>In this function you can analyse the same education data using maps.</para>
+                        <para>This allows you to recognise regional patterns, e.g. if there are any regions that have high drop out rates or where overcrowding is a problem.</para>
+                        <para>Not all datasets can map informatino.</para>
+                      </entry>
+                    </row>
+                    <row>
+                      <entry>Priority Lists</entry>
+                      <entry>
+                        <para>This function is the third planning tool. It allows you to sort the schools on the database numerically, e.g. you can list the schools in order from the highest enrolment rate of girls to the lowest.</para>
+                        <para>In the list you can also show more than one indicator, e.g. sorting the schools first by their pupil to classroom ratio, but also showing the number of pupils and the number of classrooms. </para>
+                      </entry>
+                    </row>
+                    <row>
+                      <entry>Reports</entry>
+                      <entry>
+                        <para>This function allows you to make a PDF report which shows multiple charts or data tables. This report can be printed to share with other stakeholders.</para>
+                      </entry>
+                    </row>
+                    <row>
+                      <entry>Excel Reports</entry>
+                      <entry>
+                        <para>
+                        This function allows you to run a report that will place data from the EMIS Toolbox into an Excel spreadsheet. The
+                        spreadsheet can already be prepopulated with formatting, headers and formulae. 
+                        </para>
+                        <para>
+                        Excel reports can only be viewed after an you have create the configuration of an Excel Report. 
+                        </para>
+                      </entry>
+                    </row>
+                  </tbody>
+                </tgroup>
+              </informaltable>
+            </para>
+            <para>
+You can move between functions by clicking on the tabs. Education planners
+can explore the data using charts, maps or sorted lists to best inform their
+decisions.
+            </para>
+        </section>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>The 'Analysis' Module</title>
+    <subtitle>Querying data and displaying the results as chart, table, map or reports.</subtitle>
+    <para></para>
+    <section>
+        <title>Showing Charts</title>
+        <para>
+The first section of the EMIS Toolbox uses the education data to make charts,
+e.g. to show the enrolment figures of a District over the years. To do this, you
+follow a step-by-step procedure.
+        </para>
+        
+        <para>
+            <variablelist>
+                <varlistentry>
+                  <term>Step 1: Select Indicator</term>
+                  <listitem>The information the chart will show, e.g. student numbers, or class sizes.</listitem>
+                </varlistentry>
+                <varlistentry>
+                  <term>Step 2: Select X-Axis</term>
+                  <listitem>The type of evaluation the chart will show, e.g. evaluate a District
+over a number of years, or compare different schools with each other.</listitem>
+                </varlistentry>
+                <varlistentry>
+                  <term>Step 3: Select Date</term>
+                  <listitem>The year of the data the chart will show.</listitem>
+                </varlistentry>
+                <varlistentry>
+                  <term>Step 4: Select Location</term>
+                  <listitem>The location the chart will show, e.g. your whole country or just a selected District. </listitem>
+                </varlistentry>
+                <varlistentry>
+                  <term>Step 5: Select Split Options</term>
+                  <listitem>This is an advanced function of the EMIS Toolbox. You can
+decide to split the chart into further groups, e.g. to split the
+enrolment figures into boys and girls.</listitem>
+                </varlistentry>
+            </variablelist>
+        </para>
+
+        <para>Depending on the type of evaluation you choose in step 2, numbers 3, 4 or 5
+are not always relevant and so the programme will not always ask you these.
+        </para>
+        <para>The options of each step are explained in more detail.</para>
+        <section>
+            <title>Step 1: Select Indicator</title>
+            <para>The indicator is the information you want to show in a chart. There are three
+different types of indicator:</para>
+
+              <informaltable>
+                <tgroup cols="3">
+                  <thead>
+                    <row>
+                      <entry>Indicator Type</entry>
+                      <entry>Marker</entry>
+                      <entry>Examples</entry>
+                    </row>
+                  </thead>
+                  <tbody>
+                    <row>
+                      <entry>Percentage</entry>
+                      <entry>%</entry>
+                      <entry>Percentage of girl pupils
+Percentage of pupils repeating a class</entry>
+                    </row>
+                    <row>
+                      <entry>Ratio</entry>
+                      <entry>/</entry>
+                      <entry>Pupils per toilet
+Books per pupil</entry>
+                    </row>
+                    <row>
+                      <entry>Whole Numbers</entry>
+                      <entry>(none)</entry>
+                      <entry>Number of schools
+Number of classrooms</entry>
+                    </row>
+                  </tbody>
+                </tgroup>
+              </informaltable>
+        </section>
+        
+        <section>
+            <title>Step 2: Select X-Axis</title>
+            <para>The X-Axis is for the type of analysis that the chart will show. There are five types of
+analysis:</para>
+
+              <informaltable>
+                <tgroup cols="3">
+                  <thead>
+                    <row>
+                      <entry>Analysis type</entry>
+                      <entry>Explanation</entry>
+                      <entry>Examples</entry>
+                    </row>
+                  </thead>
+                  <tbody>
+                    <row>
+                      <entry>Horizontal analysis</entry>
+                      <entry>Compare the same units of administration.</entry>
+                      <entry>Compare all schools of a District. 
+                      Compare the districts of a province.</entry>
+                    </row>
+                    <row>
+                      <entry>Vertical analysis</entry>
+                      <entry>Compare different units of administration</entry>
+                      <entry>Compare one school with the average values of the district and the province.</entry>
+                    </row>
+                    <row>
+                      <entry>Date analysis</entry>
+                      <entry>Compare different years.</entry>
+                      <entry>Compare the data for a school over the years.</entry>
+                    </row>
+                    <row>
+                      <entry>Classification analysis</entry>
+                      <entry>Compare different data classification.</entry>
+                      <entry>Compare the numbers of boys and girls.</entry>
+                    </row>
+                    <row>
+                      <entry>Location analysis</entry>
+                      <entry>Compare type of schools.</entry>
+                      <entry>Compare private and government schools in a district.
+Compare schools that have water with those that do not.</entry>
+                    </row>
+                  </tbody>
+                </tgroup>
+              </informaltable>
+        </section>
+
+        <section>
+            <title>Step 3: Select Location</title>
+            <para>Choose the location that the chart will show. You can work at the level of a whole province, one district, or just one school. To navigate the locations, use the [+] or [-] buttons.</para>
+            <para>You will see the name of the province. To include the whole province in the chart, click its name.</para>
+            <para>To make a chart for a district, click the [+] button, next to the province name. This will show the names of all districts. Click the name of your district.</para>
+            <para>To make a chart for one school, click the [+] button next to the district name. This will show the names of the schools. Click the name of your school.</para>
+
+            <para>Use the [-] buttons to hide the names of the districts or schools.</para>
+        </section>
+        <section>
+            <title>Step 4: Select Date</title>
+            <para>Choose the year you want to see. You can change the year after making the chart. If you are making a date analysis, the date box will not show.</para>
+            <para>For some data you need to select more precise dates. For example, attendance data might be collected monthly and 
+            you then need to select the year and the month.</para>
+        </section>
+
+        <section>
+            <title>Step 5: Split</title>
+            <para>Sometimes, it is useful to show more detail in a chart, e.g. to see how the enrolment figures of one district progress over the years.</para>
+            <para>
+              <informaltable>
+                <tgroup cols="2">
+                  <tbody>
+                    <row>
+                      <entry>
+                        <mediaobject>
+                          <imageobject><imagedata fileref="images\analysis\split1.png" format="PNG"/></imageobject>
+                        </mediaobject>
+                      </entry>
+                      <entry>
+                        <mediaobject>
+                          <imageobject><imagedata fileref="images\analysis\split2.png" format="PNG"/></imageobject>
+                        </mediaobject>
+                      </entry>
+                    </row>
+                    <row>
+                      <entry>Enrolment by gender</entry>
+                      <entry>Enrolment by gender, with additional split by year</entry>
+                    </row>
+                  </tbody>
+                </tgroup>
+              </informaltable>
+            </para>
+            <para>To show this kind of detail, you can split up the indicator of your chart further.</para>
+            <para>
+              <informaltable>
+                <tgroup cols="3">
+                  <thead>
+                    <row>
+                      <entry>Split type</entry>
+                      <entry>Explanation</entry>
+                      <entry>Example</entry>
+                    </row>
+                  </thead>
+                  <tbody>
+                    <row>
+                      <entry>No split dimension</entry>
+                      <entry>The bars of the chart are not split.</entry>
+                      <entry>(none)</entry>
+                    </row>
+                    <row>
+                      <entry>Date analysis</entry>
+                      <entry>A different bar is shown for each year.</entry>
+                      <entry>A graph that shows the enrolment figures for Sokoto province between the years 2000-2010, split by year.</entry>
+                    </row>
+                    <row>
+                      <entry>Horizontal analysis</entry>
+                      <entry>A different bar is shown for each unit of administration of the same level.</entry>
+                      <entry>A graph that shows the pupil/teacher ratios in government, private and religious schools, split by all districts in Sokoto province.</entry>
+                    </row>
+                    <row>
+                      <entry>Vertical analysis</entry>
+                      <entry>A different bar is shown for each unit of administration on different levels.</entry>
+                      <entry>A graph that shows the pupil/teacher ratios in government, private and religious schools split by one district and the Sokoto province averages.</entry>
+                    </row>
+                    <row>
+                      <entry>Classification analysis</entry>
+                      <entry>A different bar is shown for each data classification.</entry>
+                      <entry>A graph that pupil numbers for all districts within Sokoto province, split by boys and girls.</entry>
+                    </row>
+                    <row>
+                      <entry>Location analysis</entry>
+                      <entry>A different bar is shown for each grouping of a specific indicator.</entry>
+                      <entry>A graph that shows the pupil/teacher ratios in Sokoto province, split by government, private and religious schools.</entry>
+                    </row>
+                  </tbody>
+                </tgroup>
+              </informaltable>
+            </para>
+        </section>
+    </section>
+    
+    <section>
+        <title>Showing Maps</title>
+        <para>The second function of the Analysis module shows the education data as maps. The maps have different colour shadings, depending on the value of the indicator.</para>
+        <para>As in the chart section, you follow a series of steps to determine the detail and data that the map shows.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Step 1: Select Plot Location</term>
+            <listitem>The level of detail of the map – decide if the map will show
+            each individual school or the data for the whole district.</listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Step 2: Select Indicator</term>
+            <listitem>The information that the map will show, e.g. student numbers, or class sizes.</listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Step 3: Select Location</term>
+            <listitem>The area that the map shows, e.g. a map of a whole province or just one district.</listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Step 4: Select Date</term>
+            <listitem>The year of the data.</listitem>
+          </varlistentry>
+        </variablelist>
+        <para>Note: The option to display maps is not always available in the EMIS Toolbox. The configuration needs to include 
+        map information for the country. </para>
+    </section>
+
+    <section>
+        <title>Priority Lists</title>
+        <section>
+            <title>Showing Priority Lists</title>
+            
+            <para>The third section sorts the data in order of priority, e.g. from the highest to lowest enrolment rates. You can also show more than one indicator, e.g. sorting the schools first by their pupil to classroom ratio, but also showing the number of pupils and the number of classrooms.
+            </para>
+            <para>To make a list, you make a series of choices:</para>
+            <variablelist>
+              <varlistentry>
+                <term>Step 1: Select Location to List</term>
+                <listitem>The level at which you want to make a list. Choose if you want to list each school, or average values for each district or the province.</listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>Step 2: Select Variables to Display</term>
+                <listitem>
+                  The information that is listed, e.g. pupil/teacher ratios.
+                  <para>Advance functions also allow you to show more information, e.g. the numbers of pupils and teachers, and also the number of teachers still needed to reach a target pupil/teacher ratio.</para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>Step 3: Select Location</term>
+                <listitem>If you want to make a list of all schools, choose the area you are working with – 
+                either just one school, district or the whole province.</listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>Step 4: Select Date</term>
+                <listitem>The year of the data.</listitem>
+              </varlistentry>
+            </variablelist>
+            
+            <section>
+                <title>Step 1: Select Location to List</title>
+                <para>Decide the detail of the list, e.g. you can make a long list showing each 
+                school, or a shorter list of average values for a province or a district.</para>
+            </section>
+
+            <section>
+                <title>Step 2: Select Variables to Display</title>
+                <para>Use the list to choose the indicators your list will show.</para>
+                <para>After you have clicked an indicator, it will show with a red button on the left. You can delete an indicator by clicking the red button.</para>
+                <para>You can show more than one indicator on your list. In this case, you can order the indicators by which to sort the list. The EMIS Toolbox asks you to choose an indicator to 'sort by' and 'then by' other indicators.
+                </para>
+                <para>As an advanced function, you will also see that the indicator is shown with the word “(indicator)”. Click this word to select if you want to display the indicator value or the values that are used in the calculations, e.g. in addition to showing the percentage of girls enrolled in schools, you can also see the number of girls and the total number of pupils of the school.
+                </para>
+                <para>After you choose the variables you want to list, click the button 'OK'.</para>
+            </section>
+
+            <section>
+                <title>Step 3: Select Location</title>
+                <para>Choose the location that the list will show. You can work at the level of a whole province, one district, or just one school. To navigate the locations, use the [+] or [-] buttons.
+                </para>
+                <para>You will see the name of the province. To include the whole province on the list, click its name.</para>
+                <para>To make a list for an district, click the [+] button, next to the province name. This will show the names of all districts. Click the name of your district.</para>
+                <para>To make a list for one school, click the [+] button next to the district name. This will show the names of the schools. Click the name of your school.</para>
+                <para>Use the [-] buttons to hide the names of the districts or schools.</para>
+            </section>
+
+            <section>
+                <title>Step 4: Select Date</title>
+                <para>Choose the date of the data for your list. After you choose the date, click the button 'OK'.</para>
+            </section>
+        </section>
+        
+        <section>
+            <title>Sorting Priority Lists</title>
+            <para>Priority lists can be sorted by the indicator values of each item. The lists are always sorted by the values in the left most column, using additional columns if there are the same values.</para>
+
+            <mediaobject><imageobject><imagedata align="center" fileref="images\prioList\sorting.png" format="PNG"/></imageobject></mediaobject>
+
+            <para>In this example the priority list shows two indicators the percentage of schools visited and the count of visited schools. The field "Schools Visited" (the count) is the left most column, so all rows will be first sorted by this value. 
+            </para>
+            <para>For any records that have the same "Schools Visited" value, the list will then be sorted by the next column - "% Schools Visited" in this case. </para>
+            
+            <para>The order of the sort can be ascending or descending. The small yellow arrow indicates the current order: </para>
+            <variablelist>
+              <varlistentry>
+                <term>
+                    <imageobject><imagedata valign="center" align="center" fileref="images\prioList\sortDesc.png" format="PNG"/></imageobject> Descending Sort
+                </term>
+                <listitem>Rows are sorted from highest value on top to the lowest value at the bottom.</listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>
+                    <imageobject><imagedata valign="center" align="center" fileref="images\prioList\sortAsc.png" format="PNG"/></imageobject> Ascending Sort
+                </term>
+                <listitem>Rows are sorted from the lowest value on top to the highest value at the bottom.</listitem>
+              </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    
+    <section>
+        <title>Showing Reports</title>
+        <para>A report contains many charts and tables that show data from charts. A report can be create as PDF report (to allow printing), or HTML report (for online viewing, or to paste into MS Word).</para>
+        <para>To run a report you need to follow these steps:</para>
+        <variablelist>
+          <varlistentry>
+            <term>Step 1: Go to 'Report' analysis</term>
+            <listitem>Select the 'Analysis' module and select the 'Report' tab. </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Step 2: Select Report</term>
+            <listitem>Pick the report you want to run.</listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Step 3: Select Location</term>
+            <listitem>The location for which you want to run the report.
+                <para>Each report applies to one type of location - for example the school location. If you select a higher location, for example a district, then the Toolbox generates one report for each school within the district. </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Step 4: Select Date</term>
+            <listitem>Pick the date for which you want to run the report. </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Step 5: (optional) Select Colour Scheme</term>
+            <listitem>If you want you can select colour scheme for the report. </listitem>
+          </varlistentry>
+        </variablelist>
+        <para>To find out how to create a Report Template, visit the chapter <link linkend="reportModule">Report Templates</link>.</para>
+    </section>
+
+    <section>
+        <title>Showing Excel Reports</title>
+        <para></para>
+        <para>To run an Excel report, somebody needs to create an Excel Template first. For many users this has already happened as part of the 
+        data import.</para>
+        <para>To run an Excel Report you follow the same steps as running a normal Report. An Excel report will provide you with an Excel spreadsheet that contains data from the EMIS Toolbox.</para>
+        <para>To run a report you need to follow these steps:</para>
+        <variablelist>
+          <varlistentry>
+            <term>Step 1: Go to 'Excel Report' analysis</term>
+            <listitem>Select the 'Analysis' module and select the 'Excel Report' tab. </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Step 2: Select Excel Report</term>
+            <listitem>Pick the Excel report you want to run.</listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Step 3: Select Location</term>
+            <listitem>The location for which you want to run the Excel report. Each report has a designated location to which it applies. You can create multiple reports at the same time but selecting a containing location. E. g. if you select a Zone for a School report, the system 
+            will generate a report for each of the schools in the zone.</listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Step 4: Select Date</term>
+            <listitem>Pick the date for which you want to run the Excel report. </listitem>
+          </varlistentry>
+        </variablelist>
+        <para>To find out how to create an Excel Template, visit the chapter <link linkend="excelModule">Excel Templates</link>.</para>
+    </section>
+    
+  </chapter>
+
+  <chapter>
+    <title>The 'Indicator' Module</title>
+    <subtitle>Specify rules on how to calculate indicators.</subtitle>
+
+    <para>Indicators are an important part of the EMIS Toolbox. All analysis is based on the calculations of indicators. They are calculated according to rules you specify and help us to measure the state of education and its changes.</para>
+
+    <para>The 'Indicator' module shows all indicators configured in the EMIS Toolbox. You can add new indicators or change the rules for existing ones.</para>
+    
+    <section>
+      <title>Data and Indicators</title>
+      <para>The EMIS Toolbox stores data at each location (e. g. the school, the district, etc). Data can be stored as text, as boolean, as number, as enumeration, as enumeration set or an table of these values. You can use the 'Browse Data' module to review the data stored for each school, zone, district.</para>
+      <para>Each different data is put into a field. Each field has a unique name (e. g. the field 'name' stores the name of a school, the field 'enrollment' all 
+        enrollment data). 
+      </para>
+      <para>To calculate an indicator we need to decide what type of indicator we use. For each part of the indicator we specify what field should be used. The next section will explain the type of indicators and how they use the different fields.</para>
+    
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry>Ratio</entry>
+            <entry>
+              <para>A ratio compares one count against another count. This allows us to compare different schools or zones even if they they have 
+              very different sizes. An example of a ratio is the pupils/teacher ratio.</para>
+            </entry>
+            <entry>
+              <para>To calulate a ratio you need to specify the numerator and the denominator.</para>
+            </entry>
+          </row>
+          <row>
+            <entry>Time Ratio</entry>
+            <entry>A time ratio is like a ratio, but data for numerate and denominator are taken at different times. For example, you could 
+            compare the number of second grade students to the number of last year's first year students.</entry>
+            <entry>To calulate a time ratio you need to specify the numerator and the denominator and the time differenc between them.</entry>
+          </row>
+          <row>
+            <entry>Count</entry>
+            <entry>A count tells you how many items of a given there are.</entry>
+            <entry>To calculate a count you need to specify which field you are counting.</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    </section>
+
+    <section>
+      <title>Creating a new Indicator</title>
+      <section>
+        <title>Step 1: Decide which type of indicator to add</title>
+        <para>To createa new indicator select the appropriate add button:</para>
+        <imageobject>
+          <imagedata align="center" fileref="images\indicators\buttons.png" format="PNG"/>
+        </imageobject>
+        <para>The EMIS Toolbox will give your indicator a default name and display an empty indicator details form. </para>
+      </section>
+      <section>
+        <title>Step 2: Specify a name</title>
+        <para>Give your indicator a meaningful name. Other users will select the indicator based on this name. </para>
+        <para>The EMIS Toolbox allows indicators to be put into groups - this allows you to place related indicators together. </para>
+        <para>Indicators are placed into the same Group simply by providing the same group name.</para>
+        <para>In this example, the indicator is named "% attempted score" and has a group name "LAT". You can see that in the hierarchy the indicator 
+        is shown under the heading "LAT"</para>
+        <imageobject>
+          <imagedata align="center" fileref="images\indicators\name.png" format="PNG"/>
+        </imageobject>
+      </section>
+      
+      <section>
+        <title>Step 3: Select the fields used in the indicator.</title>
+        <para>Finally you need to select which fields are used in the calculation of the indicator.</para>
+        <para>For a count indicator you just specify the field that contains the data to count:</para>
+        <imageobject>
+          <imagedata align="center" fileref="images\indicators\addCount.png" format="PNG"/>
+        </imageobject>
+        <para>For a ratio indicator you need to specify the numerate and the denominator. Select a field for the numerator and a field for the denominator. 
+         The EMIS Toolbox will calculate the ratio by adding all values in the numerator field and divide it by the sum of all values in the denominator field. 
+        </para>
+        <imageobject>
+           <imagedata align="center" fileref="images\indicators\addRatio.png" format="PNG"/>
+        </imageobject>
+
+        <section>
+          <title>Selecting a field</title>
+          <para>To select a field, you click on "(select data field)" and the EMIS Toolbox will display a field browser: </para>
+          <imageobject>
+           <imagedata align="center" fileref="images\indicators\field.png" format="PNG"/>
+          </imageobject>
+          <para>Data can be stored at any location. To find the data you want to use in your indicator, use the tabs on top to navigate to the location where
+          the data is stored. </para>
+          <para>For example, to use the enrollment field, which is stored at school level, you click on the "School" tab and then select "enrollment" from the list
+          of fields.</para> 
+          <para>The field browser also allows you to count the number of locations with data at each level. For example the field "School count (Month)" will count the 
+          number of schools that have data for a particular month (which month is selected in the Analysis part). </para>
+       </section>
+      </section>
+      <section>
+        <title>Field Filters</title>
+        <para>Filters allow you to only use a subset of the field data when you calculate your indicator.</para>
+        <para>For example, to calcuate the percentage of girls of the whole number of pupils, you need to be able to count just girls in 
+        the numerator of your indicator.</para>
+        <para>You will notice that after selecting a field the EMIS Toolbox displays a set of filters - by defaut they are all set to "NONE"</para>
+        <imageobject>
+         <imagedata align="center" fileref="images\indicators\filters.png" format="PNG"/>
+        </imageobject>
+        <para>In this example our field (enrollment) stores data split by two classifications - gender and standard. You can now chose to only count some of the 
+        enrollment data by saying data for which gender or data for which standard should be included.
+        </para>
+        <para>To activate a filter, click on "Filter" - the EMIS Toolbox will now display checkboxes for each values (by default all data is included). Just uncheck 
+        the parts you don't want to include in the calculation of your indicator.</para>
+        <imageobject>
+         <imagedata align="center" fileref="images\indicators\filterActive.png" format="PNG"/>
+        </imageobject>
+        <para>You can also filter by other classification or boolean variables of your locations.</para>
+        <para>In our example enrollment is collected at school level. We also have the yes/no fields called "anyTeacherObservations", "isLatSchool" and "isSISchool". </para>
+        <para>You can activate the filter (by clicking on 'Filter') and then specify whether you only want to include enrollment data for schools where this value is 'yes', or 'no'. </para>
+      </section>
+    </section>
+  </chapter>
+
+<!--
+  <chapter id="reportModule">
+    <title>The 'Report Templates' Module</title>
+    <para></para>
+  </chapter>
+
+  <chapter id="excelModule">
+    <title>The 'Excel Templates' Module</title>
+    <para></para>
+  </chapter>
+
+  <chapter>
+    <title>The 'Browse Data' module</title>
+    <subtitle>Browsing the data within the EMIS Toolbox.</subtitle>
+    <para></para>
+  </chapter>
+
+  <chapter>
+    <title>The 'Manage Data' module</title>
+    <subtitle>Loading and saving datasets.</subtitle>
+    <para></para>
+  </chapter>
+
+  <chapter>
+    <title>Validating Data</title>
+    <subtitle>Creating validation reports for a set of validation rules.</subtitle>
+    <para></para>
+  </chapter>
+-->
+  <!-- TODO - glossary --> 
+</book>

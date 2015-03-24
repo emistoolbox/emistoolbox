@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+    <head>
+		<meta charset="UTF-8">
+		<title>EMIS Toolbox</title>
+        <style>
+            html, body {
+            	margin: 0px;
+                height: 100%;
+                width: 100%;
+            }
+            #map {
+                height: 400px;
+                background-color: #eee;
+                height: 100%;
+                width: 100%;
+            }
+        </style>
+        <script src="OpenLayers.js"></script>
+        <script src="stream.js"></script>
+        <script src="shapefile.js"></script>
+        <script src="dbf.js"></script>
+        <script src="ToolboxOpenLayers.js"></script>
+        <script type="text/javascript">
+
+		OpenLayers._getScriptLocation = function()
+		{ return "http://localhost:8888/map/"; };
+
+		function init()
+		{
+			console.log("init()");
+
+			var toolbox = new ToolboxOpenLayers("map", false);
+   var bounds = [-12.446776665,9.963682764999998,4.436549914999999,25.205343335];
+   var layerIndex = toolbox.addShapefileLayer("openLayers?type=file&path=data/gis/baseMaps/MLI_water_lines.shp&dataset=mali", "Rivers");
+   console.log("layerIndex", layerIndex);
+   toolbox.setStyle(layerIndex, { strokeColor: "#0000cc", strokeWidth: 1, strokeOpacity: 0.5});
+   layerIndex = toolbox.addShapefileLayer("openLayers?type=file&path=data/gis/baseMaps/MLI_roads.shp&dataset=mali", "Roads");
+   console.log("layerIndex", layerIndex);
+   toolbox.setStyle(layerIndex, { strokeColor: "#999999", strokeWidth: 1 });
+    var thresholds = [50.0];
+    var colours = ['00FF00','FF0000'];
+    var asPoints = null;
+    toolbox.setColourThresholds(colours, thresholds, asPoints);
+   toolbox.addShapefileLayer("../content?chart=gis8457915590210024655_layer_Region.shp", "Region");
+   toolbox.addShapefileLayer("../content?chart=gis8457915590210024655_layer_Cercle.shp", "Cercle");
+   toolbox.loadAllLayers();
+   toolbox.zoomToBest();
+		}
+
+        </script>
+    </head>
+    <body onLoad="init();">
+    	<div id="map"></div>
+	</body>
+</html>

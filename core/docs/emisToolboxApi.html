@@ -1,0 +1,658 @@
+<html>
+  <head>
+  	<style>
+  		th { background-color: #cccccc; }
+  	</style>
+  </head>
+  <body>
+
+    <h1>EMIS Toolbox API</h1>
+
+	<h2>API Overview</h2>
+	This document describes the API for the EMIS Toolbox. It provides access to selected functionality of the software.
+	<ol>
+	  <li><b><a href='#info'>/emistoolbox/api/info</a></b> - query available options in parameters for 'data' API call.</li>
+	  <ol>
+	  	<li><a href='#hierarchies'>List of Hierarchies</a></li>
+	  	<li><a href='#indicators'>List of Indicators</a></li>
+	  	<li><a href='#xaxis'>List of X-Axis Data</a></li>
+	  	<li><a href='#splitBys'>List of Split By Options</a></li>
+	  	<li><a href='#locations'>List of Location Options</a></li>
+	  	<li><a href='#dates'>List of Date Options</a></li>
+	  	<li><a href="#infoResponse">Response</a></li>
+	  </ol>
+<p>
+	  <li><b><a href="#data">/emistoolbox/api/data</a></b> - run analysis.</li>
+<p>
+	  <li><b><a href="#pdf">/emistoolbox/api/pdf</a></b> - run reports.</li>
+<p>
+	  <li><b><a href="#userauth">/emistoolbox/api/userauth</a></b> - obtain login token</li>
+<p>
+	  <li><b><a href="#import">/emistoolbox/api/import</a></b> - run data import</li>
+	</ol>
+
+    <h2>Securing the API</h2>
+    All API calls need to be submitted with an additional parameter <b>'secret'</b>. This value contains the shared secret used by the EMIS Toolbox and the calling
+    software.
+    <p>
+    The secret for the API is passed as the system property "emistoolbox.api.secret" to the JVM.
+	<p>
+	<h2>API Methods</h2>
+	<a id="info" name="info">
+	<h3>1. /emistoolbox/api/info</h3>
+	A set of calls to obtain information about available options in the EMIS Toolbox parameters that can be used in the 'data' API call.
+	<p>
+	<hr>
+	<a id="hierarchies">
+	<h4>1.1 List of Hierarchies</h4>
+	Returns a list of available hierarchies.
+	<p>
+	<table border="1" cellspacing="0" cellpadding="2">
+	  <tr>
+	    <th>Parameter</th>
+	    <th>Values</th>
+	    <th>Description</th>
+	  </tr>
+
+	  <tr>
+	    <td>secret</td>
+	    <td>Secret value to authorize access to API.</td>
+	    <td>Value used in deployment of EMIS Toolbox.</td>
+	  </tr>
+	  <tr>
+	    <td>dataset</td>
+	    <td>Name of data set.</td>
+	    <td>For EMIS Toolbox installations with multiple data sets this parameter specifies which to use.</td>
+	  </tr>
+
+	  <tr>
+	    <td>type</td>
+	    <td>"hierarchies"</td>
+	    <td>Constant value</td>
+	  </tr>
+	</table>
+
+    <hr>
+    <a id="indicators">
+    <h4>1.2 List of Indicators</h4>
+	Returns a list of available indicators for the specific hierarchy.
+	<p>
+	<table border="1" cellspacing="0" cellpadding="2">
+	  <tr>
+	    <th>Parameter</th>
+	    <th>Values</th>
+	    <th>Description</th>
+	  </tr>
+
+	  <tr>
+	    <td>secret</td>
+	    <td>Secret value to authorize access to API.</td>
+	    <td>Value used in deployment of EMIS Toolbox.</td>
+	  </tr>
+	  <tr>
+	    <td>dataset</td>
+	    <td>Name of data set. </td>
+	    <td>For EMIS Toolbox installations with multiple data sets this parameter specifies which to use.</td>
+	  </tr>
+
+	  <tr>
+	    <td>type</td>
+	    <td>"indicators"</td>
+	    <td>Constant value.</td>
+	  </tr>
+
+	  <tr>
+	    <td>hierarchy</td>
+	    <td>hierarchy id</td>
+	    <td>One of the hierarchy ids returned by the list of hierarchies call.</td>
+	  </tr>
+	</table>
+
+    <hr>
+    <a id="xaxis">
+    <h4>1.3 List of X-Axis Data</h4>
+	Returns a list of available indicators for the specific hierarchy
+	<p>
+	<table border="1" cellspacing="0" cellpadding="2">
+	  <tr>
+	    <th>Parameter</th>
+	    <th>Values</th>
+	    <th>Description</th>
+	  </tr>
+
+	  <tr>
+	    <td>secret</td>
+	    <td>Secret value to authorize access to API.</td>
+	    <td>Value used in deployment of EMIS Toolbox.</td>
+	  </tr>
+	  <tr>
+	    <td>dataset</td>
+	    <td>Name of data set. </td>
+	    <td>For EMIS Toolbox installations with multiple data sets this parameter specifies which to use.</td>
+	  </tr>
+
+	  <tr>
+	    <td>type</td>
+	    <td>"xaxis"</td>
+	    <td>Constant value.</td>
+	  </tr>
+
+	  <tr>
+	    <td>hierarchy</td>
+	    <td>hierarchy id</td>
+	    <td>One of the hierarchy ids returned by the list of hierarchies call.</td>
+	  </tr>
+
+      <tr>
+      	<td>indicator</td>
+      	<td>indicator id</td>
+      	<td>One of the indicator ids returned by the list of indicators call.</td>
+      </tr>
+	</table>
+
+    <hr>
+    <a id="splitBys">
+    <h4>1.4 List of Split By options</h4>
+	Returns a list of available options for the split of data.
+	<p>
+	<p>
+	<table border="1" cellspacing="0" cellpadding="2">
+	  <tr>
+	    <th>Parameter</th>
+	    <th>Values</th>
+	    <th>Description</th>
+	  </tr>
+
+	  <tr>
+	    <td>secret</td>
+	    <td>Secret value to authorize access to API.</td>
+	    <td>Value used in deployment of EMIS Toolbox.</td>
+	  </tr>
+	  <tr>
+	    <td>dataset</td>
+	    <td>Name of data set. </td>
+	    <td>For EMIS Toolbox installations with multiple data sets this parameter specifies which to use.</td>
+	  </tr>
+
+	  <tr>
+	    <td>type</td>
+	    <td>"splitBy"</td>
+	    <td>Constant value.</td>
+	  </tr>
+
+	  <tr>
+	    <td>hierarchy</td>
+	    <td>hierarchy id</td>
+	    <td>One of the hierarchy ids returned by the list of hierarchies call.</td>
+	  </tr>
+
+      <tr>
+      	<td>indicator</td>
+      	<td>indicator id</td>
+      	<td>One of the indicator ids returned by the list of indicators call.</td>
+      </tr>
+
+      <tr>
+        <td>xaxis</td>
+        <td>xaxis data id</td>
+        <td>One of the xaxis ids returned by the list of xaxis data call.</td>
+      </tr>
+	</table>
+
+    <hr>
+    <a id="locations">
+    <h4>1.5 List of Locations</h4>
+	Returns a list of available locations (for a specified parent location). If list is empty, then no date selection is requied (i. e. for year comparisions).
+	<table border="1" cellspacing="0" cellpadding="2">
+	  <tr>
+	    <th>Parameter</th>
+	    <th>Values</th>
+	    <th>Description</th>
+	  </tr>
+
+	  <tr>
+	    <td>secret</td>
+	    <td>Secret value to authorize access to API.</td>
+	    <td>Value used in deployment of EMIS Toolbox.</td>
+	  </tr>
+
+	  <tr>
+	    <td>dataset</td>
+	    <td>Name of data set. </td>
+	    <td>For EMIS Toolbox installations with multiple data sets this parameter specifies which to use.</td>
+	  </tr>
+
+	  <tr>
+	    <td>type</td>
+	    <td>"locations"</td>
+	    <td>Constant value.</td>
+	  </tr>
+
+	  <tr>
+	    <td>hierarchy</td>
+	    <td>hierarchy id</td>
+	    <td>One of the hierarchy ids returned by the list of hierarchies call.</td>
+	  </tr>
+
+      <tr>
+      	<td>indicator</td>
+      	<td>indicator id</td>
+      	<td>One of the indicator ids returned by the list of indicators call.</td>
+      </tr>
+
+      <tr>
+        <td>xaxis</td>
+        <td>xaxis data id</td>
+        <td>One of the xaxis ids returned by the list of xaxis data call.</td>
+      </tr>
+
+      <tr>
+		<td>splitBy</td>
+		<td>splitBy data id</td>
+		<td>One of the split by ids returned by the list of splitBy data call.</td>
+      </tr>
+
+      <tr>
+	  	<td>parentType</td>
+	    <td>Location type of parent node.</td>
+	    <td>Location type of parent - can be left empty to show root nodes.</td>
+	  </tr>
+
+      <tr>
+	  	<td>parentId</td>
+	    <td>Location id of parent node. </td>
+	    <td>Location id of parent - can be left empty to show root nodes.</td>
+	  </tr>
+
+	</table>
+	<p>
+	<hr>
+	<a id="dates">
+    <h4>1.6 List of Dates</h4>
+	Returns a list of available dates to select. If list is empty, then no date selection is requied (i. e. for year comparisions).
+	<table border="1" cellspacing="0" cellpadding="2">
+	  <tr>
+	    <th>Parameter</th>
+	    <th>Values</th>
+	    <th>Description</th>
+	  </tr>
+
+	  <tr>
+	    <td>secret</td>
+	    <td>Secret value to authorize access to API.</td>
+	    <td>Value used in deployment of EMIS Toolbox.</td>
+	  </tr>
+	  <tr>
+	    <td>dataset</td>
+	    <td>Name of data set. </td>
+	    <td>For EMIS Toolbox installations with multiple data sets this parameter specifies which to use.</td>
+	  </tr>
+
+	  <tr>
+	    <td>type</td>
+	    <td>"dates"</td>
+	    <td>Constant value.</td>
+	  </tr>
+
+	  <tr>
+	    <td>hierarchy</td>
+	    <td>hierarchy id</td>
+	    <td>One of the hierarchy ids returned by the list of hierarchies call.</td>
+	  </tr>
+
+      <tr>
+      	<td>indicator</td>
+      	<td>indicator id</td>
+      	<td>One of the indicator ids returned by the list of indicators call.</td>
+      </tr>
+
+      <tr>
+        <td>xaxis</td>
+        <td>xaxis data id</td>
+        <td>One of the xaxis ids returned by the list of xaxis data call.</td>
+      </tr>
+
+      <tr>
+		<td>splitBy</td>
+		<td>splitBy data id</td>
+		<td>One of the split by ids returned by the list of splitBy data call.</td>
+      </tr>
+
+      <tr>
+        <td>location</td>
+        <td>Location path. </td>
+        <td>Location path of the currently selected Location as comma seperated path.</td>
+      </tr>
+	</table>
+	<p>
+	<hr>
+	<a id="infoResponse">
+	<h4>1.7 Responses</h4>
+	Results for all info calls are returned as a list of items:
+	<table border="1" cellspacing="0" cellpadding="3">
+	  <tr>
+	    <th width="300px">XML</th>
+	    <th width="300px">JSON</th>
+	  </tr>
+	  <tr>
+	    <td>
+	<pre>
+&lt;info>
+	&lt;item>item 1&lt;/item>
+	&lt;item>item 2&lt;/item>
+	...
+&lt;/info>
+	</pre>
+        </td>
+        <td>
+          <pre>
+{ "item ", "item " ... }
+		  </pre>
+        </td>
+      </tr>
+    </table>
+
+	<hr>
+	<a id="data">
+	<h3>/emistoolbox/api/data</h3>
+	Call to retrieve array of results from EMIS Toolbox.
+	<p>
+	<b>REQUEST:</b><br>
+	<table border="1" cellspacing="0" cellpadding="2">
+	  <tr>
+	    <th>Parameter</th>
+	    <th>Values</th>
+	    <th>Description</th>
+	  </tr>
+
+	  <tr>
+	    <td>secret</td>
+	    <td>Secret value to authorize access to API.</td>
+	    <td>Value used in deployment of EMIS Toolbox.</td>
+	  </tr>
+	  <tr>
+	    <td>dataset</td>
+	    <td>Name of data set. </td>
+	    <td>For EMIS Toolbox installations with multiple data sets this parameter specifies which to use.</td>
+	  </tr>
+
+	  <tr>
+	    <td>hierarchy</td>
+	    <td>hierarchy id</td>
+	    <td>One of the hierarchy ids returned by the list of hierarchies call.</td>
+	  </tr>
+
+      <tr>
+      	<td>indicator</td>
+      	<td>indicator id</td>
+      	<td>One of the indicator ids returned by the list of indicators call.</td>
+      </tr>
+
+      <tr>
+        <td>xaxis</td>
+        <td>xaxis data id</td>
+        <td>One of the xaxis ids returned by the list of xaxis data call.</td>
+      </tr>
+
+      <tr>
+		<td>splitBy</td>
+		<td>splitBy data id</td>
+		<td>One of the split by ids returned by the list of splitBy data call.</td>
+      </tr>
+
+      <tr>
+        <td>location</td>
+        <td>Location path. </td>
+        <td>Location path of the currently selected Location as comma seperated path, or location type and id (i. e. School:99999).</td>
+      </tr>
+
+      <tr>
+        <td>date</td>
+        <td>Date value</td>
+        <td>A date as obtained from the info call to the API for type=dates. The value 'latest' can be used to target the latest date with data in the EMIS Toolbox.</td>
+      </tr>
+	</table>
+	<p>
+	Each of the parameters needs to specify the ID of the items retrieved through the respective info API call.
+	<p>
+	<b>RESPONSE:</b><br>
+		<table border="1" cellspacing="0" cellpadding="3">
+		  <tr>
+		    <th width="300px">XML</th>
+		    <th width="300px">JSON</th>
+		  </tr>
+		  <tr>
+		    <td>
+		<pre>
+&lt;data title="..." subtitle="...">
+    &lt;header>col_header1&lt;/header>
+    &lt;header>col_header1&lt;/header>
+    &lt;header>col_header1&lt;/header>
+
+    &lt;row header="row_header1">45.5,34.4,34.4&lt;/row>
+    &lt;row header="row_header2">45.5,34.4,34.4&lt;/row>
+    &lt;row header="row_header3">45.5,34.4,34.4&lt;/row>
+    ...
+&lt;/data>
+		</pre>
+	        </td>
+	        <td>
+		<pre>
+{
+    "title": "",
+    "subtitle": "",
+    "headers": ["col_header1", "col_header2", "col_header3"],
+    "data": [
+        ["row_header1", 45.4, 34.4, 34.4 ],
+        ["row_header2", 45.4, 34.4, 34.4 ],
+        ["row_header2", 45.4, 34.4, 34.4 ],
+    ]
+}
+		</pre>
+	        </td>
+	      </tr>
+	    </table>
+	<p>
+	<hr>
+	<a id="pdf">
+	<h3>/emistoolbox/api/pdf</h3>
+	Call to retrieve PDF report from EMIS Toolbox.
+	<p>
+	<b>REQUEST:</b><br>
+	<table border="1" cellspacing="0" cellpadding="2">
+	  <tr>
+	    <th>Parameter</th>
+	    <th>Values</th>
+	    <th>Description</th>
+	  </tr>
+	  <tr>
+	    <td>secret</td>
+	    <td>Secret value to authorize access to API.</td>
+	    <td>Value used in deployment of EMIS Toolbox.</td>
+	  </tr>
+	  <tr>
+	    <td>dataset</td>
+	    <td>Name of data set. </td>
+	    <td>For EMIS Toolbox installations with multiple data sets this parameter specifies which to use.</td>
+	  </tr>
+
+	  <tr>
+	    <td>report</td>
+	    <td>Name of report (same as in the EMIS Toolbox UI)</td>
+	    <td></td>
+	  </tr>
+
+	  <tr>
+	    <td>hierarchy</td>
+	    <td>hierarchy id</td>
+	    <td>One of the hierarchy ids returned by the list of hierarchies call.</td>
+	  </tr>
+
+      <tr>
+        <td>location</td>
+        <td>Location path. </td>
+        <td>Location path of the currently selected Location as comma seperated path, or the type and id (i. e. "School:99999")</td>
+      </tr>
+
+      <tr>
+        <td>date</td>
+        <td>Date value</td>
+        <td>A date as obtained from the info call to the API for type=dates. The value 'latest' can be used to target the latest date with data in the EMIS Toolbox.</td>
+      </tr>
+
+      <tr>
+        <td>colours</td>
+        <td>Name of colour scheme</td>
+        <td>The following colour schemes are available: grays, yellows and colors. The default value is grays. </td>
+      </tr>
+	</table>
+	<p>
+	<p>
+	<b>RESPONSE:</b><br>
+	<table border="1" cellspacing="0" cellpadding="3">
+	  <tr>
+		<th width="300px">XML</th>
+		<th width="300px">JSON</th>
+	  </tr>
+	  <tr>
+		<td>
+	<pre>
+&lt;items>
+  &lt;item>/emistoolbox/content?report=report451028205089454368.pdf&lt;/item>
+  &lt;item>School Name; 2010&lt;/item>
+&lt;/items>
+	</pre>
+		</td>
+		<td>
+	<pre>
+[
+  "\/emistoolbox\/content?report=report6495180054034960569.pdf",
+  "School Name; 2010"
+]
+	</pre>
+		</td>
+	  </tr>
+	</table>
+
+
+	<hr>
+	<a id="userauth">
+	<h3>/emistoolbox/api/userauth</h3>
+	Call to allow creation of a login token from the EMIS Toolbox.
+	<p>
+	<b>REQUEST:</b><br>
+	<table border="1" cellspacing="0" cellpadding="2">
+	  <tr>
+	    <th>Parameter</th>
+	    <th>Values</th>
+	    <th>Description</th>
+	  </tr>
+
+	  <tr>
+	    <td>secret</td>
+	    <td>Secret value to authorize access to API.</td>
+	    <td>Value used in deployment of EMIS Toolbox.</td>
+	  </tr>
+
+	  <tr>
+	    <td>dataset</td>
+	    <td>Name of data set. </td>
+	    <td>For EMIS Toolbox installations with multiple data sets this parameter specifies which to use.</td>
+	  </tr>
+
+	  <tr>
+	    <td>credentials</td>
+	    <td>One of "admin", "report", "viewer".</td>
+	    <td>Specifies the user access level to grant with the token.</td>
+	  </tr>
+
+	  <tr>
+	    <td>ip</td>
+		<td>IP address</td>
+		<td>Limit token to this IP address.</td>
+	  </tr>
+	</table>
+	<p>
+	<b>RESPONSE:</b><br>
+		<table border="1" cellspacing="0" cellpadding="3">
+		  <tr>
+		    <th width="300px">XML</th>
+		    <th width="300px">JSON</th>
+		  </tr>
+		  <tr>
+		    <td>
+		<pre>
+&lt;token>token_value&lt;/token>
+		</pre>
+	        </td>
+	        <td>
+		<pre>
+"token_value"
+		</pre>
+	        </td>
+	      </tr>
+	    </table>
+
+	<hr>
+	<a id="import">
+	<h3>/emistoolbox/api/import</h3>
+	Runs the data import script for the specified dataset. 
+	<p>
+	<b>REQUEST:</b><br>
+	<table border="1" cellspacing="0" cellpadding="2">
+	  <tr>
+	    <th>Parameter</th>
+	    <th>Values</th>
+	    <th>Description</th>
+	  </tr>
+
+	  <tr>
+	    <td>secret</td>
+	    <td>Secret value to authorize access to API.</td>
+	    <td>Value used in deployment of EMIS Toolbox.</td>
+	  </tr>
+
+	  <tr>
+	    <td>dataset</td>
+	    <td>Name of data set. </td>
+	    <td>Dataset for which to run the import. </td>
+	  </tr>
+
+      </table>
+	<p>
+	<b>RESPONSE:</b><br>
+		<table border="1" cellspacing="0" cellpadding="3">
+		  <tr>
+		    <th width="300px">XML</th>
+		    <th width="300px">JSON</th>
+		  </tr>
+		  <tr>
+		    <td>
+		<pre>
+&lt;items>
+  &lt;item id="id">6&lt;/item>
+  &lt;item id="tasks.subTasks.count">3405&lt;/item>
+  &lt;item id="errors">0&lt;/item>
+  &lt;item id="finished">true&lt;/item>
+  &lt;item id="tasks.count">20&lt;/item>
+  &lt;item id="tasks.done.count">20&lt;/item>
+&lt;/items>
+		</pre>
+	        </td>
+	        <td>
+		<pre>
+{
+"id": "5",
+"tasks.subTasks.count": "3405",
+"errors": "0",
+"finished": "true",
+"tasks.count": "20",
+"tasks.done.count": "20"
+}
+		</pre>
+	        </td>
+	      </tr>
+	    </table>
+
+  </body>
+</html>

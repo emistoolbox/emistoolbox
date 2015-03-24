@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+    <head>
+		<meta charset="UTF-8">
+		<title>EMIS Toolbox</title>
+        <style>
+            html, body {
+            	margin: 0px;
+                height: 100%;
+                width: 100%;
+            }
+            #map {
+                height: 400px;
+                background-color: #eee;
+                height: 100%;
+                width: 100%;
+            }
+        </style>
+        <script src="OpenLayers.js"></script>
+        <script src="stream.js"></script>
+        <script src="shapefile.js"></script>
+        <script src="dbf.js"></script>
+        <script src="ToolboxOpenLayers.js"></script>
+        <script type="text/javascript">
+
+		OpenLayers._getScriptLocation = function()
+		{ return "http://localhost:8888/map/"; };
+
+		function init()
+		{
+			var toolbox = new ToolboxOpenLayers("map", false);

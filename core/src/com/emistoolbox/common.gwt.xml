@@ -1,0 +1,5 @@
+<module>
+    <!-- GWT module for EmisToolbox common -->
+    <inherits name='com.google.gwt.user.User'/>
+    <source path="common"/>
+</module>
