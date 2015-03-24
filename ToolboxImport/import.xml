@@ -1,0 +1,348 @@
+<toolboxImport>
+  <value key="year" value="2011" />
+
+  <database id="esspin" vendor="OLEDB" connection="Provider=Microsoft.Jet.OLEDB.4.0;Data Source=D:\work\nigeria\source\ToolboxImport\ESSPIN_Bauchi2012_V2.mdb" />
+  <database id="nemis" vendor="MSSQL" connection="Server=localhost,1433;Network Library=DBMSSOCN;Database=Bauchi_dbNEMISA;UID=sa;Pwd=testing" />
+
+  <mapping id="pupil_teacher">
+    <value key="P" value="P" />
+    <value key="T" value="T" />
+  </mapping>
+  
+  <mapping id="gender">
+    <value key="M" value="M" />
+    <value key="F" value="F" />
+  </mapping>
+  
+  <mapping id="yes_no">
+    <value key="Y" value="Y" />
+    <value key="N" value="N" />
+  </mapping>
+
+  <mapping id="ages">
+    <!-- Master ID = 3 --> 
+    <value key="b12" value="561" />
+    <value key="12" value="16" />
+    <value key="13" value="24" />
+    <value key="14" value="135" />
+    <value key="a14" value="562" />
+  </mapping>
+  
+  <mapping id="grades">
+      <value key="PRY1" value="5" />  
+      <value key="PRY2" value="6" />  
+      <value key="PRY3" value="7" />  
+      <value key="PRY4" value="8" />  
+      <value key="PRY5" value="9" />  
+      <value key="PRY6" value="10" />  
+
+      <value key="JSS1" value="11" />
+      <value key="JSS2" value="12" />
+      <value key="JSS3" value="13" />
+      
+      <value key="SS1" value="" />
+      <value key="SS2" value="" />
+      <value key="SS3" value="" />
+  </mapping>
+  
+  <mapping id="subjects">
+        <value key="AgricScience" value=""/>
+        <value key="Agriculture" value=""/>
+        <value key="Arabic" value=""/>
+        <value key="AutoMechanics" value=""/>
+        <value key="BasicScience" value=""/>
+        <value key="BasicTechnology" value=""/>
+        <value key="Biology1" value=""/>
+        <value key="BuildingConstruction" value=""/>
+        <value key="BusinessStudies" value=""/>
+        <value key="Chemistry" value=""/>
+        <value key="Christian" value=""/>
+        <value key="Christian/Islamic" value=""/>
+        <value key="CivicEducation1" value=""/>
+        <value key="Clothing&amp;Textile" value=""/>
+        <value key="Computer" value=""/>
+        <value key="Cultural&amp;CreativeArts" value=""/>
+        <value key="Economics" value=""/>
+        <value key="Electrical/Electronics" value=""/>
+        <value key="English1" value=""/>
+        <value key="FoodandNutrition" value=""/>
+        <value key="FrenchLanguage1" value=""/>
+        <value key="Geography" value=""/>
+        <value key="Hausa" value=""/>
+        <value key="HealthScience" value=""/>
+        <value key="History1" value=""/>
+        <value key="HomeEcons" value=""/>
+        <value key="HomeManagement1" value=""/>
+        <value key="Igbo" value=""/>
+        <value key="Islamic1" value=""/>
+        <value key="LitratureinEnglish" value=""/>
+        <value key="Mathematics" value=""/>
+        <value key="Others" value=""/>
+        <value key="Physical&amp;HealthEducation(" value=""/>
+        <value key="Physics1" value=""/>
+        <value key="Practical/Crafts" value=""/>
+        <value key="SocialStudies" value=""/>
+        <value key="TechnicalDrawing" value=""/>
+        <value key="Woodwork" value=""/>
+        <value key="Yoruba" value=""/>
+    </mapping>
+
+    <!-- NEMIS master = 66 --> 
+    <mapping id="classroom_condition">
+        <value key="1" value="456" name="Good"/>
+        <value key="2" value="457" name="Needs minor repairs"/>
+        <value key="3" value="458" name="Needs major repairs"/>
+        <value key="4" value="459" name="Under construction"/>
+        <value key="5" value="460" name="Unusable"/>
+    </mapping>
+    
+    <!-- NEMIS master = 67 -->
+    <mapping id="classroom_floor">
+        <value key="1" value="461" name="Mud/Earth" />
+        <value key="2" value="462" name="Concret" />
+        <value key="3" value="463" name="Wood/Plank" />
+        <value key="4" value="464" name="Tile" />
+    </mapping>
+
+    <!-- NEMIS master = 68 -->    
+    <mapping id="classroom_wall">
+        <value key="1" value="465" name="Mud"/>
+        <value key="2" value="466" name="Cement/Concrete"/>
+        <value key="3" value="467" name="Wood/Bamboo"/>
+        <value key="4" value="468" name="Burnt bricks"/>
+        <value key="5" value="469" name="Iron sheets"/>
+        <value key="6" value="470" name="Stone"/>
+    </mapping>
+
+    <!-- NEMIS master = 69 -->    
+    <mapping id="classroom_roof">
+        <value key="1" value="471" name="Mud" />
+        <value key="2" value="472" name="Cement/Concrete" />
+        <value key="3" value="473" name="Wood/Bamboo" />
+        <value key="4" value="474" name="Ceramic tiles" />
+        <value key="5" value="475" name="Iron sheets" />
+    </mapping>
+
+    <!-- NEMIS master = 9 -->    
+    <mapping id="school_shift">
+        <note>ESSPIN only collects single and double shift, but doesn't differentiates between morning and afternoon</note>
+        <value key="S" value="56" name="Single Shift"/>
+        <value key="D" value="153" name="Double Shift"/>
+    </mapping>
+
+    <!-- NEMIS master = 49 -->    
+    <mapping id="teacher_type_primary">
+        <value key="1" value="312" name="Head"/>
+        <value key="2" value="313" name="Assistant Head"/>
+        <value key="3" value="546" name="Teacher"/>
+    </mapping>
+
+    <!-- NEMIS master = 50 -->    
+    <mapping id="teacher_type_secondary">
+        <value key="1" value="314" name="Head"/>
+        <value key="2" value="315" name="Assistant Head"/>
+        <value key="3" value="547" name="Teacher"/>
+    </mapping>
+
+    <!-- NEMIS master = 98 -->
+    <mapping id="teacher_salary_source">
+        <value key="1" value="648" name="Federal Government - FTS" />
+        <value key="2" value="649" name="State Government - On this schools payroll" />
+        <value key="3" value="650" name="State Government - On another schoolspayroll" />
+        <value key="4" value="651" name="Other, for example: community, PTA" />
+        <value key="5" value="652" name="No salary, for example: volunteer, NYSC" />
+    </mapping>
+
+    <!-- NEMIS master = 85 -->    
+    <mapping id="teacher_present">
+        <value key="1" value="536" name="Present or temporarily absent" />
+        <value key="2" value="537" name="Absent for more than 1 month Maternity leave" />
+        <value key="3" value="538" name="Absent for more than 1 month Sick leave" />
+        <value key="4" value="539" name="Absent for more than 1 month Training" />
+        <value key="5" value="540" name="Absent for more than 1 month Secondment" />
+        <value key="6" value="541" name="Absent for more than 1 month Unauthorised" />
+    </mapping>
+
+    <mapping id="lgas">
+        <read keyColumn="LGAID" valueColumn="LGAID" nameColumn="LGA">
+            <sql db="nemis" query="SELECT LGAID, LGA FROM tblMtd_LGA" name="tblMtd_LGA"/>
+        </read>
+    </mapping>
+
+    <mapping id="school_code">
+        <read keyColumn="esspin.School_Pseudo_Code" valueColumn="nemis.Id_School" join="nemis.SchoolCode = esspin.School_Code">
+            <sql db="esspin" query="SELECT School_Pseudo_Code, School_Code FROM JuniorCore" name="JuniorCore"/>
+            <sql db="nemis" query="SELECT Id_School, SchoolCode FROM tblBse_School" name="tblBse_School" />
+        </read>
+    </mapping>
+    
+    <!-- NEMIS master = 76 --> 
+    <mapping id="challenges">
+        <value key="blind" value="495" name="Visual impaired" />
+        <value key="hearing" value="496" name="Hearing / speech impaired" />
+        <value key="physical" value="497" name="Physically challenged" />
+        <value key="mental" value="498" name="Mentally challenged" />
+    </mapping> 
+
+    <import name="SchoolCode Validation">
+        <sql db="esspin" query="SELECT School_pseudo_Code FROM JuniorCore" name="JuniorCore" idColumns="School_pseudo_Code" />
+        <insert>
+            <column name="Id_School" value="school_code(School_pseudo_Code)" missing="error"/>
+        </insert>
+    </import>
+    
+    
+    <import name="Classrooms Junior">
+        <sql db="esspin" query="SELECT * FROM JuniorClassroom" name="JuniorClassroom" idColumns="School_pseudo_Code,ClassroomID" />
+        <insert db="nemis" table="tblVar_SchoolClassrooms_2009">
+            <column name="Id_School" value="school_code(School_pseudo_Code)" missing="error"/>
+            <column name="Year" value="$year" missing="error"/>
+            <column name="YearOfConstruction" value="Year_Construct" />
+            <column name="Id_PresentCondition" value="classroom_condition(Present_Condition)"/>
+            
+            <column name="LengthInMeters" value="Length_M" missing="null" />
+            <column name="WidthInMeters" value="Width_M" missing="null" />
+            <column name="Id_FloorMaterial" value="classroom_floor(Floor)" />
+            <column name="Id_WallMaterial" value="classroom_wall(Wall)" />
+            <column name="Id_RoofMaterial" value="classroom_roof(Roof)" />
+            <column name="Seating" value="yes_no(Seating)" />
+            <column name="GoodBlackboards" value="yes_no(Blackboard)" />
+        </insert>
+        
+<!--
+        <update db="..." table=".." rowMissing="insert|skip|error"/>
+            <column ... />
+        </update
+-->
+    </import>
+    
+    <import name="Junior - Textbooks">
+        <sql db="esspin" query="SELECT TOP 50 * FROM JuniorTextBooks" name="JuniorTextBooks" idColumns="School_Pseudo_Code,Pupil_Teacher"/>
+        <insert db="nemis" table="tblVar_SchoolTextBooks">
+            <expandRow headers="Grade" valueHeader="Number">
+                <expand column="JSS1" values="JSS1" />
+                <expand column="JSS2" values="JSS2" />
+                <expand column="JSS3" values="JSS3" />
+            </expandRow>
+
+            <column name="Id_School" value="school_code(School_Pseudo_Code)" missing="error"/>
+            <column name="Type" value="pupil_teacher(Pupil_Teacher)" />
+            <column name="Id_Subject" value="subjects(SubjectArea)" />
+            <column name="Year" value="$year" />
+            <column name="Number" const="0" />
+
+            <column name="Id_SchoolClass" value="grades(Grade)" />
+            <column name="NumberBooks" value="Number" />
+        </insert>
+    </import>
+    
+    <import name="Junior - Enrolment by Age">
+        <sql db="esspin" query="SELECT * FROM JuniorEnrolment" name="JuniorEnrolment" idColumns="School_Pseudo_Code" />
+
+<!--        
+        <insert db="nemis" table="tblVar">
+            <column name="Id_School" value="school_code(School_Pseudo_Code)" />
+            <column name="Year" value="$year"/>
+            <column name="Id_SchoolClass" />
+            <column name="Gender" />
+            <column name="Enrolment" />
+            <column name="Attendance" />
+            <column name="AttendanceCensusDay" />
+            <column name="Admissions" />
+            <column name="Repeaters" />
+            <column name="Withdrawals" />
+            <column name="Deaths" />
+            <column name="Promoted" />
+            <column name="TransferredOut" />
+        </insert>
+-->        
+        <insert db="nemis" table="tblVar_EnrolmentAge2008">
+            <expandRow headers="Grade,Gender,Age" valueHeader="Count">
+                <expand column="C1_b12_JSS1_Male" values="JSS1,M,b12" />
+                <expand column="C1_b12_JSS2_Male" values="JSS2,M,b12" />
+                <expand column="C1_b12_JSS3_Male" values="JSS3,M,b12" />
+                <expand column="C1_b12_JSS1_Female" values="JSS1,F,b12" />
+                <expand column="C1_b12_JSS2_Female" values="JSS1,F,b12" />
+                <expand column="C1_b12_JSS3_Female" values="JSS1,F,b12" />
+                <expand column="C1_12_JSS1_Male" values="JSS1,M,12" />
+                <expand column="C1_12_JSS1_Female" values="JSS1,F,12" />
+                <expand column="C1_12_JSS2_Male" values="JSS2,M,12" />
+                <expand column="C1_12_JSS2_Female" values="JSS2,F,12" />
+                <expand column="C1_12_JSS3_feMale" values="JSS3,F,12" />
+                <expand column="C1_12_JSS3_Male" values="JSS3,M,12" />
+                <expand column="C1_13_JSS1_Male" values="JSS1,M,13" />
+                <expand column="C1_13_JSS1_Female" values="JSS1,F,13" />
+                <expand column="C1_13_JSS2_Male" values="JSS2,M,13" />
+                <expand column="C1_13_JSS2_Female" values="JSS2,F,13" />
+                <expand column="C1_13_JSS3_Male" values="JSS3,M,13" />
+                <expand column="C1_13_JSS3_Female" values="JSS3,F,13" />
+                <expand column="C1_14_JSS1_Male" values="JSS1,M,14" />
+                <expand column="C1_14_JSS1_Female" values="JSS1,F,14" />
+                <expand column="C1_14_JSS2_Male" values="JSS2,M,14" />
+                <expand column="C1_14_JSS2_Female" values="JSS2,F,14" />
+                <expand column="C1_14_JSS3_Male" values="JSS3,M,14" />
+                <expand column="C1_14_JSS3_Female" values="JSS3,F,14" />
+                <expand column="C1_a14_JSS1_Male" values="JSS1,M,a14" />
+                <expand column="C1_a14_JSS1_Female" values="JSS1,F,a14" />
+                <expand column="C1_a14_JSS2_Male" values="JSS2,M,a14" />
+                <expand column="C1_a14_JSS2_Female" values="JSS2,F,a14" />
+                <expand column="C1_a14_JSS3_Male" values="JSS3,M,a14" />
+                <expand column="C1_a14_JSS3_Female" values="JSS3,F,a14" />
+            </expandRow>
+        
+            <column name="Id_School" value="school_code(School_Pseudo_Code)" />
+            <column name="Year" value="$year"/>
+
+            <column name="Id_SchoolClass" value="grades(Grade)" />
+            <column name="Id_Agecategory" value="ages(Age)"/>
+            <column name="Gender" value="gender(Gender)"/>
+            <column name="Number" value="Count" />
+        </insert>
+    </import>
+
+    <import name="Junior - Enrolment Challenges">
+        <sql db="esspin" query="SELECT TOP 5 * FROM JuniorEnrolment WHERE School_Pseudo_Code = '11741'" name="JuniorEnrolment" idColumns="School_Pseudo_Code" />
+        <insert db="nemis" table="tblVar_EnrolmentChallenge">
+            <expandRow headers="Grade,Gender,Challenge" valueHeader="Count">
+                <expand column="C4_BLIND_JSS1_Male" values="JSS1,M,blind"/>
+                <expand column="C4_BLIND_JSS2_Male" values="JSS2,M,blind"/>
+                <expand column="C4_BLIND_JSS3_Male" values="JSS3,M,blind"/>
+                <expand column="C4_BLIND_JSS1_Female" values="JSS1,F,blind"/>
+                <expand column="C4_BLIND_JSS2_Female" values="JSS2,F,blind"/>
+                <expand column="C4_BLIND_JSS3_Female" values="JSS3,F,blind"/>
+                <expand column="C4_HEARING_JSS1_Male" values="JSS1,M,hearing"/>
+                <expand column="C4_HEARING_JSS2_Male" values="JSS2,M,hearing"/>
+                <expand column="C4_HEARING_JSS3_Male" values="JSS3,M,hearing"/>
+                <expand column="C4_HEARING_JSS1_Female" values="JSS1,F,hearing"/>
+                <expand column="C4_HEARING_JSS2_Female" values="JSS2,F,hearing"/>
+                <expand column="C4_HEARING_JSS3_Female" values="JSS3,F,hearing"/>
+                <expand column="C4_PHYSICAL_JSS1_Male" values="JSS1,M,physical"/>
+                <expand column="C4_PHYSICAL_JSS2_Male" values="JSS2,M,physical"/>
+                <expand column="C4_PHYSICAL_JSS3_Male" values="JSS3,M,physical"/>
+                <expand column="C4_PHYSICAL_JSS1_Female" values="JSS1,F,physical"/>
+                <expand column="C4_PHYSICAL_JSS2_Female" values="JSS2,F,physical"/>
+                <expand column="C4_PHYSICAL_JSS3_Female" values="JSS3,F,physical"/>
+                <expand column="C4_MENTAL_JSS1_Male" values="JSS1,M,mental"/>
+                <expand column="C4_MENTAL_JSS2_Male" values="JSS2,M,mental"/>
+                <expand column="C4_MENTAL_JSS3_Male" values="JSS3,M,mental"/>
+                <expand column="C4_MENTAL_JSS1_Female" values="JSS1,F,mental"/>
+                <expand column="C4_MENTAL_JSS2_Female" values="JSS2,F,mental"/>
+                <expand column="C4_MENTAL_JSS3_Female" values="JSS3,F,mental"/>
+            </expandRow>
+
+            <column name="Id_School" value="school_code(School_Pseudo_Code)" />
+            <column name="Id_Challenge" value="challenges(Challenge)" />
+            <column name="Id_SchoolClass" value="grades(Grade)" />
+            <column name="Year" value="$year" />
+            <column name="Gender" value="gender(Gender)" />
+            <column name="Number" value="Count" />
+        </insert>
+    </import>
+        
+    <mapping id="toilets">
+        <value key="bucket" value="488" />
+        <value key="pit" value="487" />
+        <value key="flush" value="489" />
+    </mapping>
+    
+</toolboxImport>

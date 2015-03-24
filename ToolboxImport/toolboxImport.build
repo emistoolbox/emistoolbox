@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<project name="toolboxImport" default="build" basedir="." >
+    <description>EMIS Toolbox Import build file - c# tool for importing data between databases.</description>
+    <property name="debug" value="true" overwrite="false" />
+
+    <target name="clean" description="remove all generated files">
+        <delete file="build/toolboxImport.exe" failonerror="false" />
+    </target>
+
+    <target name="build" description="compiles the source code">
+        <mkdir dir="build"/>
+        <csc target="exe" platform="x86" output="build\toolboxImport.exe" debug="${debug}">
+            <references>
+                <include name="bin/*.dll" />
+            </references>
+            <sources>
+                <include name="**/*.cs" />
+            </sources>
+        </csc>
+    </target>
+    
+    <target name="all" depends="clean build" />
+</project>
+

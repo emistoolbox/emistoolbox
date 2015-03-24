@@ -1,0 +1,34 @@
+== 1. Before we start == 
+What we need: 
+- Connection details for source NEMIS database. 
+- Connection details for target NEMIS database. 
+- oldNemisImport.xml file (this is the configuration on how to run the import. 
+
+== 1. Configure Database == 
+- Open oldNemisImport.xml file in text editor. 
+- Find entry for <database> 
+- Change connection settings to new data. 
+
+== 2. Starting the Tool == 
+- Start Database Migration Tool 
+- Load oldNemisImport.xml
+- Review mappings to see if we have data from the database. 
+
+== 3. Test Migration == 
+- Select a single import and run import (test mode). 
+- Review error messages and mapping errors. 
+- You can save the error report as HTML file. 
+- Run each single import in turn. 
+- Run all imports at same time. 
+
+== 4. Multiple Data Sources == 
+- Open oldNemisImport.xml file in text editor. 
+- Replace source <database> tag with multiple Add <dataSet name="Bauchi 2012"> sections - each containing a <database> tag. 
+- Reload configuration oldNeisImport.xml. 
+- Test all imports for the new database source. 
+
+== 5. Final Import == 
+- Run import for all databases, all imports and enable "Data Commit"
+- Review error messages - not how they are now in multiple files. 
+
+- Remember: You can save the error report as HTML. 

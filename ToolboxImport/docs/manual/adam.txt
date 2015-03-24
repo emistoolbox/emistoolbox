@@ -1,0 +1,24 @@
+= SQL training = 
+(1) Prepare source database (MS-SQL)
+- attach database
+- ensure connection works
+    - open IP port
+    - provide login
+- record the connection parameters
+
+(2) Prepare target database 
+- make backup of database before any migration
+- maybe disable any further data inserts while running the migration
+- ensure connection works
+  - open IP port
+  - provide login
+- record the connection parameters
+
+(3) Queries in database to find errors. 
+  - important to be able to view source of errors / maybe see a pattern
+
+(4) Queries to change error
+  - but important to only change obvious things - don't interpret errors 
+
+(5) Queries to explore data 
+  - find for which years data has been submitted (group by Year). 

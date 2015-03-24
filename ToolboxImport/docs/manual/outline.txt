@@ -1,0 +1,28 @@
+
+Moving data from one database to another can be difficult. Often data is stored in different data formats and uses different codes for the same concepts (e. g. gender might be encoded as M/F in one database and male/female in another). The Database Migration Tool provides support to deal with these issues. 
+
+While an automated tool like the Import Tool can take care of most aspects of the migration there will always be border cases that need manual intervention. The Database Migration Tool records each of these cases and provides information as summary and detailed list - this allows the operator to rectify issues (or decide to just ignore them). 
+
+No migration is going to be successful on it's first attempt. It is therefore important to create a backup of the target database to allow an easy rollback. In addition, the Database Migration Tool by default runs in a test mode in which all data fetching, validation and error logging is executed but the final insertion into the target database is only simulated. No data is added to the target database. The operator can review the error logs, rectify problems and only after they are confident of a successful migration can actual insert data into the target database. 
+
+== Error Reporting == 
+The system outputs a list of all errors encountered as HTML document. 
+
+* Name of database migration (i. e. database to run) - "default" if only one database is available. 
+** Name of import rule - this is generally based on one or more SQL statements. 
+** For each SQL statement, we output the SQL that was executed. 
+** A table with the detailed error messages. 
+
+The table contains the following columns: 
+- Error - the type of the error that occurred. 
+    - "Missing Mapping" - The value from the source data wasn't found in the lookup table. 
+    - "Missing Value" - The source data didn't have a value for this column. 
+    - "Missing Field" - The specified field couldn't be found in the source data. 
+    - "Exception thrown" - There was an exception (an unexpected error) while running the insert. 
+- Column - name of the column (in the SQL query) where the error occurred. 
+- Mapping - name of the mapping the system tried to use. Only applicable for "Missing Mapping" errors.
+- Value - value that caused the error. 
+- Count - number of times this particular error occurred. 
+
+At the end of the table, the system also shows the number of errors reported and rows successfully inserted. 
+

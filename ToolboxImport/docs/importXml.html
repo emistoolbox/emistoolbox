@@ -1,0 +1,238 @@
+<html>
+	<head>
+<style>
+.pad30 {
+    padding: 30px;
+}
+
+h2 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+h3 {
+    font-size: 16px;
+    font-weight: bold;
+    border-bottom: 1px solid black;
+}
+
+h3 span {
+    border-bottom: 3px solid black;
+}
+
+table {
+    width: 50%;
+    margin-left: 100px;
+    margin-right: auto;
+    border: 1px solid #333333;
+}
+
+th, td {
+    padding: 4px 4px 4px 4px ;
+    vertical-align: top;
+}
+
+th {
+    text-align: center ;
+    border-bottom: 1px solid #333333;
+    border-right: 1px solid #333333;
+}
+
+td {
+    text-align: left;
+    border-bottom: 1px dotted #333333;
+    border-right: 1px dotted #333333;
+}
+
+</style>
+	</head>
+	<body>
+		<h2>Import XML Configuration</h2>
+
+		<h3><span>&lt;dataImport&gt; tag</span></h3>
+		The document tag of the import configuration.
+		<p>
+		Contains: <a href='#valueTag'>value</a>+, <a href='#databaseTag'>database</a>+, <a href='#dataSetTag'>dataSet</a>, <a href='#mappingTag'>mapping</a>+, <a href='#importTag'>import</a>+
+		<p>
+
+<!-- ###################################### -->
+		<a name="valueTag">
+		<h3><span>&lt;value&gt; tag</span></h3>
+		This tag defines a key to value mapping. This can be used in three different contexts:
+		<p>
+		<ul>
+		  <li><b>dataImport/value:</b> defines a variable (the key) with the specified value.</li>
+          <li><b>dataImport/dataSet/value:</b> defines a variable only applicable to the dataset. </li>
+		  <li><b>mapping/value:</b> defines a mapping from key to value in the overall mapping.</li>
+		</ul>
+
+		<p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>key</td><td>The name of the variable.</td></tr>
+			<tr><td>value</td><td>The value of the variable.</td></tr>
+			<tr><td>name</td><td>Descriptive name that describes the value. Mainly used in mappings to provide explanation to numerical values.</td></tr>
+		</table>
+		<p>
+
+<!-- ###################################### -->
+		<a name="databaseTag">
+		<h3><span>&lt;database&gt; tag</span></h3>
+		Defines a database connections that can be used as source or target for the import.
+		<p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>id</td><td>Id of database connection. Used by other parts of the import configuration.</td></tr>
+			<tr><td>vendor</td><td>Type of database. Values are: </td></tr>
+			<tr><td>connection</td><td>Connection string to database. Vendor specific.</td></tr>
+		</table>
+        <p>
+<!-- ###################################### -->
+        <a name="dataSetTag">
+        <h3><span>&lt;dataSet&gt; tag</span></h3>
+        Defines a data set. You can set variables (through value tags) and database connections). 
+        <p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>name</td><td>Name of context.</td></tr>
+        </table>
+        <p>
+		Contains: <a href='#valueTag'>value</a>+, <a href='#databaseTag'>database</a>+
+        <p>
+        
+<!-- ###################################### -->
+		<a name="mappingTag">
+		<h3><span>&lt;mapping&gt; tag</span></h3>
+		Defines a mapping of values. This can be used to bridge the use of different codes in the target and source database (e. g. 'male' vs 'M').
+		<p>
+		<ul>
+		  <li>Mappings can be defined as constant values using the <a href='#valueTag'>value</a> tag.</li>
+		  <li>Reading key and value from a database. This is configured with the <a href='#readTag'>read</a> tag.</li>
+		</ul>
+		<p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>id</td><td>Unique id of mapping. This can be then used as "id(...)" expression to perform the look-up.</td></tr>
+		</table>
+
+		Contains: <a href='#valueTag'>value</a>+, <a href='#readTag'>read</a>+
+		<p>
+
+
+<!-- ###################################### -->
+		<a name="readTag">
+		<h3><span>&lt;read&gt; tag</span></h3>
+		Defines how to read data from databases to define a mapping. The read tag can read data from a single query, or from two queries (which can come from different databases).
+		<p>
+		<b>Single Query:</b><br> If data is read from a single query, the mapping is defined a column that contains the key and a column that contains the value.
+		<p>
+		<b>Two Queries:</b><br> If data is read from two queries, the mapping is defined by a column (in one database) that contains the key, a column (in the other database) that contains the value and
+		two join columns (one in each database). The join columns allow us to create a mapping across two databases, using a common value that is neither key nor value.
+		<p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>keyColumn</td><td>Name of column that contains the key of mapping. For single query, just the column name. For two queries [databaseId].[column] </td></tr>
+			<tr><td>valueColumn</td><td>Name of column that contains the value of mapping. For single query, just the column name. For two queries [databaseId].[column] </td></tr>
+			<tr><td>nameColumn</td><td>Name of column that contains the option name of the mapping. </td></tr>
+			<tr><td>join</td><td>Join condition (only when using two queries). Format is [databaseId].[column] = [databaseId].[column]</td></tr>
+		</table>
+		<p>
+		Contains: <a href='#sqlTag'>sql</a>{1,2}
+
+<!-- ###################################### -->
+		<a name="sqlTag">
+		<h3><span>&lt;sql&gt; tag</span></h3>
+		Defines an SQL query to run on one of the database connections.
+		<p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>db</td><td>Database id. Referring to database connections defined in a <a href='#databaseTag'>database</a> tag.</td></tr>
+			<tr><td>query</td><td>SQL statement to execute.</td></tr>
+			<tr><td>name</td><td>Name to use in error messages.</td></tr>
+		</table>
+
+<!-- ###################################### -->
+		<a name="importTag">
+		<h3><span>&lt;import&gt; tag</span></h3>
+		Defines how to import data from a query in the source database to a table in the target database.
+		<p>
+		The import tag contains an sql tag to query the source data and then one or more insert tags to define in which tables new
+		data is added. Note that by having multiple insert tags, it is possible to add data into more than one table.
+		<p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>name</td><td>Name of import rule. This is used in the user interface to allow partial imports and display errors.</td></tr>
+		</table>
+		<p>
+		Contains: <a href='#sqlTag'>sql</a>, <a href='#insertTag'>insert</a>+
+
+<!-- ###################################### -->
+		<a name="insertTag">
+		<h3><span>&lt;insert&gt; tag</span></h3>
+		For each row of the contained inserts data into the specified table.
+		<p>
+		By using the <a href='#expandRowTag'>expandRow</a> tag multiple rows can be inserted into the target table for each row read.
+		<p>
+		The use of multiple insert tags allow insertion of values into multiple tables.
+		<p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>db</td><td>Reference to database connection defined in a <a href='#databaseTag'>database</a> tag.</td></tr>
+			<tr><td>table</td><td>Table into which to insert the new data.</td></tr>
+		</table>
+		<p>
+		Contains: <a href='#expandTag'>expandRow</a>?, <a href='#columnTag'>column</a>+
+
+<!-- ###################################### -->
+		<a name="columnTag">
+		<h3><span>&lt;column&gt; tag</span></h3>
+		Specifies the value to use when inserting new rows into the target database.
+		<p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>name</td><td>Column name in the target table (as specified in the insert tag).</td></tr>
+			<tr><td>value</td><td>Value to insert. The value can be a column name or a variable reference (e. g. "$year").<p>The value can also use mappings to
+				transform the value by using the id of the mapping as function. I. e. "genderMap(GENDER)" uses the mapping with id 'genderMap' to transform the
+				value found in the 'GENDER' column in the read row.</td></tr>
+            <tr><td>missing</td><td>Specifies how to handle rows that don't have a value (esp. after applying mappings). <p>
+            <b>'allowNull'</b>: allows NULL value.<br>
+            <b>'skip'</b>: skip row.<br>
+            (default): report error.</td></tr>
+		</table>
+
+<!-- ###################################### -->
+		<a name="expandRowTag">
+		<h3><span>&lt;expandRow&gt; tag</span></h3>
+		Expands a single row into multiple rows. This is typically used where multiple columns contain related data and they should be flattened into
+		multiple rows.
+		<p>
+		For example, the source table might contain the columns "MaleCount" and "FemaleCount", while the target table has "Gender" and "Count". For each
+		read row, we need to create two rows: One row where Gender = "male", Count = MaleCount and the other where Gender = "female", Count = FemaleCount.
+		<p>
+		The expandRow tag provides this functionality by specifying a set of new columns that define fixed values for the columns containing data (i. e. in this case the Gender column)
+		and one column to hold the actual value of each of the columns (in this case Count).
+		<p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>headers</td><td>New columns that contain constant values describing the data.</td></tr>
+			<tr><td>valueHeader</td>Column that contains the value of the column we expand.<td></td></tr>
+		</table>
+
+<!-- ###################################### -->
+		<a name="expandTag">
+		<h3><span>&lt;expand&gt; tag</span></h3>
+		Definition of how a single column can be expanded to a full row.
+		<p>
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+			<tr><td>column</td><td>Column that contains the value. This value will be placed under the column specified in the 'valueHeader' attribute of the parent expandRow tag.</td></tr>
+			<tr><td>values</td><td>Values that describe this column. The values are placed under the columns specified in the 'headers' attribute of the parent expandRow tag.
+		</table>
+	</body>
+</html>
+
+<!--
+		<table class="attributes">
+			<tr><th>Attribute</th><th>Description</th></tr>
+		</table>
+-->
