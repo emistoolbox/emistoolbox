@@ -1,0 +1,61 @@
+<!-- Build for unitlib jar -->
+<project name="emistoolbox-pdf" default="compile" basedir="." >
+  <description>PDF library for EMIS Toolbox</description>
+
+  <property name="src" location="src"/>
+  <property name="lib" location="lib"/>
+  <property name="build" location="build"/>
+  <property name="classes" location="${build}/classes"/>
+  <property name="jar" location="jar"/>
+
+  <path id="path.compile">
+    <fileset dir="${lib}">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="path.test">
+    <fileset dir="${lib}">
+      <include name="**/*.jar"/>
+    </fileset>
+
+    <pathelement location="${build}/${ant.project.name}.jar"/>
+  </path>
+
+  <target name="clean">
+    <delete quiet="true" includeemptydirs="true">
+      <fileset dir="${classes}" includes="**/*"/>
+    </delete>
+
+    <mkdir dir="${classes}"/>
+    <mkdir dir="${build}"/>
+    <mkdir dir="${jar}"/>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${classes}"/>
+    <javac srcdir="${src}" destdir="${classes}" debug="on" source="1.6" target="1.6">
+      <classpath refid="path.compile"/>
+    </javac>
+  </target>
+
+  <target name="prepareJar" depends="compile">
+    <delete quiet="true">
+      <fileset dir="${jar}" includes="**/*.bak"/>
+      <fileset dir="${jar}" includes="**/*~"/>
+    </delete>
+  </target>
+
+  <target name="jar" depends="prepareJar">
+    <mkdir dir="${build}"/>
+    <jar destfile="${build}/${ant.project.name}.jar" manifest="${jar}/Manifest.mf">
+        <fileset dir="${classes}"/>
+        <fileset dir="${jar}">
+          <exclude name="**/Manifest.mf"/>
+        </fileset>
+    </jar>
+  </target>
+
+  <target name="all" depends="clean,jar">
+  </target>
+</project>
