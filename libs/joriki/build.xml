@@ -1,6 +1,6 @@
 <!-- Build for unitlib jar -->
-<project name="jokiri" default="compile" basedir="." >
-  <description>Jokiri library</description>
+<project name="joriki" default="compile" basedir="." >
+  <description>joriki library</description>
 
   <property name="src" location="src"/>
   <property name="lib" location="lib"/>
