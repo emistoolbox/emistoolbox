@@ -116,9 +116,17 @@ public class MetaResultValueImpl implements MetaResultValue
 		else
 		{
 			Set<EmisMetaDateEnum> result = new HashSet<EmisMetaDateEnum>(); 
-			EmisAggregatorDef aggrDef = indicator.getAggregator(aggregatorKey);
+			EmisAggregatorDef aggrDef = indicator.getAggregator(getKeyName(aggregatorKey));
 			result.add(aggrDef.getMetaData().getDateType()); 
 			return result; 
 		}
+	}
+	
+	public static String getKeyName(String aggregatorKey)
+	{
+		if (aggregatorKey.startsWith("?") || aggregatorKey.startsWith("+"))
+			return aggregatorKey.substring(1); 
+		
+		return aggregatorKey; 
 	}
 }

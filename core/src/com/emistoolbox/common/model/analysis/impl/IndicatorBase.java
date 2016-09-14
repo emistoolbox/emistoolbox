@@ -37,15 +37,26 @@ public abstract class IndicatorBase extends NamedImpl implements EmisIndicator, 
     private boolean biggerIsBetter;
     private double maxValue = (0.0D / 0.0D);
 
+    private String yAxisLabel; 
+    
     public IndicatorBase() 
     { this(null); }
 
     public IndicatorBase(String[] aggregatorNames) 
     { this.aggregators = new AggregatorList(aggregatorNames); }
 
+    
     @Override
 	public String getGroupName() 
     { return groupName; }
+
+	@Override
+	public String getYAxisLabel() 
+	{ return yAxisLabel; } 
+
+	@Override
+	public void setYAxisLabel(String yAxis) 
+	{ this.yAxisLabel = yAxis; } 
 
 	@Override
 	public void setGroupName(String groupName) 

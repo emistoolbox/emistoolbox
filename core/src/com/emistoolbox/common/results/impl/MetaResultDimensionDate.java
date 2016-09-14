@@ -30,7 +30,7 @@ public class MetaResultDimensionDate extends NamedImpl implements MetaResultDime
 
     public String getName()
     {
-        String result = super.getName();
+        String result = normalize(super.getName());
         if (this.value != null)
         {
             result = result + " '" + this.value.toString() + "'";

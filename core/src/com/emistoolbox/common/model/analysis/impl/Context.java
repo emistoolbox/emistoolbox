@@ -9,7 +9,9 @@ import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaEnum;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,8 +26,9 @@ public class Context extends ContextBase implements EmisContext, Serializable
     private List<EmisEnumTupleValue> dates;
     private List<EmisEntity> entities;
     private EmisMetaEntity entityType;
-    private Map<String, EmisEnumSet> enums;
-    private Map<String, byte[]> entityFilters = new HashMap();
+    private Map<String, EmisEnumSet> enumFilters;
+    private Map<String, EmisEnumSet> dateEnumFilters = new HashMap<String, EmisEnumSet>();
+    private Map<String, byte[]> entityFilters = new HashMap<String, byte[]>();
 
     public int getHierarchyDateIndex()
     { return this.dateIndex; }
@@ -46,12 +49,24 @@ public class Context extends ContextBase implements EmisContext, Serializable
     { return this.entityType; }
 
     public EmisEnumSet getEnumFilter(String name)
-    { return this.enums == null ? null : (EmisEnumSet) this.enums.get(name); }
+    { return this.enumFilters == null ? null : (EmisEnumSet) this.enumFilters.get(name); }
 
     public Map<String, EmisEnumSet> getEnumFilters()
-    { return this.enums; }
+    { return this.enumFilters; }
 
-    public void setDateType(EmisMetaDateEnum dateType)
+    @Override
+	public EmisEnumSet getDateEnumFilter(String dateEnumName) 
+    { return dateEnumFilters.get(dateEnumName); }
+
+	@Override
+	public void addDateEnumFilter(EmisEnumSet values) 
+	{ dateEnumFilters.put(values.getEnum().getName(), values); }
+
+	@Override
+	public Map<String, EmisEnumSet> getDateEnumFilters() 
+	{ return dateEnumFilters; }
+
+	public void setDateType(EmisMetaDateEnum dateType)
     { this.dateType = dateType; }
 
     public void setDates(List<EmisEnumTupleValue> newDates)
@@ -65,13 +80,13 @@ public class Context extends ContextBase implements EmisContext, Serializable
 
     public void addEnumFilter(EmisEnumSet values)
     {
-        if (this.enums == null)
-            this.enums = new HashMap();
-        this.enums.put(values.getEnum().getName(), values);
+        if (this.enumFilters == null)
+            this.enumFilters = new HashMap();
+        this.enumFilters.put(values.getEnum().getName(), values);
     }
 
     public void setEnumFilters(Map<String, EmisEnumSet> enums)
-    { this.enums = enums; }
+    { this.enumFilters = enums; }
 
     public void addBooleanEntityFilter(EmisMetaData field, Boolean selectTrue)
     { this.entityFilters.put(getKey(field), new byte[] { (byte) (selectTrue.booleanValue() ? 1 : 0) }); }
@@ -104,9 +119,7 @@ public class Context extends ContextBase implements EmisContext, Serializable
         for (String key : this.entityFilters.keySet())
         {
             if (key.startsWith(entity.getName() + "."))
-            {
                 result.add(key.substring(entity.getName().length() + 1));
-            }
         }
         return result;
     }
@@ -132,4 +145,55 @@ public class Context extends ContextBase implements EmisContext, Serializable
 
     public String getKey(EmisMetaData field)
     { return field.getEntity().getName() + "." + field.getName(); }
+    
+    public EmisContext createCopy()
+    {
+		Context result = new Context(); 
+		result.dateIndex = dateIndex; 
+		result.dateType = dateType; 
+		if (dates != null)
+		{
+			result.dates = new ArrayList<EmisEnumTupleValue>(); 
+			for (EmisEnumTupleValue date : dates)
+				result.dates.add(date.createCopy()); 
+		}
+		
+		if (entities != null)
+		{
+			result.entities = new ArrayList<EmisEntity>(); 
+			result.entities.addAll(entities); 
+		}
+		
+		result.entityType = entityType; 
+		
+		if (entityFilters != null)
+		{
+			result.entityFilters = new HashMap<String, byte[]>();
+			for (Map.Entry<String, byte[]> filter : entityFilters.entrySet())
+			{
+				byte[] oldValues = filter.getValue(); 
+				byte[] values = new byte[oldValues.length];
+				for (int i = 0; i < values.length; i++) 
+					values[i] = oldValues[i]; 
+				
+				result.entityFilters.put(filter.getKey(), values); 
+			}
+		}
+		
+		if (dateEnumFilters != null)
+		{
+			result.dateEnumFilters = new HashMap<String, EmisEnumSet>(); 
+			for (Map.Entry<String, EmisEnumSet> dateFilter : dateEnumFilters.entrySet())
+				result.dateEnumFilters.put(dateFilter.getKey(), dateFilter.getValue().createCopy()); 
+		}
+		
+		if (enumFilters != null)
+		{
+			result.enumFilters = new HashMap<String, EmisEnumSet>(); 
+			for (Map.Entry<String, EmisEnumSet> enumFilter : enumFilters.entrySet())
+				result.enumFilters.put(enumFilter.getKey(), enumFilter.getValue().createCopy()); 
+		}
+
+		return result; 
+    }
 }

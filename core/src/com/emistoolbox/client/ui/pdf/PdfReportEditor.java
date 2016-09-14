@@ -23,6 +23,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -52,8 +53,10 @@ public class PdfReportEditor extends FlexTable implements EmisEditor<PdfReportCo
     private PushButton uiAddVariables;
     private PushButton uiEdit;
     private ListBoxWithUserObjects<PdfContentConfig> uiContents = new ListBoxWithUserObjects<PdfContentConfig>();
+    private CheckBox uiShortTitles = new CheckBox(Message.messageReport().reportShortTitles()); 
 
-    public PdfReportEditor(EmisMeta meta) {
+    public PdfReportEditor(EmisMeta meta) 
+    {
         this.meta = meta;
 
         uiEntity.addStyleName(EmisToolbox.CSS_TWO_THIRDS_TEXT);
@@ -113,6 +116,9 @@ public class PdfReportEditor extends FlexTable implements EmisEditor<PdfReportCo
         setWidget(row, 1, this.uiLayout);
         row++;
 
+        setWidget(row, 1, this.uiShortTitles); 
+        row++; 
+        
         getFlexCellFormatter().setVerticalAlignment(row, 0, HasVerticalAlignment.ALIGN_TOP);
         setHTML(row, 0, Message.messageAdmin().preHtmlContents() + ":");
         this.uiContents.setVisibleItemCount(15);
@@ -278,10 +284,10 @@ public class PdfReportEditor extends FlexTable implements EmisEditor<PdfReportCo
 
         int[] layout = (int[]) this.uiLayout.getUserObject();
         if (layout == null)
-        {
             layout = new int[] { 1, 1 };
-        }
+
         this.reportConfig.setLayout(layout[0], layout[1]);
+        this.reportConfig.setShortTitles(uiShortTitles.getValue()); 
 
         List<PdfContentConfig> contents = new ArrayList<PdfContentConfig>();
         for (int i = 0; i < this.uiContents.getItemCount(); i++)
@@ -317,6 +323,7 @@ public class PdfReportEditor extends FlexTable implements EmisEditor<PdfReportCo
         this.uiSize.setSelectedIndex(config.getPageSize().ordinal());
 
         this.uiLayout.setSelectedIndex(getLayoutIndex(config.getRows(), config.getColumns()));
+        this.uiShortTitles.setValue(config.hasShortTitles());
 
         this.uiContents.clear();
         for (PdfContentConfig content : config.getContentConfigs())

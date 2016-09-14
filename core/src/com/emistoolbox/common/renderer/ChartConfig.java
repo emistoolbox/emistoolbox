@@ -71,6 +71,10 @@ public abstract interface ChartConfig
     public abstract String getAxisFormat();
 
     public abstract void setAxisFormat(String paramString);
+    
+    public abstract String getYAxisLabel(); 
+    
+    public abstract void setYAxisLabel(String text); 
 
     public abstract ChartColor getTextColour();
 

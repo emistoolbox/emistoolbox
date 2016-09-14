@@ -48,6 +48,10 @@ public abstract interface PdfReportConfig extends Named
 
     public abstract EmisMetaHierarchy getHierarchy();
     
+    public void setShortTitles(boolean shortTitles); 
+    
+    public boolean hasShortTitles(); 
+    
     public static enum PageOrientation {
         LANDSCAPE, PORTRAIT;
     }

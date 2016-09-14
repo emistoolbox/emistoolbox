@@ -24,4 +24,6 @@ public abstract interface TableMetaResult extends MetaResult
     public abstract void setSortOrder(int paramInt);
 
     public Set<EmisMetaDateEnum> getUsedDateTypes(boolean withoutAxis); 
+    
+    public TableMetaResult createCopy(); 
 }

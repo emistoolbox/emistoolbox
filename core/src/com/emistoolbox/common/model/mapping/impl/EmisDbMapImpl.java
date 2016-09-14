@@ -1,6 +1,7 @@
 package com.emistoolbox.common.model.mapping.impl;
 
 import com.emistoolbox.common.model.mapping.DbDataSourceConfig;
+import com.emistoolbox.common.model.mapping.EmisDateInitDbMap;
 import com.emistoolbox.common.model.mapping.EmisDbMap;
 import com.emistoolbox.common.model.mapping.EmisEntityDbMap;
 import com.emistoolbox.common.model.mapping.EmisHierarchyDbMap;
@@ -12,6 +13,7 @@ import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.util.NamedUtil;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,11 +22,12 @@ public class EmisDbMapImpl implements EmisDbMap, Serializable
 {
     private static final long serialVersionUID = 1L;
     private EmisMeta meta;
-    private List<DbDataSourceConfig> dataSources = new ArrayList();
-    private List<EmisHierarchyDbMap> hierarchyMaps = new ArrayList();
-    private List<EmisEntityDbMap> entityMaps = new ArrayList();
-    private List<GisEntityDbMap> gisMaps = new ArrayList();
-
+    private List<DbDataSourceConfig> dataSources = new ArrayList<DbDataSourceConfig>();
+    private List<EmisHierarchyDbMap> hierarchyMaps = new ArrayList<EmisHierarchyDbMap>();
+    private List<EmisEntityDbMap> entityMaps = new ArrayList<EmisEntityDbMap>();
+    private List<GisEntityDbMap> gisMaps = new ArrayList<GisEntityDbMap>();
+    private List<EmisDateInitDbMap> dateInitMaps = new ArrayList<EmisDateInitDbMap>(); 
+    
     public EmisMeta getMeta()
     {
         return this.meta;
@@ -61,7 +64,7 @@ public class EmisDbMapImpl implements EmisDbMap, Serializable
 
     public List<EmisEntityDbMap> find(EmisMetaEntity entity)
     {
-        List result = new ArrayList();
+        List<EmisEntityDbMap> result = new ArrayList<EmisEntityDbMap>();
         for (EmisEntityDbMap map : this.entityMaps)
         {
             if (NamedUtil.sameName(map.getEntity(), entity))
@@ -73,7 +76,7 @@ public class EmisDbMapImpl implements EmisDbMap, Serializable
 
     public List<EmisEntityDbMap> find(EmisMetaEntity entity, EmisMetaDateEnum dateType)
     {
-        List result = new ArrayList();
+        List<EmisEntityDbMap> result = new ArrayList<EmisEntityDbMap>();
         for (EmisEntityDbMap map : this.entityMaps)
         {
             if ((NamedUtil.sameName(map.getEntity(), entity)) && (NamedUtil.sameName(map.getDateEnum(), dateType)))
@@ -85,7 +88,7 @@ public class EmisDbMapImpl implements EmisDbMap, Serializable
 
     public List<EmisMetaDateEnum> findDateTypes(EmisMetaEntity entity)
     {
-        List result = new ArrayList();
+        List<EmisMetaDateEnum> result = new ArrayList<EmisMetaDateEnum>();
         for (EmisMetaData data : entity.getData())
         {
             EmisMetaDateEnum tmp = data.getDateType();
@@ -166,4 +169,22 @@ public class EmisDbMapImpl implements EmisDbMap, Serializable
         for (GisEntityDbMap map : gisMaps)
         	map.updateDimensions(); 
     }
+
+	@Override
+	public List<EmisDateInitDbMap> getDateInitMappings() 
+	{ return dateInitMaps; }
+
+	@Override
+	public void setDateInitMappings(List<EmisDateInitDbMap> mappings)
+	{ this.dateInitMaps = mappings; }
+
+	@Override
+	public EmisDateInitDbMap findDateInit(EmisMetaDateEnum dateType) 
+	{
+		for (EmisDateInitDbMap map : dateInitMaps)
+			if (NamedUtil.sameName(map.getDateType(), dateType))
+				return map; 
+
+		return null;
+	}
 }

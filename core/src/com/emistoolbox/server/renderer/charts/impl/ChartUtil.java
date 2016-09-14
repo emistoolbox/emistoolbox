@@ -80,9 +80,11 @@ public class ChartUtil
     {
         EmisIndicator indicator = value.getIndicator();
         if (indicator == null)
-        {
             return;
-        }
+
+        if (indicator.getYAxisLabel() != null)
+        	config.setYAxisLabel(indicator.getYAxisLabel()); 
+        
         if ((!Double.isNaN(indicator.getBadThreshold())) && (!Double.isNaN(indicator.getGoodThreshold())))
             config.setThreshold(indicator.getGoodThreshold(), indicator.getGoodThresholdText(), indicator.getBadThreshold(), indicator.getBadThresholdText());
         else if (!Double.isNaN(indicator.getGoodThreshold()))
@@ -101,16 +103,10 @@ public class ChartUtil
         dimensions = Math.min(result.getDimensions(), dimensions);
         int totalSize = 1;
         for (int i = 0; i < dimensions; i++)
-        {
             totalSize *= result.getDimensionSize(i);
-        }
+        
+        // Make chart bigger if there are a lot of bars. 
         if (totalSize > 10)
-            config.setChartSize(config.getChartWidth() * totalSize / 25, config.getChartHeight());
+            config.setChartSize(Math.max(config.getChartWidth(), config.getChartWidth() * totalSize / 25), config.getChartHeight());
     }
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.server.renderer.charts.impl.ChartUtil JD-Core
- * Version: 0.6.0
- */

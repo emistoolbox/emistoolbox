@@ -13,9 +13,3 @@ public abstract interface PdfReport
 
     public abstract List<PdfPage> getPages();
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.server.renderer.pdfreport.PdfReport JD-Core
- * Version: 0.6.0
- */

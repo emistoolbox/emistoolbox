@@ -9,6 +9,7 @@ import com.emistoolbox.client.admin.ui.ListBoxWithUserObjects;
 import com.emistoolbox.client.admin.ui.MetaResultValueListEditor;
 import com.emistoolbox.client.admin.ui.TreeHierarchyBrowser;
 import com.emistoolbox.common.model.EmisEntity;
+import com.emistoolbox.common.model.EmisEnumSet;
 import com.emistoolbox.common.model.EmisEnumTupleValue;
 import com.emistoolbox.common.model.analysis.EmisContext;
 import com.emistoolbox.common.model.analysis.EmisReportConfig;
@@ -19,6 +20,7 @@ import com.emistoolbox.common.model.meta.EmisMeta;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaEnum;
+import com.emistoolbox.common.model.meta.EmisMetaEnumTuple;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
@@ -50,6 +52,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,6 +71,7 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
     private EmisEnumTupleValue currentDate;
     private int currentHierarchyDateIndex = -1;
     protected EmisMetaEntity currentListEntity;
+    private EmisContext globalFilter; 
 
     private List<EmisEntity> rootEntities; 
     
@@ -91,6 +95,24 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
         setCurrentHierarchy((EmisMetaHierarchy) emisMeta.getHierarchies().get(0));
     }
 
+    public void setGlobalFilter(EmisContext context)
+    {
+    	globalFilter = context;
+    	EmisEnumTupleValue dt = getCurrentDate();
+    	if (dt != null)
+    	{
+	    	dt = filterDate(dt); 
+	    	if (dt == null)
+	    		setCurrentDate(null);     	
+    	}
+    	
+    	updateUi();
+    }
+    
+    
+    public EmisContext getGlobalFilter()
+    { return globalFilter; } 
+    
     public List<EmisEntity> getRootEntities()
     { return rootEntities; }
     
@@ -99,7 +121,7 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
         return this.showReportHasHandlers.addValueChangeHandler(showReportHandler);
     }
 
-    protected abstract void updateUi();
+	protected abstract void updateUi();
     
     protected EmisEnumTupleValue getDefaultDate(Set<EmisMetaDateEnum> dateTypes)
     {
@@ -210,7 +232,7 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
 
         return context;
     }
-
+    
     public T get()
     {
         commit();
@@ -521,15 +543,12 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
         for (PdfReportConfig report : reports)
         {
             if (report.allowContentConfig(contentConfig))
-            {
                 uiReports.add(report.getTitle() + (report.getEntityType() != null ? "(" + report.getEntityType().getName() + ")" : ""), report);
-            }
         }
         HorizontalPanel hp = new HorizontalPanel();
         if (addButtons.length == 1)
-        {
             hp.add(uiReports);
-        }
+
         for (int i = 0; i < addButtons.length; i++)
         {
             final int buttonIndex = i;
@@ -661,9 +680,27 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
     	editor.setDateIndex(getCurrentDateIndex()); 
     }
 
+    private EmisEnumTupleValue filterDate(EmisEnumTupleValue dt)
+    {
+    	if (globalFilter == null)
+    		return dt; 
+    	
+    	EmisMetaEnum[] enumTypes = dt.getEnumTuple().getEnums();
+    	String[] values = dt.getValue(); 
+    	
+    	for (int i = 0; i < enumTypes.length; i++) 
+    	{
+    		EmisEnumSet filter = globalFilter.getDateEnumFilter(enumTypes[i].getName());
+    		if (filter != null && !filter.hasValue(values[i]))
+    			return null;  
+    	}
+    	
+    	return dt; 
+    }
+    
     private void editDate(int row, Set<EmisMetaDateEnum> dateTypes)
     {
-        DateTupleEditor editor = new DateTupleEditor(dateTypes);
+        DateTupleEditor editor = new DateTupleEditor(dateTypes, globalFilter);
         editor.set(getCurrentDate());
         editor.addValueChangeHandler(new ValueChangeHandler<EmisEnumTupleValue>() {
             public void onValueChange(ValueChangeEvent<EmisEnumTupleValue> event)

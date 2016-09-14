@@ -33,6 +33,7 @@ import com.emistoolbox.common.model.mapping.DbRowContextAccess;
 import com.emistoolbox.common.model.mapping.DbRowDateAccess;
 import com.emistoolbox.common.model.mapping.DbRowFieldAccess;
 import com.emistoolbox.common.model.mapping.DbRowMultipleAccess;
+import com.emistoolbox.common.model.mapping.EmisDateInitDbMap;
 import com.emistoolbox.common.model.mapping.EmisDbMap;
 import com.emistoolbox.common.model.mapping.EmisEntityDbMap;
 import com.emistoolbox.common.model.mapping.EmisHierarchyDbMap;
@@ -80,6 +81,7 @@ import com.emistoolbox.common.results.impl.MetaResultDimensionEntity;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityAncestors;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityFilter;
+import com.emistoolbox.common.results.impl.MetaResultDimensionEntityGrandChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEnum;
 import com.emistoolbox.common.user.EmisUser;
 import com.emistoolbox.common.util.Named;
@@ -389,6 +391,8 @@ public class XmlWriter
         setAttr(dateTag, "id", date);
         setAttr(dateTag, "parent", date.getParent());
         setIds(dateTag, "values", date.getValues());
+        if (date.hasAllowDynamicInit())
+        	setAttr(dateTag, "dateInit", "true"); 
     }
 
     private void addXml(Element parent, EmisMetaHierarchy hierarchy)
@@ -405,11 +409,14 @@ public class XmlWriter
         {
             addXml(tag, config);
         }
+        tag = createElementAndAdd("dateInits", mapTag); 
+        for (EmisDateInitDbMap dateInitMap : map.getDateInitMappings())
+        	addXml(tag, dateInitMap, map); 
+        
         tag = createElementAndAdd("entityMaps", mapTag);
         for (EmisEntityDbMap entityMap : map.getEntityMappings())
-        {
             addXml(tag, entityMap, map);
-        }
+
         tag = createElementAndAdd("gisEntityMaps", mapTag);
         for (GisEntityDbMap gisMap : map.getGisEntityMappings())
         {
@@ -441,6 +448,14 @@ public class XmlWriter
         return "";
     }
 
+    private void addXml(Element parent, EmisDateInitDbMap dateInitMap, EmisDbMap dbmap)
+    {
+    	Element tag = createElementAndAdd("dateInit", parent); 
+    	addXml(tag, dateInitMap.getDbContext(), dbmap);
+    	addXml(tag, null, dateInitMap.getValueAccess()); 
+    	setAttr(tag, "dateType", dateInitMap.getDateType()); 
+    }
+    
     private void addXml(Element parent, DbDataSourceConfig config)
     {
         Element tag = createElementAndAdd("dbConfig", parent);
@@ -726,6 +741,9 @@ public class XmlWriter
         setAttr(tag, "pageOrientation", "" + reportConfig.getOrientation());
         setAttr(tag, "rows", Integer.valueOf(reportConfig.getRows()));
         setAttr(tag, "cols", Integer.valueOf(reportConfig.getColumns()));
+        
+        if (reportConfig.hasShortTitles())
+        	setAttr(tag, "shortTitles", "true"); 
 
         Element tmp = createElementAndAdd("title", tag);
         tmp.setTextContent(reportConfig.getTitle());
@@ -791,11 +809,14 @@ public class XmlWriter
 
         Element metaResultTag = createElementAndAdd("metaResultValues", tag);
         for (MetaResultValue value : metaResult.getMetaResultValues())
-        {
             addXml(metaResultTag, value);
-        }
 
         addXml(tag, metaResult.getContext());
+        if (null != metaResult.getGlobalFilter())
+        {
+        	Element globalFilterTag = createElementAndAdd("globalFilter", tag); 
+        	addXml(globalFilterTag, metaResult.getGlobalFilter());
+        }
     }
 
     private void addXml(Element parent, MetaResultValue value)
@@ -825,18 +846,16 @@ public class XmlWriter
     private void addXml(Element parent, TableMetaResult tableMetaResult)
     {
         if (tableMetaResult == null)
-        {
             return;
-        }
+
         Element tag = createElementAndAdd("tableMetaResult", parent);
         if (tableMetaResult.getSortOrder() == 1)
             tag.setAttribute("sort", "asc");
         else if (tableMetaResult.getSortOrder() == -1)
             tag.setAttribute("sort", "desc");
         else if (tableMetaResult.getSortOrder() == 2)
-        {
             tag.setAttribute("sort", "name");
-        }
+
         updateXml(tag, tableMetaResult);
         for (int i = 0; i < tableMetaResult.getDimensionCount(); i++)
             addXml(tag, tableMetaResult.getDimension(i));
@@ -881,6 +900,11 @@ public class XmlWriter
         {
             setAttr(tag, "type", "entityChildren");
             addXml(tag, (MetaResultDimensionEntity) metaResult);
+        }
+        else if (metaResult instanceof MetaResultDimensionEntityGrandChildren)
+        {
+        	setAttr(tag, "type", "entityGrandChildren"); 
+        	addXml(tag, (MetaResultDimensionEntity) metaResult); 
         }
     }
 
@@ -932,6 +956,7 @@ public class XmlWriter
         setAttr(tag, "max", Double.valueOf(indicator.getMaxValue()));
         setAttr(tag, "name", indicator.getName());
         setAttr(tag, "groupName", indicator.getGroupName());
+        setAttr(tag, "yAxis", indicator.getYAxisLabel()); 
 
         if ((indicator instanceof EmisIndicatorTimeRatio))
         {
@@ -1005,13 +1030,11 @@ public class XmlWriter
 
             setAttr(tag, "type", "full");
             if (ctx.getHierarchyDateIndex() != -1)
-            {
                 setAttr(tag, "dateIndex", Integer.valueOf(ctx.getHierarchyDateIndex()));
-            }
+
             if (ctx.getDateType() != null)
-            {
                 setAttr(tag, "dateType", ctx.getDateType());
-            }
+
             if (ctx.getDates() != null)
             {
                 for (EmisEnumTupleValue value : ctx.getDates())
@@ -1037,6 +1060,7 @@ public class XmlWriter
             {
                 setAttr(tag, "entityType", ctx.getEntityType());
             }
+
             if (ctx.getEnumFilters() != null)
             {
                 for (Map.Entry<String, EmisEnumSet> enumFilter : ctx.getEnumFilters().entrySet())
@@ -1056,9 +1080,17 @@ public class XmlWriter
                     setAttr(entityFilterTag, "key", entityFilter.getKey());
                     setIds(entityFilterTag, "values", (byte[]) entityFilter.getValue());
                 }
-
             }
 
+            if (ctx.getDateEnumFilters() != null)
+            {
+            	for (Map.Entry<String, EmisEnumSet> dateFilter : ctx.getDateEnumFilters().entrySet())
+            	{
+            		Element dateFilterTag = createElementAndAdd("dateFilter", tag); 
+            		setAttr(dateFilterTag, "key", dateFilter.getKey());
+            		setIds(dateFilterTag, "values", ((EmisEnumSet) dateFilter.getValue()).getAllIndexes()); 
+            	}
+            }
         }
         else
         {
@@ -1177,8 +1209,3 @@ public class XmlWriter
         tag.setAttribute(attr, ids.toString());
     }
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.server.XmlWriter JD-Core Version: 0.6.0
- */

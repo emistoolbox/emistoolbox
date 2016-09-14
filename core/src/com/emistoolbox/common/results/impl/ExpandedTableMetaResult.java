@@ -1,7 +1,6 @@
 package com.emistoolbox.common.results.impl;
 
 import com.emistoolbox.common.model.analysis.EmisAggregatorDef;
-import com.emistoolbox.common.model.analysis.EmisIndicator;
 import com.emistoolbox.common.results.MetaResultValue;
 import com.emistoolbox.common.results.TableMetaResult;
 import java.util.ArrayList;
@@ -65,5 +64,17 @@ public class ExpandedTableMetaResult extends TableMetaResultAdaptor implements T
             }
         }
     }
+
+	@Override
+	public TableMetaResult createCopy() 
+	{
+		ExpandedTableMetaResult result = new ExpandedTableMetaResult(metaResult.createCopy()); 
+		result.expandedValues = new ArrayList<MetaResultValue>(); 		
+		result.expandedValues.addAll(expandedValues); 
+		
+		return result; 
+	}
+    
+    
 }
 

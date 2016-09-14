@@ -25,6 +25,7 @@ import com.emistoolbox.common.model.meta.EmisMetaEnumTuple;
 import com.emistoolbox.common.results.MetaResult;
 import com.emistoolbox.common.results.MetaResultValue;
 import com.emistoolbox.common.results.ResultUtil;
+import com.emistoolbox.common.results.impl.MetaResultValueImpl;
 import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.server.model.EmisDataSet;
 import com.emistoolbox.server.model.EmisEntityData;
@@ -55,14 +56,10 @@ public class ResultCollector
     }
 
     public EmisDataSet getDataSet()
-    {
-        return this.emisDataSet;
-    }
+    { return this.emisDataSet; }
 
     public EmisHierarchy getHierarchy()
-    {
-        return this.hierarchy;
-    }
+    { return this.hierarchy; }
 
     public MetaResult getMetaResult()
     {
@@ -70,11 +67,47 @@ public class ResultCollector
     }
 
     public List<int[]> filter(EmisContext context, EmisMetaEntity metaEntity, List<int[]> idsList)
+    { return filter(context, metaEntity, idsList, emisDataSet); }
+    
+    public List<EmisEntity> filterEntities(EmisContext context, EmisMetaEntity metaEntity, List<EmisEntity> entities)
+    { 
+    	List<EmisEntity> result = new ArrayList<EmisEntity>();
+    	return result; 
+    }
+
+    public static int[] filter(EmisContext context, EmisMetaEntity metaEntity, int[] ids, EmisDataSet dataset)
+    {
+    	if (ids == null)
+    		return new int[0]; 
+    	
+    	List<int[]> idsList = new ArrayList<int[]>(); 
+    	idsList.add(ids);
+    	idsList = filter(context, metaEntity, idsList, dataset);
+    	if (idsList.size() == 0)
+    		return new int[0]; 
+    	
+    	if (idsList.size() == 1)
+    		return idsList.get(0); 
+    	
+    	List<Integer> tmp = new ArrayList<Integer>(); 
+    	for (int[] tmpIds : idsList)
+    		for (int intId : tmpIds)
+    			if (intId > -1)
+    				tmp.add(intId); 
+
+    	int[] result = new int[tmp.size()]; 
+    	for (int i = 0; i < result.length; i++)
+    		result[i] = tmp.get(i);
+    	
+    	return result; 
+    }
+    
+    public static List<int[]> filter(EmisContext context, EmisMetaEntity metaEntity, List<int[]> idsList, EmisDataSet dataset)
     {
         idsList = copyIds(idsList);
         for (String filter : context.getEntityFilterNames(metaEntity))
         {
-            int entityTypeIndex = NamedUtil.findIndex(metaEntity, getDataSet().getMetaDataSet().getEntities());
+            int entityTypeIndex = NamedUtil.findIndex(metaEntity, dataset.getMetaDataSet().getEntities());
             EmisMetaData field = (EmisMetaData) NamedUtil.find(filter, metaEntity.getData());
             if (field == null)
                 continue;
@@ -84,44 +117,41 @@ public class ResultCollector
                 continue;
 
             EmisMetaDateEnum dateEnum = field.getDateType();
-            int dateTypeIndex = NamedUtil.findIndex(dateEnum, getDataSet().getMetaDataSet().getDateEnums());
+            int dateTypeIndex = NamedUtil.findIndex(dateEnum, dataset.getMetaDataSet().getDateEnums());
 
-            EmisEntityDataSet dataset = getDataSet().getEntityDataSet(entityTypeIndex, dateTypeIndex);
-            if (dataset == null)
+            EmisEntityDataSet entityDataset = dataset.getEntityDataSet(entityTypeIndex, dateTypeIndex);
+            if (entityDataset == null)
                 continue;
 
             for (int[] ids : idsList)
-                filter(context, field, dataset, dateIndex, ids);
+                filter(context, field, entityDataset, dateIndex, ids);
         }
 
         return idsList;
     }
 
-    public void filter(EmisContext context, EmisMetaData field, EmisEntityDataSet dataset, int dateIndex, int[] ids)
+    public static void filter(EmisContext context, EmisMetaData field, EmisEntityDataSet dataset, int dateIndex, int[] ids)
     {
         EntityDataAccess access = dataset.getDataAccess(field.getName());
         if (access == null)
-        {
             return;
-        }
+
         for (int i = 0; i < ids.length; i++)
         {
             if (ids[i] == -1)
-            {
                 continue;
-            }
+
             EmisEntityData data = dataset.getData(dateIndex, ids[i]);
             if (data == null)
-            {
                 continue;
-            }
+
             int value = access.getAsInt(data.getMasterArray(), 0);
             if (!context.allowEntityWithValue(field, value))
                 ids[i] = -1;
         }
     }
 
-    private List<int[]> copyIds(List<int[]> idsList)
+    private static List<int[]> copyIds(List<int[]> idsList)
     {
         List<int[]> result = new ArrayList<int[]>();
         for (int[] ids : idsList)
@@ -129,19 +159,15 @@ public class ResultCollector
         return result;
     }
 
-    private int getDateIndex(EmisContext context, EmisMetaData field)
+    private static int getDateIndex(EmisContext context, EmisMetaData field)
     {
         Collection<EmisEnumTupleValue> values = context.getDates(field.getDateType());
         if (values == null)
-        {
             return -1;
-        }
-        Iterator<EmisEnumTupleValue> i$ = values.iterator();
-        if (i$.hasNext())
-        {
-            EmisEnumTupleValue value = i$.next();
+
+        for (EmisEnumTupleValue value : values)
             return value.getEnumTuple().getIndex(value.getIndex());
-        }
+
         return -1;
     }
 
@@ -202,8 +228,9 @@ public class ResultCollector
     		if (!NamedUtil.sameName(indicator, metaResult.getIndicator()))
     			continue; 
     		
-    		if (metaResult.getAggregatorKey() != null)
-    			result.add(metaResult.getAggregatorKey()); 
+    		String plainKey = metaResult.getAggregatorKey(); 
+    		if (plainKey != null && plainKey.equals(MetaResultValueImpl.getKeyName(plainKey)))
+    			result.add(plainKey); 
     		else
     		{
     			for (String key : indicator.getAggregatorNames())
@@ -219,11 +246,12 @@ public class ResultCollector
         Map<String, Double> values = new HashMap<String, Double>();
         for (String aggrKey : aggrKeys)
         {
-            EmisAggregatorDef aggr = aggrList.getAggregator(aggrKey); 
+        	String key = MetaResultValueImpl.getKeyName(aggrKey); 
+            EmisAggregatorDef aggr = aggrList.getAggregator(key); 
             int timeOffset = 0;
-            if (denominatorTimeOffset != null && aggrKey.equals("denominator"))
+            if (denominatorTimeOffset != null && key.equals("denominator"))
                 timeOffset = denominatorTimeOffset; 
-            values.put(aggrKey, Double.valueOf(getAggregatorValue(context, aggr, timeOffset)));
+            values.put(MetaResultValueImpl.getKeyName(aggrKey), Double.valueOf(getAggregatorValue(context, aggr, timeOffset)));
         }
 
         return values;
@@ -425,7 +453,7 @@ public class ResultCollector
     {
         int entityTypeIndex = NamedUtil.findIndex(entityType, getDataSet().getMetaDataSet().getEntities());
 
-        EmisContext context = metaResult.getContext();
+        EmisContext context = metaResult.getContextWithGlobalFilter();
         for (EmisEntity entity : context.getEntities())
         {
             List<int[]> children = getHierarchy().getDescendants(context.getHierarchyDateIndex(), entity.getEntityType(), entity.getId(), entityType);
@@ -442,7 +470,7 @@ public class ResultCollector
                 {
                     List<EmisEntity> entities = new ArrayList<EmisEntity>();
                     entities.add(new Entity(entityType, ids[i]));
-                    context.setEntities(entities);
+                    metaResult.getContext().setEntities(entities);
                     
                     Map<String, String> values = new HashMap<String, String>();
                     for (int y = 0; y < entityFields.length; y++) 

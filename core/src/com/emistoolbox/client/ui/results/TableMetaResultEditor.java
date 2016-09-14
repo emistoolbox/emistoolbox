@@ -404,12 +404,12 @@ public class TableMetaResultEditor extends MetaResultEditor<TableMetaResult>
         {
             PdfChartContentConfigImpl result = new PdfChartContentConfigImpl();
             result.setChartType(getChartType()); 
-            result.setMetaResult(get());
+            result.setMetaResult(get().createCopy());
             return result;
         }
 
         PdfTableContentConfigImpl result = new PdfTableContentConfigImpl();
-        result.setMetaResult(get());
+        result.setMetaResult(get().createCopy());
         return result;
     }
 

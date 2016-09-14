@@ -26,7 +26,12 @@ public class EnumTupleValueImpl implements EmisEnumTupleValue, Serializable
         EmisMetaEnum[] enums = this.meta.getEnums();
         String[] result = new String[this.indexes.length];
         for (int i = 0; i < result.length; i++)
-            result[i] = enums[i].getValue(this.indexes[i]);
+        {
+        	if (indexes[i] == -1)
+        		result[i] = ""; 
+        	else
+        		result[i] = enums[i].getValue(this.indexes[i]);
+        }
         return result;
     }
 
@@ -109,5 +114,17 @@ public class EnumTupleValueImpl implements EmisEnumTupleValue, Serializable
     	
     	return bestValue; 
     }
+
+	@Override
+	public EmisEnumTupleValue createCopy() 
+	{
+		EnumTupleValueImpl result = new EnumTupleValueImpl(); 
+	    result.meta = meta; 
+	    result.indexes= new byte[indexes.length];
+	    for (int i = 0; i < indexes.length; i++)
+	    	result.indexes[i] = indexes[i]; 
+		
+		return result;
+	}
 }
 

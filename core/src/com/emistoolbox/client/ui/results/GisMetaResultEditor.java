@@ -161,7 +161,7 @@ public class GisMetaResultEditor extends MetaResultEditor<GisMetaResult>
     protected PdfContentConfig getContentConfig(int addButton)
     {
         PdfGisContentConfigImpl result = new PdfGisContentConfigImpl();
-        result.setMetaResult(get());
+        result.setMetaResult(get().createCopy());
         return result;
     }
     

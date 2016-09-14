@@ -10,7 +10,7 @@ import com.emistoolbox.common.results.MetaResultValue;
 import java.util.List;
 import java.util.Set;
 
-public class MetaResultAdaptor implements MetaResult
+public abstract class MetaResultAdaptor implements MetaResult
 {
     private MetaResult metaResult;
 
@@ -20,7 +20,18 @@ public class MetaResultAdaptor implements MetaResult
     public EmisContext getContext()
     { return this.metaResult.getContext(); }
 
-    public EmisMetaHierarchy getHierarchy()
+    public EmisContext getContextWithGlobalFilter()
+    { return this.metaResult.getContextWithGlobalFilter(); }
+
+    @Override
+	public EmisContext getGlobalFilter() 
+    { return this.metaResult.getGlobalFilter(); } 
+
+	@Override
+	public void setGlobalFilter(EmisContext globalFilter) 
+	{ this.metaResult.setGlobalFilter(globalFilter); }
+
+	public EmisMetaHierarchy getHierarchy()
     { return this.metaResult.getHierarchy(); }
 
     public EmisIndicator getIndicator()

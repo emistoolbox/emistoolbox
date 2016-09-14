@@ -1,7 +1,9 @@
 package com.emistoolbox.server.renderer.pdfreport.itext;
 
+import com.emistoolbox.common.model.EmisEnumTupleValue;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportWriterException;
+import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.server.ServerUtil;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
@@ -42,7 +44,16 @@ public class ItextPdfReportWriter implements PdfReportWriter
     private static final Font DEFAULT_SUBTITLE_FONT = new Font(Font.FontFamily.HELVETICA, 12.0F, 1);
     private static final Font DEFAULT_FOOTER_FONT = new Font(Font.FontFamily.HELVETICA, 10.0F);
     
-    private int[] getCellHeights(PdfPage page, float totalHeight)
+    private String dateInfo; 
+    
+    @Override
+	public void setDateInfo(ReportMetaResult metaInfo) 
+    {
+    	for (EmisEnumTupleValue item : metaInfo.getContext().getDates())
+    		dateInfo = StringUtils.join(item.getValue(), ", ");
+    }
+
+	private int[] getCellHeights(PdfPage page, float totalHeight)
     {
         int[] result = new int[page.getRows()]; 
 
@@ -56,6 +67,8 @@ public class ItextPdfReportWriter implements PdfReportWriter
                     result[row] = 2; 
                 else if (content instanceof PdfVariableContent && ((PdfVariableContent) content).getSize() > 4)
                     result[row] = 2; 
+                else if (content instanceof PdfTextContent && ((PdfTextContent) content).getText().length() > 150)
+                	result[row] = 2; 
             }
         }
         
@@ -63,11 +76,24 @@ public class ItextPdfReportWriter implements PdfReportWriter
         for (int i = 0; i < result.length; i++) 
             totalCount += result[i]; 
         
-        float unitHeight = totalHeight * 0.95f / totalCount; 
+        float unitHeight = totalHeight * getHeightFactor(totalCount) / totalCount; 
         for (int i = 0; i < result.length; i++) 
             result[i] = (int) (result[i] * unitHeight);  
 
         return result; 
+    }
+    
+    /** We adjust the height by the number of rows - the more rows, the more likely some of them don't use the maximum 
+     *  space. 
+     */
+    private float getHeightFactor(int rowCount)
+    {
+    	if (rowCount <= 4)
+    		return 0.95f;
+    	else if (rowCount <= 8)
+    		return 1.0f; 
+		else 
+    		return 1.05f; 
     }
     
     public void writeReport(PdfReport report, File outputFile) throws IOException, PdfReportWriterException
@@ -141,6 +167,7 @@ public class ItextPdfReportWriter implements PdfReportWriter
 
                             cell.addElement(contentTable);
                         }
+
                         tablePageLayout.addCell(cell);
                     }
                 }
@@ -157,8 +184,8 @@ public class ItextPdfReportWriter implements PdfReportWriter
 
     private PdfPCell getSizedImage(PdfContent content, float width, float height) throws BadElementException, MalformedURLException, IOException
     {
-        width -= Math.ceil(width * 0.1);
-        height -= Math.ceil(height * 0.1);
+        width -= Math.ceil(width * 0.02);
+        height -= Math.ceil(height * 0.02);
 
         Image image = Image.getInstance(ServerUtil.getFile("charts", ((ItextPdfImageContent) content).getImagePath(), true).getAbsolutePath());
         image.scaleAbsolute(width, height);
@@ -201,7 +228,7 @@ public class ItextPdfReportWriter implements PdfReportWriter
         return (check == null) || (check.equals(""));
     }
 
-    private static String setTitleRow(PdfPTable table, PdfPage page, PdfReport report, String previousPageTitle)
+    private String setTitleRow(PdfPTable table, PdfPage page, PdfReport report, String previousPageTitle)
     {
         String title = report.getReportConfig().getTitle();
         String subtitle = report.getReportConfig().getSubtitle();
@@ -213,16 +240,15 @@ public class ItextPdfReportWriter implements PdfReportWriter
         }
         else
         {
-            title = page.getTitle();
-            subtitle = page.getSubtitle();
+            title = replaceDate(page.getTitle());
+            subtitle = replaceDate(page.getSubtitle());
         }
 
         StringBuilder builder = new StringBuilder();
         builder.append(title);
         if (!isNullOrEmpty(subtitle))
-        {
             builder.append(" - ").append(subtitle);
-        }
+
         String currentPageTitle = builder.toString();
 
         Font titleFont = DEFAULT_TITLE_FONT;
@@ -254,6 +280,14 @@ public class ItextPdfReportWriter implements PdfReportWriter
         table.setHeaderRows(1);
 
         return currentPageTitle;
+    }
+    
+    private String replaceDate(String title)
+    {
+    	if (dateInfo == null)
+    		return title; 
+    	
+    	return title.replaceAll("\\{\\$date\\}", dateInfo); 
     }
 
     private static void setFooterRow(PdfPTable table, String footer, int colspan)

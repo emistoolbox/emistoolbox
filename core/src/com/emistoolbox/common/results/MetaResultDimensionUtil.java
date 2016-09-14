@@ -8,6 +8,7 @@ import java.util.Set;
 import com.emistoolbox.client.MessageAdmin;
 import com.emistoolbox.common.model.EmisEntity;
 import com.emistoolbox.common.model.EmisEnumTupleValue;
+import com.emistoolbox.common.model.analysis.EmisAggregatorDef;
 import com.emistoolbox.common.model.analysis.EmisIndicator;
 import com.emistoolbox.common.model.analysis.EmisReportConfig;
 import com.emistoolbox.common.model.impl.EmisEnumUtils;
@@ -23,6 +24,7 @@ import com.emistoolbox.common.results.impl.MetaResultDimensionEntity;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityAncestors;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityFilter;
+import com.emistoolbox.common.results.impl.MetaResultDimensionEntityGrandChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEnum;
 import com.emistoolbox.common.results.impl.MetaResultUtil;
 import com.emistoolbox.common.util.NamedIndexList;
@@ -48,6 +50,13 @@ public class MetaResultDimensionUtil
             EmisMetaEntity parent = (EmisMetaEntity) entities.get(i);
             EmisMetaEntity child = (EmisMetaEntity) entities.get(i + 1);
             result.add(getChildrenDimension(msgAdmin.metadeInfoAllChildrenForParent(child.getName(), parent.getName()), parent, hierarchy));
+        }
+
+        for (int i = 0; i < index - 1; i++)
+        {
+            EmisMetaEntity parent = (EmisMetaEntity) entities.get(i);
+            EmisMetaEntity child = (EmisMetaEntity) entities.get(i + 2);
+            result.add(getGrandChildrenDimension(msgAdmin.metadeInfoAllChildrenForParent(child.getName(), parent.getName()), parent, hierarchy));
         }
 
         return result; 
@@ -116,7 +125,7 @@ public class MetaResultDimensionUtil
         return result; 
     }
     
-    public static List<MetaResultDimension> getEntityFilterDimensions(MessageAdmin msgAdmin, EmisMetaEntity seniorEntity, MetaResultDimension ignoreDimension)
+    public static List<MetaResultDimension> getEntityFilterDimensions(MessageAdmin msgAdmin, EmisMetaEntity seniorEntity, EmisIndicator indicator, MetaResultDimension ignoreDimension)
     {
         List<MetaResultDimension> result = new ArrayList<MetaResultDimension>(); 
 
@@ -134,11 +143,36 @@ public class MetaResultDimensionUtil
                 continue;
 
             if ((field.getType() == EmisMetaData.EmisDataType.BOOLEAN) || field.getType() == EmisMetaData.EmisDataType.ENUM || field.getType() == EmisMetaData.EmisDataType.ENUM_SET)
-                result.add(getEntityFilterDimension(msgAdmin, field));
+            	if (canUseField(field, indicator))	
+            		result.add(getEntityFilterDimension(msgAdmin, field));
         }
         
         return result; 
     }
+
+    private static boolean canUseField(EmisMetaData field, EmisIndicator indicator)
+    {
+    	for (EmisAggregatorDef aggr : indicator.getAggregators().values())
+    		if (canUseField(field, aggr.getMetaData() == null ? aggr.getCountDateType() : aggr.getMetaData().getDateType()))
+    			return true; 
+    	
+    	return false; 
+    }
+    
+    private static boolean canUseField(EmisMetaData field, EmisMetaDateEnum dateType)
+    {
+    	EmisMetaDateEnum fieldDateType = field.getDateType(); 
+    	while (dateType != null)
+    	{
+    		if (NamedUtil.sameName(dateType, fieldDateType))
+    			return true; 
+    		
+    		dateType = dateType.getParent(); 
+    	}
+    	
+    	return false; 
+    }
+    
     
     public static List<MetaResultDimension> getDateDimensions(MessageAdmin msgAdmin, EmisIndicator indicator, EmisMetaDateEnum ignoreDateType, EmisReportConfig reportConfig)
     {
@@ -203,7 +237,7 @@ public class MetaResultDimensionUtil
         else
             addDimensions(result, msgAdmin.metadeInfoEnumAnalysis(), MetaResultDimensionUtil.getEnumDimensions(msgAdmin, indicator, null, null)); // TODO EmisReportConfig 
 
-        addDimensions(result, msgAdmin.metadeInfoByEntityVariables(), MetaResultDimensionUtil.getEntityFilterDimensions(msgAdmin, indicator.getSeniorEntity(hierarchy), ignoreDimension));
+        addDimensions(result, msgAdmin.metadeInfoByEntityVariables(), MetaResultDimensionUtil.getEntityFilterDimensions(msgAdmin, indicator.getSeniorEntity(hierarchy), indicator, ignoreDimension));
     }
     
     private static void addDimensions(MetaResultDimensionBuilder result, String title, List<MetaResultDimension> dims)
@@ -236,6 +270,15 @@ public class MetaResultDimensionUtil
         return metaDim;
     }
 
+    private static MetaResultDimension getGrandChildrenDimension(String name, EmisMetaEntity entity, EmisMetaHierarchy hierarchy)
+    {
+        MetaResultDimensionEntity metaDim = new MetaResultDimensionEntityGrandChildren();
+        metaDim.setName(name);
+        metaDim.setHierarchy(hierarchy);
+        metaDim.setEntityType(entity);
+        return metaDim;
+    }
+
     private static MetaResultDimension getEntityFilterDimension(MessageAdmin msgAdmin, EmisMetaData field)
     {
         MetaResultDimensionEntityFilter result = new MetaResultDimensionEntityFilter();
@@ -251,20 +294,34 @@ public class MetaResultDimensionUtil
     
     public static String getTitle(MetaResult metaResult, ENTITY_DATE_LEVEL entityAndDateLevel, boolean asHtml)
     { return getTitle(metaResult, entityAndDateLevel, asHtml, false); } 
+
+    public static StringBuffer getSimpleTitle(MetaResult metaResult, boolean asHtml, StringBuffer result)
+    {
+    	if (result == null)
+    		result = new StringBuffer(); 
+    	
+        if (metaResult.getIndicator() == null)
+        	return result; 
+        
+    	if (asHtml)
+    		result.append("<div class='title'>"); 
+    	
+    	result.append(metaResult.getIndicator().getName()); 
+
+    	if (asHtml)
+    		result.append("</div>"); 
+    	
+    	return result; 
+    }
     
     public static String getTitle(MetaResult metaResult, ENTITY_DATE_LEVEL entityAndDateLevel, boolean asHtml, boolean showEntityPathNames)
     {
         StringBuffer result = new StringBuffer();
-        if (metaResult.getIndicator() != null)
-        {
-            if (asHtml)
-                result.append("<div class='title'>");
-            result.append(metaResult.getIndicator().getName());
-            if (asHtml)
-                result.append("</div><div class='subtitle'>");
-            else
-                result.append(" - ");
-        }
+        
+        getSimpleTitle(metaResult, asHtml, result); 
+        if (result.length() > 0 && !asHtml)
+        	result.append(" - "); 
+        
         boolean anyEntity = false;
 
         Set<EmisMetaDateEnum> dateTypes = metaResult.getUsedDateTypes();

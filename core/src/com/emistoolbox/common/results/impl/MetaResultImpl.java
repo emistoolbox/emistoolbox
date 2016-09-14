@@ -2,6 +2,8 @@ package com.emistoolbox.common.results.impl;
 
 import com.emistoolbox.common.model.analysis.EmisContext;
 import com.emistoolbox.common.model.analysis.EmisIndicator;
+import com.emistoolbox.common.model.analysis.impl.Context;
+import com.emistoolbox.common.model.analysis.impl.MultipleContext;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.results.MetaResult;
@@ -17,12 +19,44 @@ public class MetaResultImpl implements Serializable, MetaResult
     private static final long serialVersionUID = 1L;
     private EmisMetaHierarchy hierarchy;
     private EmisContext context;
+    private EmisContext globalFilter; 
     private List<MetaResultValue> values = new ArrayList<MetaResultValue>();
 
+    protected void copy(MetaResultImpl result)
+    {
+    	result.hierarchy = hierarchy; 
+    	if (context != null)
+    		result.context = ((Context) context).createCopy(); 
+    	
+    	if (globalFilter != null)
+    		result.globalFilter = ((Context) globalFilter).createCopy(); 
+    	
+    	if (values != null)
+    	{
+    		result.values = new ArrayList<MetaResultValue>(); 
+    		result.values.addAll(values); 
+    	}
+    }
+    
     public EmisContext getContext()
     { return this.context; }
 
-    public EmisMetaHierarchy getHierarchy()
+    @Override
+	public EmisContext getContextWithGlobalFilter() 
+    {
+    	if (globalFilter == null)
+    		return context; 
+    	
+    	return new MultipleContext(new EmisContext[] { context, globalFilter}, context.getDateType());
+	}
+
+	public EmisContext getGlobalFilter() 
+    { return globalFilter; }
+
+	public void setGlobalFilter(EmisContext globalFilter) 
+	{ this.globalFilter = globalFilter; }
+
+	public EmisMetaHierarchy getHierarchy()
     { return this.hierarchy; }
 
     public Set<EmisMetaDateEnum> getUsedDateTypes()

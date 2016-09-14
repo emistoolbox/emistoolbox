@@ -40,6 +40,12 @@ public abstract interface EmisContext
 
     public abstract Map<String, EmisEnumSet> getEnumFilters();
 
+    public abstract EmisEnumSet getDateEnumFilter(String dateEnumName); 
+    
+    public abstract void addDateEnumFilter(EmisEnumSet values); 
+    
+    public abstract Map<String, EmisEnumSet> getDateEnumFilters(); 
+    
     public abstract void setEnumFilters(Map<String, EmisEnumSet> paramMap);
 
     public abstract Set<String> getEntityFilterNames(EmisMetaEntity paramEmisMetaEntity);

@@ -30,9 +30,8 @@ public class GisResultCollector extends ResultCollector
 
         EmisMetaEntity entityType = metaResult.getContext().getEntityType();
         if (entityType == null)
-        {
             throw new IllegalArgumentException("GisMetaResult requires entity type on which we plot.");
-        }
+
         if (entityType.getGisType() == EmisMetaEntity.EmisGisType.NONE)
             throw new IllegalArgumentException("Cannot plot entity of type " + entityType.getName());
     }
@@ -40,9 +39,8 @@ public class GisResultCollector extends ResultCollector
     private EmisMetaEntity getTopEntityType(NamedIndexList<EmisMetaEntity> entityOrder, EmisContext context)
     {
         if ((context.getEntities() == null) || (context.getEntities().size() == 0) || (((EmisEntity) context.getEntities().get(0)).getEntityType() == null))
-        {
             return (EmisMetaEntity) entityOrder.get(0);
-        }
+
         return ((EmisEntity) context.getEntities().get(0)).getEntityType();
     }
 
@@ -50,7 +48,7 @@ public class GisResultCollector extends ResultCollector
     {
         List result = new ArrayList();
 
-        EmisContext context = getMetaResult().getContext();
+        EmisContext context = getMetaResult().getContextWithGlobalFilter();
 
         NamedIndexList entityOrder = getHierarchy().getMetaHierarchy().getEntityOrder();
         int start = entityOrder.getIndex(getTopEntityType(entityOrder, context));
@@ -60,9 +58,8 @@ public class GisResultCollector extends ResultCollector
         {
             EmisMetaEntity tmpEntityType = (EmisMetaEntity) entityOrder.get(i);
             if (tmpEntityType.getGisType() == EmisMetaEntity.EmisGisType.NONE)
-            {
                 continue;
-            }
+
             int tmpEntityTypeIndex = NamedUtil.findIndex(tmpEntityType, getDataSet().getMetaDataSet().getEntities());
 
             GisFeatureSet featureSet = null;

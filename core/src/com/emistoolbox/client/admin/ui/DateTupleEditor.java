@@ -1,10 +1,13 @@
 package com.emistoolbox.client.admin.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import com.emistoolbox.client.EmisEditor;
+import com.emistoolbox.common.model.EmisEnumSet;
 import com.emistoolbox.common.model.EmisEnumTupleValue;
+import com.emistoolbox.common.model.analysis.EmisContext;
 import com.emistoolbox.common.model.impl.EmisEnumUtils;
 import com.emistoolbox.common.model.impl.EnumTupleValueImpl;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
@@ -28,8 +31,8 @@ public class DateTupleEditor extends FlexTable implements EmisEditor<EmisEnumTup
     private ListBox[] uiValues;
     private boolean[] requiredFields;
     private PushButton btnOk = new PushButton("OK"); 
-
-    public DateTupleEditor(Set<EmisMetaDateEnum> newDateTypes)
+    
+    public DateTupleEditor(Set<EmisMetaDateEnum> newDateTypes, EmisContext globalFilter)
     {
     	dateTypes = EmisEnumUtils.sort(newDateTypes);
 
@@ -40,7 +43,7 @@ public class DateTupleEditor extends FlexTable implements EmisEditor<EmisEnumTup
     	for (EmisMetaDateEnum dateType : dateTypes)
     	{
     		setHTML(row, 0, "<b>" + dateType.getName() + ":</b>"); 
-    		uiValues[row] = getListBox(dateType); 
+    		uiValues[row] = getListBox(dateType, globalFilter == null ? null : globalFilter.getDateEnumFilter(dateType.getName())); 
     		setWidget(row, 1, uiValues[row]); 
     		row++; 
     	}
@@ -72,13 +75,22 @@ public class DateTupleEditor extends FlexTable implements EmisEditor<EmisEnumTup
     	updateButton(); 
     }
 
-    private ListBox getListBox(EmisMetaDateEnum dateType)
+    private ListBox getListBox(EmisMetaDateEnum dateType, EmisEnumSet dateFilter)
     {
     	ListBox result = new ListBox(); 
     	result.setVisibleItemCount(1);
 
+    	List<String> values = new ArrayList<String>(); 
+    	if (dateFilter != null)
+    		values.addAll(dateFilter.getAll());
+    	else
+    	{
+    		for (String value : dateType.getValues())
+    			values.add(value);  
+    	}
+    	
     	result.addItem(""); 
-    	for (String value : dateType.getValues())
+    	for (String value : values)
     		result.addItem(value);
 
     	result.addChangeHandler(new ChangeHandler() {
@@ -110,12 +122,12 @@ public class DateTupleEditor extends FlexTable implements EmisEditor<EmisEnumTup
 		EmisMetaDateEnum dateType = dateTypes.get(dateTypes.size() - 1); 
 		result.setEnumTuple(dateType);
 		
-		byte[] indexes = new byte[dateType.getDimensions()]; 
+		String[] values = new String[dateType.getDimensions()]; 
 		EmisMetaEnum[] enums = dateType.getEnums(); 
-		for (int i = 0; i < indexes.length; i++) 
-			indexes[i] = getListBoxIndex((EmisMetaDateEnum) enums[i]); 
+		for (int i = 0; i < values.length; i++) 
+			values[i] = getListBoxValue((EmisMetaDateEnum) enums[i]); 
 
-		result.setIndex(indexes);
+		result.setValue(values);
 
 		return result; 
 	}
@@ -126,37 +138,45 @@ public class DateTupleEditor extends FlexTable implements EmisEditor<EmisEnumTup
 		if (value == null)
 		{
 			for (int i = 0; i < dateTypes.size(); i++)
-				setListBoxIndex(dateTypes.get(i), (byte) -1); 
+				setListBoxValue(dateTypes.get(i), ""); 
 
 			return; 
 		}
 		
 		EmisMetaEnum[] enums = value.getEnumTuple().getEnums(); 
-		byte[] indexes = value.getIndex(); 
+		String[] values = value.getValue(); 
 		
 		for (int i = 0; i < enums.length; i++)
-			setListBoxIndex((EmisMetaDateEnum) enums[i], indexes[i]);
+			setListBoxValue((EmisMetaDateEnum) enums[i], values[i]);
 	} 
 
-	private byte getListBoxIndex(EmisMetaDateEnum dateType)
+	private String getListBoxValue(EmisMetaDateEnum dateType)
 	{
 		ListBox lb = findListBox(dateType);
 		if (lb == null)
-			return -1; 
+			return ""; 
 
 		byte result = (byte) lb.getSelectedIndex();
 		if (result == -1)
-			return result; 
+			return ""; 
 		
-		result--; 
-		return result; 
+		return lb.getValue(result); 
 	}
 	
-	private void setListBoxIndex(EmisMetaDateEnum dateType, byte index)
+	private void setListBoxValue(EmisMetaDateEnum dateType, String value)
 	{
 		ListBox lb = findListBox(dateType); 
 		if (lb != null)
-			lb.setSelectedIndex(index + 1);
+			lb.setSelectedIndex(findListBoxIndex(lb, value, 0));
+	}
+	
+	private int findListBoxIndex(ListBox lb, String value, int defaultIndex)
+	{
+		for (int i = 0; i < lb.getItemCount(); i++)
+			if (value.equals(lb.getValue(i)))
+				return i; 
+		
+		return defaultIndex; 
 	}
 	
 	private int findIndex(EmisMetaDateEnum dateType)

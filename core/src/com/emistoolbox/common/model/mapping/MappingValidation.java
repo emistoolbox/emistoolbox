@@ -2,6 +2,7 @@ package com.emistoolbox.common.model.mapping;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.emistoolbox.common.model.mapping.impl.DbRowByColumnAccess;
 import com.emistoolbox.common.model.mapping.impl.DbRowByColumnIndexAccess;
@@ -75,13 +76,17 @@ public class MappingValidation
         
         // Ensure all fields still exist. 
         Map<String, DbRowAccess> accesses = map.getFieldAccess(); 
-        for (String fieldName : accesses.keySet())
+        Set<String> keys = accesses.keySet(); 
+        
+        Iterator<Map.Entry<String, DbRowAccess>> iter = accesses.entrySet().iterator(); 
+        while (iter.hasNext()) 
         {
-            EmisMetaData field = NamedUtil.find(fieldName, entity.getData()); 
+        	Map.Entry<String, DbRowAccess> entry = iter.next(); 
+            EmisMetaData field = NamedUtil.find(entry.getKey(), entity.getData()); 
             if (field == null)
-                accesses.remove(fieldName);
-            else if (!validateMapping(field, accesses.get(fieldName)))
-                accesses.remove(fieldName); 
+                iter.remove();
+            else if (!validateMapping(field, entry.getValue()))
+                iter.remove(); 
         }
 
         return accesses.size() > 0; 

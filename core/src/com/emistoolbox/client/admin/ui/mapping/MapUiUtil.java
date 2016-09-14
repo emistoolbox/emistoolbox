@@ -174,6 +174,7 @@ public class MapUiUtil
 
     public static MapUiDbContextEditor getMapUiAsWidget(DbContext context, DbMapEditor dbMapEditor)
     { return getMapUiAsWidget(context, null, dbMapEditor); }
+    
     public static MapUiDbContextEditor getMapUiAsWidget(DbContext context, EmisMetaDateEnum loopEnum, DbMapEditor dbMapEditor)
     {
         MapUiDbContextEditor result = new MapUiDbContextEditor(dbMapEditor, loopEnum);

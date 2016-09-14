@@ -23,10 +23,11 @@ import java.util.Map;
 
 public class IndicatorEditor extends FlexTable implements EmisEditor<EmisIndicator>
 {
-    private static int AGGREGATOR_ROW = 8;
+    private int aggregatorRow = 0;
     private EmisIndicator indicator;
     private TextBox uiName = new TextBox();
     private TextBox uiGroupName = new TextBox();
+    private TextBox uiYAxis = new TextBox(); 
 
     private TextBox uiMaxValue = new TextBox();
     private TextBox uiFactor = new TextBox();
@@ -48,6 +49,7 @@ public class IndicatorEditor extends FlexTable implements EmisEditor<EmisIndicat
 
         this.uiName.setWidth("350px");
         this.uiGroupName.setWidth("350px");
+        this.uiYAxis.setWidth("350px");
         this.uiMaxValue.setWidth("50px");
         this.uiBadThreshold.setWidth("50px");
         this.uiGoodThreshold.setWidth("50px");
@@ -89,6 +91,10 @@ public class IndicatorEditor extends FlexTable implements EmisEditor<EmisIndicat
         setWidget(row, 1, this.uiMaxValue);
         row++; 
         
+        setHTML(row, 0, EmisToolbox.div(EmisToolbox.CSS_SECTION, Message.messageAdmin().ieHtmlYAxis() + ":")); 
+        setWidget(row, 1, this.uiYAxis);
+        row++; 
+        
         getFlexCellFormatter().setColSpan(row, 0, 2);
         setHTML(row, 0, "<hr>");
         row++; 
@@ -100,6 +106,12 @@ public class IndicatorEditor extends FlexTable implements EmisEditor<EmisIndicat
         setWidget(row, 0, this.uiTimeOffsetText);
         setWidget(row, 1, this.uiTimeOffset);
         row++; 
+        
+        getFlexCellFormatter().setColSpan(row, 0, 2);
+        setHTML(row, 0, "<hr>");
+        row++; 
+
+        aggregatorRow = row; 
     }
 
     private void updateThresholds()
@@ -174,6 +186,7 @@ public class IndicatorEditor extends FlexTable implements EmisEditor<EmisIndicat
     {
         this.uiName.setText(this.indicator.getName());
         this.uiGroupName.setText(this.indicator.getGroupName());
+        this.uiYAxis.setText(indicator.getYAxisLabel()); 
         setTextBoxFromDouble(this.uiMaxValue, this.indicator.getMaxValue());
 
         int index = 0;
@@ -214,10 +227,10 @@ public class IndicatorEditor extends FlexTable implements EmisEditor<EmisIndicat
             this.uiTimeOffsetText.setVisible(false);
         }
 
-        int row = AGGREGATOR_ROW;
+        int row = aggregatorRow;
         for (String aggregator : this.indicator.getAggregatorNames())
         {
-            if (row != AGGREGATOR_ROW)
+            if (row != aggregatorRow)
             {
                 setHTML(row, 1, "<hr>");
                 row++;
@@ -248,8 +261,9 @@ public class IndicatorEditor extends FlexTable implements EmisEditor<EmisIndicat
 
     public void commit()
     {
-        this.indicator.setName(this.uiName.getText());
-        this.indicator.setGroupName(this.uiGroupName.getText());
+        this.indicator.setName(uiName.getText());
+        this.indicator.setGroupName(uiGroupName.getText());
+        this.indicator.setYAxisLabel(uiYAxis.getText()); 
         this.indicator.setMaxValue(getDoubleFromTextBox(this.uiMaxValue));
 
         int index = this.uiThresholdType.getSelectedIndex();
@@ -264,7 +278,7 @@ public class IndicatorEditor extends FlexTable implements EmisEditor<EmisIndicat
             ((IndicatorTimeRatio) this.indicator).setTimeOffset(this.uiTimeOffset.getSelectedIndex() == 0 ? -1 : 1);
 
         Map<String, EmisAggregatorDef> aggregators = this.indicator.getAggregators();
-        int row = AGGREGATOR_ROW;
+        int row = aggregatorRow;
         while (row < getRowCount())
         {
             Widget w = getWidget(row, 1);

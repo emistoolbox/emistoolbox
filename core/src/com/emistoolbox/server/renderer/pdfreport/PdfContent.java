@@ -14,9 +14,3 @@ public abstract interface PdfContent
 
     public abstract String getTitle();
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.server.renderer.pdfreport.PdfContent JD-Core
- * Version: 0.6.0
- */

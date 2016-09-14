@@ -619,4 +619,8 @@ public abstract interface MessageAdmin extends Messages
     public String saveFileAs();
 	
     public String errorServerError();
+    public String ieHtmlYAxis(); 
+   
+    public String enumAllowDynamicInit(); 
+    public String dbmapDateInit(); 
 }

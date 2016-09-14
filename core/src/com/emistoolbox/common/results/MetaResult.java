@@ -10,27 +10,33 @@ import java.util.Set;
 
 public abstract interface MetaResult
 {
-    public abstract EmisMetaHierarchy getHierarchy();
+    public EmisMetaHierarchy getHierarchy();
 
-    public abstract void setHierarchy(EmisMetaHierarchy paramEmisMetaHierarchy);
+    public void setHierarchy(EmisMetaHierarchy paramEmisMetaHierarchy);
 
-    public abstract EmisIndicator getIndicator();
+    public EmisIndicator getIndicator();
 
-    public abstract void setIndicator(EmisIndicator paramEmisIndicator);
+    public void setIndicator(EmisIndicator paramEmisIndicator);
 
-    public abstract int getMetaResultValueCount();
+    public int getMetaResultValueCount();
 
-    public abstract MetaResultValue getMetaResultValue(int paramInt);
+    public MetaResultValue getMetaResultValue(int paramInt);
 
-    public abstract List<MetaResultValue> getMetaResultValues();
+    public List<MetaResultValue> getMetaResultValues();
 
-    public abstract void setMetaResultValues(List<MetaResultValue> paramList);
+    public void setMetaResultValues(List<MetaResultValue> paramList);
 
-    public abstract void addMetaResultValue(MetaResultValue paramMetaResultValue);
+    public void addMetaResultValue(MetaResultValue paramMetaResultValue);
 
-    public abstract EmisContext getContext();
+    public EmisContext getContext();
 
-    public abstract void setContext(EmisContext paramEmisContext);
+    public EmisContext getContextWithGlobalFilter();
+
+    public void setContext(EmisContext paramEmisContext);
+
+    public EmisContext getGlobalFilter(); 
+    
+    public void setGlobalFilter(EmisContext globalFilter); 
     
     public Set<EmisMetaDateEnum> getUsedDateTypes(); 
 }

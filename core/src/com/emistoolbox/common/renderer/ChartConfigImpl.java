@@ -9,6 +9,7 @@ public class ChartConfigImpl implements ChartConfig
     public static final ChartFont LABEL_FONT = new ChartFont("SansSerif", 1, 11);
 
     private String axisFormat = "#,##0";
+    private String yAxisLabel = null; 
     private ChartColor backgroundColour = new ChartColor(255, 255, 255);
     private ChartColor badColour = new ChartColor(0, 0, 0);
     private double badThreshold = (0.0D / 0.0D);
@@ -37,10 +38,17 @@ public class ChartConfigImpl implements ChartConfig
         return this.axisFormat;
     }
 
-    public ChartColor getBackgroundColour()
-    {
-        return this.backgroundColour;
-    }
+    @Override
+	public String getYAxisLabel() 
+    { return yAxisLabel; } 
+
+	@Override
+	public void setYAxisLabel(String text) 
+	{ yAxisLabel = text; } 
+
+
+	public ChartColor getBackgroundColour()
+    { return this.backgroundColour; }
 
     public ChartColor getBadColour()
     {

@@ -101,4 +101,15 @@ public abstract interface MessageReport extends Messages
     public abstract String dataDate(); 
     
     public abstract String dataValue(); 
+    
+    public abstract String globalFilterTitle(); 
+    public abstract String globalFilterNone(); 
+
+    public abstract String globalFilterDates(); 
+    public abstract String globalFilterEnums(); 
+    public abstract String globalFilterEntities(); 
+    
+    public abstract String globalFilterAdd(); 
+    public abstract String globalFilterDel(); 
+    public abstract String reportShortTitles();
 }

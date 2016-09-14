@@ -20,10 +20,22 @@ public class EnumSetEditor extends FlexTable implements EmisEditor<EmisEnumSet>
     private CheckBox[] uiChecks;
 
     public EnumSetEditor()
-    { init(null); }
+    { init((EmisEnumSet) null); }
+    
+    public EnumSetEditor(EmisMetaData field)
+    {
+    	init(field.getEnumType()); 
+    	this.field = field; 
+    }
     
     public EnumSetEditor(EmisMetaEnum enumType) 
+    { init(enumType); }
+
+    private void init(EmisMetaEnum enumType)
     {
+    	if (enumType == null)
+    		throw new IllegalArgumentException("Enum type cannot be null."); 
+    	
     	EmisEnumSet values = new EnumSetImpl(); 
     	values.setEnum(enumType);
     	values.setAll();
@@ -105,7 +117,7 @@ public class EnumSetEditor extends FlexTable implements EmisEditor<EmisEnumSet>
     public void set(EmisEnumSet data)
     {
         this.enumSet = data;
-        this.uiChecks = new CheckBox[this.enumSet.size()];
+        this.uiChecks = new CheckBox[this.enumSet.getTotalCount()];
         for (byte i = 0; i < this.uiChecks.length; i = (byte) (i + 1))
         {
             this.uiChecks[i] = new CheckBox();
@@ -116,7 +128,5 @@ public class EnumSetEditor extends FlexTable implements EmisEditor<EmisEnumSet>
     }
 
     public EmisMetaData getMetaData()
-    {
-        return this.field;
-    }
+    { return this.field; }
 }

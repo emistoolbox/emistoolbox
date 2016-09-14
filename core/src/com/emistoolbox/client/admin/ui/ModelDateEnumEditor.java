@@ -24,7 +24,7 @@ import java.util.List;
 public class ModelDateEnumEditor extends FlexTable
 {
     private Tree uiTree = new Tree();
-    private EnumEditor uiEnum = new EnumEditor();
+    private EnumEditor uiEnum = new EnumEditor(true);
 
     public ModelDateEnumEditor() {
         this.uiTree.setStylePrimaryName("emisTree");

@@ -37,11 +37,16 @@ public class MapUiField extends MapUiWidgetBase implements HasValueChangeHandler
     private String fieldValue;
     private FIELD_TYPES currentType = FIELD_TYPES.FIELD_TYPE_NONE;
     private String dataset; 
+    private boolean fieldOnly = false; 
     
     public MapUiField(EmisToolboxServiceAsync service, String dataset) 
+    { this(service, dataset, false); } 
+    
+    public MapUiField(EmisToolboxServiceAsync service, String dataset, boolean fieldOnly) 
     {
         super(service, dataset);
         
+        this.fieldOnly = fieldOnly; 
         this.dataset = dataset; 
 
         this.uiType.addItem("", "" + FIELD_TYPES.FIELD_TYPE_NONE);
@@ -59,35 +64,51 @@ public class MapUiField extends MapUiWidgetBase implements HasValueChangeHandler
                 }
 
                 MapUiField.FIELD_TYPES fieldType = MapUiField.FIELD_TYPES.valueOf(MapUiField.this.uiType.getValue(MapUiField.this.uiType.getSelectedIndex()));
-                switch (fieldType) {
-                case FIELD_TYPE_CONST:
-                    if ((MapUiField.this.access instanceof DbRowConstAccess))
-                        break;
-                    MapUiField.this.set(new DbRowConstAccessImpl());
-                    break;
-                case FIELD_TYPE_FIELD:
-                    if ((MapUiField.this.access instanceof DbRowFieldAccess))
-                        break;
-                    MapUiField.this.set(new DbRowFieldAccessImpl());
-                    break;
-                case FIELD_TYPE_CONTEXT:
-                    if ((MapUiField.this.access instanceof DbRowContextAccess))
-                        break;
-                    MapUiField.this.set(new DbRowContextAccessImpl());
-                    break;
-                case FIELD_TYPE_BYCOLUMN: 
-                    MapUiField.this.set(new DbRowByColumnIndexAccess());
-                    break; 
-                default:
-                    MapUiField.this.set(null);
-                }
+                updateFieldType(fieldType); 
             }
         });
+        
         setHTML(0, 0, Message.messageAdmin().mapuifHtmlSourceType());
-        setWidget(0, 1, this.uiType);
-        setWidget(1, 0, this.uiLabel);
+        
 
-        set(null);
+        if (fieldOnly)
+        {
+        	setHTML(0, 1, Message.messageAdmin().mapuifInfoValueInField());
+            updateFieldType(FIELD_TYPES.FIELD_TYPE_FIELD); 
+    	}
+        else
+        {
+        	setWidget(0, 1, this.uiType);
+        	set(null);
+        }
+        
+        setWidget(1, 0, this.uiLabel);
+    }
+
+    private void updateFieldType(MapUiField.FIELD_TYPES fieldType)
+    {
+        switch (fieldType) {
+        case FIELD_TYPE_CONST:
+            if ((MapUiField.this.access instanceof DbRowConstAccess))
+                break;
+            MapUiField.this.set(new DbRowConstAccessImpl());
+            break;
+        case FIELD_TYPE_FIELD:
+            if ((MapUiField.this.access instanceof DbRowFieldAccess))
+                break;
+            MapUiField.this.set(new DbRowFieldAccessImpl());
+            break;
+        case FIELD_TYPE_CONTEXT:
+            if ((MapUiField.this.access instanceof DbRowContextAccess))
+                break;
+            MapUiField.this.set(new DbRowContextAccessImpl());
+            break;
+        case FIELD_TYPE_BYCOLUMN: 
+            MapUiField.this.set(new DbRowByColumnIndexAccess());
+            break; 
+        default:
+            MapUiField.this.set(null);
+        }
     }
     
     public void addByColumnType()
@@ -129,8 +150,16 @@ public class MapUiField extends MapUiWidgetBase implements HasValueChangeHandler
 
     private void displayUi()
     {
-        this.uiLabel.setText(Message.messageAdmin().mapuifLabelNone());
-        setWidget(FIELD_TYPES.FIELD_TYPE_NONE);
+        if (fieldOnly)
+        {
+        	setWidget(FIELD_TYPES.FIELD_TYPE_FIELD);
+            uiLabel.setText("");
+        }
+        else
+        {
+        	setWidget(FIELD_TYPES.FIELD_TYPE_NONE);
+            uiLabel.setText(Message.messageAdmin().mapuifLabelNone());
+        }
     }
 
     private void displayUi(DbRowConstAccess access)
@@ -268,15 +297,11 @@ public class MapUiField extends MapUiWidgetBase implements HasValueChangeHandler
 
         List<String> fields = dbMetaInfo == null ? null : dbMetaInfo.get(getDbContext().getQuery());
         if (fields == null)
-        {
             this.uiFieldList.addItem(Message.messageAdmin().mapuifInfoWaitingForFieldNames(), null);
-        }
         else
         {
             for (String field : fields)
-            {
                 this.uiFieldList.addItem(field);
-            }
         }
         if (this.fieldValue != null)
             GwtUtils.setListValueWithAdd(this.uiFieldList, this.fieldValue);
@@ -284,8 +309,13 @@ public class MapUiField extends MapUiWidgetBase implements HasValueChangeHandler
 
     private void fireFieldTypeHandlers()
     {
-        FIELD_TYPES value = this.uiType.getSelectedIndex() == -1 ? null : FIELD_TYPES.valueOf(this.uiType.getValue(this.uiType.getSelectedIndex()));
-        ValueChangeEvent.fire(this, value);
+    	FIELD_TYPES value; 
+    	if (fieldOnly)
+    		value = FIELD_TYPES.FIELD_TYPE_FIELD; 
+    	else
+            value = this.uiType.getSelectedIndex() == -1 ? null : FIELD_TYPES.valueOf(this.uiType.getValue(this.uiType.getSelectedIndex()));
+
+    	ValueChangeEvent.fire(this, value);
     }
 
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<FIELD_TYPES> handler)
@@ -299,9 +329,3 @@ public class MapUiField extends MapUiWidgetBase implements HasValueChangeHandler
         FIELD_TYPE_NONE, FIELD_TYPE_CONST, FIELD_TYPE_FIELD, FIELD_TYPE_CONTEXT, FIELD_TYPE_BYCOLUMN;
     }
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.client.admin.ui.mapping.MapUiField JD-Core
- * Version: 0.6.0
- */

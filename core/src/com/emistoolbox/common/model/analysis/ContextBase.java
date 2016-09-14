@@ -6,6 +6,7 @@ import com.emistoolbox.common.model.EmisEnumTupleValue;
 import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,13 +101,23 @@ public abstract class ContextBase implements EmisContext, Serializable
     {
     }
 
-    public void addBooleanEntityFilter(EmisMetaData field, Boolean selectTrue)
-    {
-    }
+    @Override
+	public EmisEnumSet getDateEnumFilter(String dateEnumName) 
+    { return null; }
+
+	@Override
+	public void addDateEnumFilter(EmisEnumSet values) 
+	{}
+
+	@Override
+	public Map<String, EmisEnumSet> getDateEnumFilters() 
+	{ return new HashMap(); }
+
+	public void addBooleanEntityFilter(EmisMetaData field, Boolean selectTrue)
+    {}
 
     public void addEnumEntityFilter(EmisMetaData field, EmisEnumSet values)
-    {
-    }
+    {}
 
     public boolean allowEntityWithValue(EmisMetaData field, int value)
     {
@@ -128,9 +139,3 @@ public abstract class ContextBase implements EmisContext, Serializable
         return null;
     }
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.common.model.analysis.ContextBase JD-Core
- * Version: 0.6.0
- */

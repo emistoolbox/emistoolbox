@@ -21,4 +21,6 @@ public abstract interface EmisEnumTupleValue
     public <T extends EmisMetaEnumTuple> EmisEnumTupleValue get(T dateType);
 
     public <T extends EmisMetaEnumTuple> EmisEnumTupleValue get(Set<T> dateTypes);
+    
+    public EmisEnumTupleValue createCopy(); 
 }

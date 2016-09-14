@@ -33,4 +33,22 @@ public class TableMetaResultImpl extends MetaResultImpl implements TableMetaResu
 
     public Set<EmisMetaDateEnum> getUsedDateTypes(boolean withoutAxis)
     { return MetaResultUtil.getUsedDateTypes(getMetaResultValues(), withoutAxis ? dimensions : null); }
+
+	@Override
+	public TableMetaResult createCopy() 
+	{
+		TableMetaResultImpl result = new TableMetaResultImpl(); 
+		super.copy(result); 
+		result.sortOrder = sortOrder; 
+
+		if (dimensions != null)
+		{
+			result.dimensions = new MetaResultDimension[dimensions.length]; 
+			for (int i = 0; i < dimensions.length; i++)
+				result.dimensions[i] = dimensions[i]; 
+		}
+		
+		return result; 
+	}
+    
 }

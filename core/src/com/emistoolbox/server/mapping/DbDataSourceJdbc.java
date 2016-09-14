@@ -97,9 +97,17 @@ public class DbDataSourceJdbc extends DbDataSourceBase implements DbDataSource
                     if (queryId.equals(DbDataSourceConfig.GLOBAL_QUERY) || queryId.equals(HSQL_INIT_QUERY))
                         continue; 
                     
-                    lastQueryId = queryId; 
-                    String key = "[" + queryId + "]";
-                    result.put(key, getFieldNamesInternal(key, conn));
+                    try {
+	                    lastQueryId = queryId; 
+	                    String key = "[" + queryId + "]";
+	                    result.put(key, getFieldNamesInternal(key, conn));
+                    }
+                    catch (IOException ex)
+                    {
+                    	System.out.println(queryId); 
+                    	ex.printStackTrace(System.out); 
+                    	throw ex; 
+                    }
                 }
             }
         }

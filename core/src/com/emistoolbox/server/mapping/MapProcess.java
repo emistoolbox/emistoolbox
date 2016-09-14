@@ -5,7 +5,9 @@ import com.emistoolbox.common.model.mapping.DbContext;
 import com.emistoolbox.common.model.mapping.DbRowAccess;
 import com.emistoolbox.common.model.mapping.DbRowArrayAccess;
 import com.emistoolbox.common.model.mapping.DbRowDateAccess;
+import com.emistoolbox.common.model.mapping.DbRowFieldAccess;
 import com.emistoolbox.common.model.mapping.EmisAccessException;
+import com.emistoolbox.common.model.mapping.EmisDateInitDbMap;
 import com.emistoolbox.common.model.mapping.EmisDbMap;
 import com.emistoolbox.common.model.mapping.EmisEntityDbMap;
 import com.emistoolbox.common.model.mapping.EmisHierarchyDbMap;
@@ -162,11 +164,26 @@ public class MapProcess
     {
         try
         {
-            this.majorSteps = map.getEntityMappings().size();
-            this.majorSteps += map.getGisEntityMappings().size();
-
+        	//
+        	// Find number of steps required. 
+        	//
+            majorSteps = map.getEntityMappings().size();
+            majorSteps += map.getGisEntityMappings().size();
+            majorSteps += map.getDateInitMappings().size(); 
+            
             for (EmisHierarchyDbMap hierarchyMap : map.getHierarchyMappings())
                 this.majorSteps += hierarchyMap.getMappings().size();
+            
+            //
+            // Run import
+            //
+            for (EmisDateInitDbMap dateInitMap : map.getDateInitMappings())
+            {
+            	importData(dateInitMap); 
+            	this.majorStepsDone += 1; 
+            	if (isInterrupted())
+            		return; 
+            }
             
             for (GisEntityDbMap gisEntityMap : map.getGisEntityMappings())
             {
@@ -393,6 +410,43 @@ public class MapProcess
                 }
         }
         return (0.0D / 0.0D);
+    }
+
+    private void importData(EmisDateInitDbMap dateInitMap)
+    	throws IOException
+    {
+    	DbDataSource dbSource = DbUtil.getDataSource(dateInitMap.getDbContext().getDataSource(), dataset); 
+    	if (dbSource == null)
+    		return; 
+
+        DbContext dbContext = dateInitMap.getDbContext();
+        if (dbContext == null || dbContext.getQuery() == null)
+        	return; 
+        
+        if (dateInitMap.getValueAccess() == null || dateInitMap.getDateType() == null)
+        	return; 
+        
+        DbResultSet rs = null; 
+        try { 
+            rs = dbSource.query(dbContext.getQuery()); 
+            rs.addAccessColumn(((DbRowFieldAccess) dateInitMap.getValueAccess()).getFieldName());
+            
+            List<String> dateValues = new ArrayList<String>(); 
+            while (rs.next())
+            {
+            	Map<String, String> values = rs.getAllValues();
+            	String dateValue = dateInitMap.getValueAccess().getValue(0, values);
+            	if (dateValue != null && !dateValue.equals(""))
+            		dateValues.add(dateValue);
+            }
+
+        	dateInitMap.getDateType().setValues(dateValues.toArray(new String[] {})); 
+        }
+        finally 
+        {
+            if (rs != null)
+                rs.close(); 
+        }
     }
 
     private void importData(EmisEntityDbMap entityMap) throws IOException

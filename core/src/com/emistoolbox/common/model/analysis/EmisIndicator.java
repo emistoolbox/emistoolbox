@@ -15,6 +15,10 @@ public abstract interface EmisIndicator extends Named, EmisAggregatorList
 	
 	public void setGroupName(String groupName); 
 
+	public String getYAxisLabel(); 
+
+	public void setYAxisLabel(String yAxis); 
+	
     public abstract double getGoodThreshold();
 
     public abstract String getGoodThresholdText();

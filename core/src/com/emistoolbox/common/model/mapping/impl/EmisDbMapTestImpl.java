@@ -1,6 +1,7 @@
 package com.emistoolbox.common.model.mapping.impl;
 
 import com.emistoolbox.common.model.mapping.DbDataSourceConfig;
+import com.emistoolbox.common.model.mapping.EmisDateInitDbMap;
 import com.emistoolbox.common.model.mapping.EmisDbMap;
 import com.emistoolbox.common.model.mapping.EmisEntityDbMap;
 import com.emistoolbox.common.model.mapping.EmisHierarchyDbMap;
@@ -10,6 +11,7 @@ import com.emistoolbox.common.model.meta.EmisMeta;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,5 +89,17 @@ public class EmisDbMapTestImpl implements EmisDbMap, Serializable
     { this.mapping.setMetaData(meta); }
 
 	public void updateDimensions() 
-	{ this.mapping.updateDimensions(); } 
+	{ this.mapping.updateDimensions(); }
+
+	@Override
+	public List<EmisDateInitDbMap> getDateInitMappings() 
+	{ return mapping.getDateInitMappings(); } 
+
+	@Override
+	public void setDateInitMappings(List<EmisDateInitDbMap> mappings) 
+	{ mapping.setDateInitMappings(mappings); }
+
+	@Override
+	public EmisDateInitDbMap findDateInit(EmisMetaDateEnum dateType) 
+	{ return mapping.findDateInit(dateType); } 
 }
