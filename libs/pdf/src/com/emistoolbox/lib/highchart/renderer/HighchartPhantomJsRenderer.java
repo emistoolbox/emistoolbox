@@ -9,39 +9,6 @@ import java.util.Map;
 import es.jbauer.lib.io.IOInput;
 
 abstract public class HighchartPhantomJsRenderer implements HighchartRenderer {
-	protected String phantomJSDirectory;
-	protected String highchartsExportServerDirectory;
-
-	public String getPhantomJSDirectory () {
-		return phantomJSDirectory;
-	}
-
-	public void setPhantomJSDirectory (String phantomJSDirectory) {
-		this.phantomJSDirectory = phantomJSDirectory;
-	}
-
-	public String getHighchartsExportServerDirectory () {
-		return highchartsExportServerDirectory;
-	}
-
-	public void setHighchartsExportServerDirectory (String highchartsExportServerDirectory) {
-		this.highchartsExportServerDirectory = highchartsExportServerDirectory;
-	}
-
-	protected Process runPhantomJS (Map<String,String> parameters) throws InterruptedException, IOException {
-		String [] command = new String [2 + 2 * parameters.size ()];
-
-		int i = 0;
-		command [i++] = Util.getAbsolutePath (phantomJSDirectory,"bin/phantomjs");
-		command [i++] = Util.getAbsolutePath (highchartsExportServerDirectory,"java/highcharts-export/highcharts-export-convert/src/main/resources/phantomjs/highcharts-convert.js");
-		for (Map.Entry<String,String> entry : parameters.entrySet ()) {
-			command [i++] = '-' + entry.getKey ();
-			command [i++] = entry.getValue ();
-		}
-
-		return Runtime.getRuntime ().exec (command);
-	}
-
 	protected void write (String string,OutputStream out) throws IOException {
 		out.write (string.getBytes ("UTF-8"));
 		out.close ();
@@ -76,17 +43,18 @@ abstract public class HighchartPhantomJsRenderer implements HighchartRenderer {
 	public static void main (String [] args) throws IOException, InterruptedException {
 		HighchartPhantomJsRenderer renderer;
 
-		if (useFileRenderer)
-			renderer = new HighchartPhantomJsFileRenderer ();
+		if (useFileRenderer) {
+			HighchartPhantomJsFileRenderer fileRenderer = new HighchartPhantomJsFileRenderer ();
+			fileRenderer.setPhantomJSDirectory ("/Users/joriki/work/Jörg/highcharts/phantomjs-2.1.1-macosx");
+			fileRenderer.setHighchartsDirectory ("/Users/joriki/work/Jörg/highcharts/highcharts-export-server/java/highcharts-export/highcharts-export-convert/src/main/resources/phantomjs");
+			renderer = fileRenderer;
+		}
 		else {
 			HighchartPhantomJsPostRenderer postRenderer = new HighchartPhantomJsPostRenderer ();
 			postRenderer.setHost ("127.0.0.1");
 			postRenderer.setPort (3003);
 			renderer = postRenderer;
 		}
-
-		renderer.setPhantomJSDirectory ("/Users/joriki/work/Jörg/highcharts/phantomjs-2.1.1-macosx");
-		renderer.setHighchartsExportServerDirectory ("/Users/joriki/work/Jörg/highcharts/highcharts-export-server");
 
 		IOInput input = renderer.render (configString,type,2.5,0);
 	}

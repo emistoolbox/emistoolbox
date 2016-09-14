@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64InputStream;
@@ -22,17 +21,12 @@ public class HighchartPhantomJsPostRenderer extends HighchartPhantomJsRenderer {
 	private int port = -1;
 	private int timeout = 2000;
 
-	private Process process;
-
 	public String getHost () {
 		return host;
 	}
 
 	public void setHost (String host) {
-		if (!host.equals (this.host)) {
-			close ();
-			this.host = host;
-		}
+		this.host = host;
 	}
 
 	public int getPort () {
@@ -40,10 +34,7 @@ public class HighchartPhantomJsPostRenderer extends HighchartPhantomJsRenderer {
 	}
 
 	public void setPort (int port) {
-		if (port != this.port) {
-			close ();
-			this.port = port;
-		}
+		this.port = port;
 	}
 
 	public int getTimeout () {
@@ -54,21 +45,7 @@ public class HighchartPhantomJsPostRenderer extends HighchartPhantomJsRenderer {
 		this.timeout = timeout;
 	}
 
-	public void close () {
-		if (process != null) {
-			process.destroy ();
-			process = null;
-		}
-	}
-
 	public IOInput render (String config,Map<String,String> parameters,String contentType,File outFile) throws IOException, InterruptedException {
-		if (process == null) { // lazy process creation
-			Map<String,String> map = new HashMap<String,String> ();
-			map.put ("host",host);
-			map.put ("port",String.valueOf (port));
-			process = runPhantomJS (map);
-		}
-
 		URL url = new URL ("http",host,port,"");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection ();
 		connection.setRequestMethod ("POST");
@@ -95,7 +72,7 @@ public class HighchartPhantomJsPostRenderer extends HighchartPhantomJsRenderer {
 			Thread.sleep (retryInterval);
 		} while (System.currentTimeMillis () < start + timeout);
 
-		throw new IOException ("Couldn't connect to Highcharts rendering server after " + timeout / 1000. + " seconds");
+		throw new IOException ("Couldn't connect to Highcharts rendering server " + host + ":" + port + " after " + timeout / 1000. + " seconds");
 	}
 
 	protected boolean rendersAsFile (HighchartRenderingType type) {
