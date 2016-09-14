@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE book [
+<!ENTITY LocaleCountry "nigeria">
+<!ENTITY MidLevel "LGA">
+<!ENTITY MidLevels "LGAs">
+<!ENTITY TopLevel "State">
+<!ENTITY TopLevels "States">
+]>
 <book xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
   <info>
     <title>EMIS Toolbox User Manual</title>
@@ -7,6 +14,11 @@
         <email>murkhog@googlemail.com</email>
         <uri>http://emistoolbox.com</uri>
     </author>
+    <legalnotice>
+        <mediaobject>
+          <imageobject><imagedata fileref="images/usaid.png" /></imageobject>
+        </mediaobject>
+    </legalnotice>
   </info>
 
   <chapter>
@@ -16,11 +28,11 @@
         <para>The EMIS Toolbox is a programme for education planners in government. It helps them to track the performance of the education sector, to decide how to allocate resources, and to share this information with other stakeholders (such as parents, schools or those in government).</para>
         <para>The EMIS Toolbox works by giving those working in the education sector the tools to show and analyse their data in different ways, e.g. as charts, in maps or sorted as lists.</para>
         <para>In this way, they can see patterns, e.g. regions that have poor pupil enrolment rates or individual schools that have high teacher absent rates. In this way, they can inform policy-making, and resource allocation. This helps the education sector become more efficient, e.g. as officials can spend money on the poorest schools, or send inspection teams to schools which are performing badly.</para>
-        <para>The EMIS Toolbox also allows its user to easily create report cards with charts and maps about a school or a district. This helps government to be more transparent, because they can easily share information about schools with communities or other government agencies.</para>
+        <para>The EMIS Toolbox also allows its user to easily create report cards with charts and maps about a school or a &MidLevel;. This helps government to be more transparent, because they can easily share information about schools with communities or other government agencies.</para>
         <para>
             <mediaobject>
                <imageobject>
-                  <imagedata fileref="images\intro\overview.png" format="PNG"/>
+                  <imagedata width="13cm" fileref="images/intro/overview.png" format="PNG"/>
                </imageobject>
             </mediaobject>
         </para>
@@ -34,7 +46,7 @@
             The EMIS Toolbox has seven main sections - also called modules. You can carry out different tasks using the different modules. The functions of each are explained in these sections.</para>
             <para>You can move between modules by clicking on the tabs at the top of the screen. 
               <mediaobject>
-              <imageobject><imagedata fileref="images\intro\mainMenu.png" format="PNG"/></imageobject>
+              <imageobject><imagedata width="13cm" fileref="images/intro/mainMenu.png" format="PNG"/></imageobject>
               </mediaobject>
             </para>
             <para>As way of introduction we provide an overview of the the Analysis module. All other modules have their own chapter later in this document.</para>
@@ -61,7 +73,7 @@
                       <entry>
                         <para>In this function you can analyse the same education data using maps.</para>
                         <para>This allows you to recognise regional patterns, e.g. if there are any regions that have high drop out rates or where overcrowding is a problem.</para>
-                        <para>Not all datasets can map informatino.</para>
+                        <para>Not all datasets can map information.</para>
                       </entry>
                     </row>
                     <row>
@@ -85,7 +97,7 @@
                         spreadsheet can already be prepopulated with formatting, headers and formulae. 
                         </para>
                         <para>
-                        Excel reports can only be viewed after an you have create the configuration of an Excel Report. 
+                        Excel reports can only be viewed after you have create the configuration of an Excel Template. 
                         </para>
                       </entry>
                     </row>
@@ -110,7 +122,7 @@ decisions.
         <title>Showing Charts</title>
         <para>
 The first section of the EMIS Toolbox uses the education data to make charts,
-e.g. to show the enrolment figures of a District over the years. To do this, you
+e.g. to show the enrolment figures of a &MidLevel; over the years. To do this, you
 follow a step-by-step procedure.
         </para>
         
@@ -122,7 +134,7 @@ follow a step-by-step procedure.
                 </varlistentry>
                 <varlistentry>
                   <term>Step 2: Select X-Axis</term>
-                  <listitem>The type of evaluation the chart will show, e.g. evaluate a District
+                  <listitem>The type of evaluation the chart will show, e.g. evaluate a &MidLevel;
 over a number of years, or compare different schools with each other.</listitem>
                 </varlistentry>
                 <varlistentry>
@@ -131,7 +143,7 @@ over a number of years, or compare different schools with each other.</listitem>
                 </varlistentry>
                 <varlistentry>
                   <term>Step 4: Select Location</term>
-                  <listitem>The location the chart will show, e.g. your whole country or just a selected District. </listitem>
+                  <listitem>The location the chart will show, e.g. your whole country or just a selected &MidLevel;. </listitem>
                 </varlistentry>
                 <varlistentry>
                   <term>Step 5: Select Split Options</term>
@@ -202,13 +214,13 @@ analysis:</para>
                     <row>
                       <entry>Horizontal analysis</entry>
                       <entry>Compare the same units of administration.</entry>
-                      <entry>Compare all schools of a District. 
-                      Compare the districts of a province.</entry>
+                      <entry>Compare all schools of a &MidLevel;. 
+                      Compare the &MidLevels; of a &TopLevel;.</entry>
                     </row>
                     <row>
                       <entry>Vertical analysis</entry>
                       <entry>Compare different units of administration</entry>
-                      <entry>Compare one school with the average values of the district and the province.</entry>
+                      <entry>Compare one school with the average values of the &MidLevel; and the &TopLevel;.</entry>
                     </row>
                     <row>
                       <entry>Date analysis</entry>
@@ -223,7 +235,7 @@ analysis:</para>
                     <row>
                       <entry>Location analysis</entry>
                       <entry>Compare type of schools.</entry>
-                      <entry>Compare private and government schools in a district.
+                      <entry>Compare private and government schools in a &MidLevel;.
 Compare schools that have water with those that do not.</entry>
                     </row>
                   </tbody>
@@ -233,12 +245,12 @@ Compare schools that have water with those that do not.</entry>
 
         <section>
             <title>Step 3: Select Location</title>
-            <para>Choose the location that the chart will show. You can work at the level of a whole province, one district, or just one school. To navigate the locations, use the [+] or [-] buttons.</para>
-            <para>You will see the name of the province. To include the whole province in the chart, click its name.</para>
-            <para>To make a chart for a district, click the [+] button, next to the province name. This will show the names of all districts. Click the name of your district.</para>
-            <para>To make a chart for one school, click the [+] button next to the district name. This will show the names of the schools. Click the name of your school.</para>
+            <para>Choose the location that the chart will show. You can work at the level of a whole &TopLevel;, one &MidLevel;, or just one school. To navigate the locations, use the [+] or [-] buttons.</para>
+            <para>You will see the name of the &TopLevel;. To include the whole &TopLevel; in the chart, click its name.</para>
+            <para>To make a chart for a &MidLevel;, click the [+] button, next to the &TopLevel; name. This will show the names of all &MidLevels;. Click the name of your &MidLevel;.</para>
+            <para>To make a chart for one school, click the [+] button next to the &MidLevel; name. This will show the names of the schools. Click the name of your school.</para>
 
-            <para>Use the [-] buttons to hide the names of the districts or schools.</para>
+            <para>Use the [-] buttons to hide the names of the &MidLevels; or schools.</para>
         </section>
         <section>
             <title>Step 4: Select Date</title>
@@ -249,7 +261,7 @@ Compare schools that have water with those that do not.</entry>
 
         <section>
             <title>Step 5: Split</title>
-            <para>Sometimes, it is useful to show more detail in a chart, e.g. to see how the enrolment figures of one district progress over the years.</para>
+            <para>Sometimes, it is useful to show more detail in a chart, e.g. to see how the enrolment figures of one &MidLevel; progress over the years.</para>
             <para>
               <informaltable>
                 <tgroup cols="2">
@@ -257,12 +269,12 @@ Compare schools that have water with those that do not.</entry>
                     <row>
                       <entry>
                         <mediaobject>
-                          <imageobject><imagedata fileref="images\analysis\split1.png" format="PNG"/></imageobject>
+                          <imageobject><imagedata width="6cm" fileref="images/analysis/split1.png" format="PNG"/></imageobject>
                         </mediaobject>
                       </entry>
                       <entry>
                         <mediaobject>
-                          <imageobject><imagedata fileref="images\analysis\split2.png" format="PNG"/></imageobject>
+                          <imageobject><imagedata width="6cm" fileref="images/analysis/split2.png" format="PNG"/></imageobject>
                         </mediaobject>
                       </entry>
                     </row>
@@ -294,27 +306,27 @@ Compare schools that have water with those that do not.</entry>
                     <row>
                       <entry>Date analysis</entry>
                       <entry>A different bar is shown for each year.</entry>
-                      <entry>A graph that shows the enrolment figures for Sokoto province between the years 2000-2010, split by year.</entry>
+                      <entry>A graph that shows the enrolment figures for Sokoto &TopLevel; between the years 2000-2010, split by year.</entry>
                     </row>
                     <row>
                       <entry>Horizontal analysis</entry>
                       <entry>A different bar is shown for each unit of administration of the same level.</entry>
-                      <entry>A graph that shows the pupil/teacher ratios in government, private and religious schools, split by all districts in Sokoto province.</entry>
+                      <entry>A graph that shows the pupil/teacher ratios in government, private and religious schools, split by all &MidLevels; in Sokoto &TopLevel;.</entry>
                     </row>
                     <row>
                       <entry>Vertical analysis</entry>
                       <entry>A different bar is shown for each unit of administration on different levels.</entry>
-                      <entry>A graph that shows the pupil/teacher ratios in government, private and religious schools split by one district and the Sokoto province averages.</entry>
+                      <entry>A graph that shows the pupil/teacher ratios in government, private and religious schools split by one &MidLevel; and the Sokoto &TopLevel; averages.</entry>
                     </row>
                     <row>
                       <entry>Classification analysis</entry>
                       <entry>A different bar is shown for each data classification.</entry>
-                      <entry>A graph that pupil numbers for all districts within Sokoto province, split by boys and girls.</entry>
+                      <entry>A graph that pupil numbers for all &MidLevels; within Sokoto &TopLevel;, split by boys and girls.</entry>
                     </row>
                     <row>
                       <entry>Location analysis</entry>
                       <entry>A different bar is shown for each grouping of a specific indicator.</entry>
-                      <entry>A graph that shows the pupil/teacher ratios in Sokoto province, split by government, private and religious schools.</entry>
+                      <entry>A graph that shows the pupil/teacher ratios in Sokoto &TopLevel;, split by government, private and religious schools.</entry>
                     </row>
                   </tbody>
                 </tgroup>
@@ -331,7 +343,7 @@ Compare schools that have water with those that do not.</entry>
           <varlistentry>
             <term>Step 1: Select Plot Location</term>
             <listitem>The level of detail of the map – decide if the map will show
-            each individual school or the data for the whole district.</listitem>
+            each individual school or the data for the whole &MidLevel;.</listitem>
           </varlistentry>
           <varlistentry>
             <term>Step 2: Select Indicator</term>
@@ -339,7 +351,7 @@ Compare schools that have water with those that do not.</entry>
           </varlistentry>
           <varlistentry>
             <term>Step 3: Select Location</term>
-            <listitem>The area that the map shows, e.g. a map of a whole province or just one district.</listitem>
+            <listitem>The area that the map shows, e.g. a map of a whole &TopLevel; or just one &MidLevel;.</listitem>
           </varlistentry>
           <varlistentry>
             <term>Step 4: Select Date</term>
@@ -361,7 +373,7 @@ Compare schools that have water with those that do not.</entry>
             <variablelist>
               <varlistentry>
                 <term>Step 1: Select Location to List</term>
-                <listitem>The level at which you want to make a list. Choose if you want to list each school, or average values for each district or the province.</listitem>
+                <listitem>The level at which you want to make a list. Choose if you want to list each school, or average values for each &MidLevel; or the &TopLevel;.</listitem>
               </varlistentry>
               <varlistentry>
                 <term>Step 2: Select Variables to Display</term>
@@ -373,7 +385,7 @@ Compare schools that have water with those that do not.</entry>
               <varlistentry>
                 <term>Step 3: Select Location</term>
                 <listitem>If you want to make a list of all schools, choose the area you are working with – 
-                either just one school, district or the whole province.</listitem>
+                either just one school, &MidLevel; or the whole &TopLevel;.</listitem>
               </varlistentry>
               <varlistentry>
                 <term>Step 4: Select Date</term>
@@ -384,7 +396,7 @@ Compare schools that have water with those that do not.</entry>
             <section>
                 <title>Step 1: Select Location to List</title>
                 <para>Decide the detail of the list, e.g. you can make a long list showing each 
-                school, or a shorter list of average values for a province or a district.</para>
+                school, or a shorter list of average values for a &TopLevel; or a &MidLevel;.</para>
             </section>
 
             <section>
@@ -400,12 +412,12 @@ Compare schools that have water with those that do not.</entry>
 
             <section>
                 <title>Step 3: Select Location</title>
-                <para>Choose the location that the list will show. You can work at the level of a whole province, one district, or just one school. To navigate the locations, use the [+] or [-] buttons.
+                <para>Choose the location that the list will show. You can work at the level of a whole &TopLevel;, one &MidLevel;, or just one school. To navigate the locations, use the [+] or [-] buttons.
                 </para>
-                <para>You will see the name of the province. To include the whole province on the list, click its name.</para>
-                <para>To make a list for an district, click the [+] button, next to the province name. This will show the names of all districts. Click the name of your district.</para>
-                <para>To make a list for one school, click the [+] button next to the district name. This will show the names of the schools. Click the name of your school.</para>
-                <para>Use the [-] buttons to hide the names of the districts or schools.</para>
+                <para>You will see the name of the &TopLevel;. To include the whole &TopLevel; on the list, click its name.</para>
+                <para>To make a list for an &MidLevel;, click the [+] button, next to the &TopLevel; name. This will show the names of all &MidLevels;. Click the name of your &MidLevel;.</para>
+                <para>To make a list for one school, click the [+] button next to the &MidLevel; name. This will show the names of the schools. Click the name of your school.</para>
+                <para>Use the [-] buttons to hide the names of the &MidLevels; or schools.</para>
             </section>
 
             <section>
@@ -418,9 +430,9 @@ Compare schools that have water with those that do not.</entry>
             <title>Sorting Priority Lists</title>
             <para>Priority lists can be sorted by the indicator values of each item. The lists are always sorted by the values in the left most column, using additional columns if there are the same values.</para>
 
-            <mediaobject><imageobject><imagedata align="center" fileref="images\prioList\sorting.png" format="PNG"/></imageobject></mediaobject>
+            <mediaobject><imageobject><imagedata width="13cm" align="center" fileref="images/prioList/sorting.png" format="PNG"/></imageobject></mediaobject>
 
-            <para>In this example the priority list shows two indicators the percentage of schools visited and the count of visited schools. The field "Schools Visited" (the count) is the left most column, so all rows will be first sorted by this value. 
+            <para>In this example the priority list shows two indicators: the percentage of schools visited and the count of visited schools. The field "Schools Visited" (the count) is the left most column, so all rows will be first sorted by this value. 
             </para>
             <para>For any records that have the same "Schools Visited" value, the list will then be sorted by the next column - "% Schools Visited" in this case. </para>
             
@@ -428,13 +440,13 @@ Compare schools that have water with those that do not.</entry>
             <variablelist>
               <varlistentry>
                 <term>
-                    <imageobject><imagedata valign="center" align="center" fileref="images\prioList\sortDesc.png" format="PNG"/></imageobject> Descending Sort
+                    <imageobject><imagedata valign="center" align="center" fileref="images/prioList/sortDesc.png" format="PNG"/></imageobject> Descending Sort
                 </term>
                 <listitem>Rows are sorted from highest value on top to the lowest value at the bottom.</listitem>
               </varlistentry>
               <varlistentry>
                 <term>
-                    <imageobject><imagedata valign="center" align="center" fileref="images\prioList\sortAsc.png" format="PNG"/></imageobject> Ascending Sort
+                    <imageobject><imagedata valign="center" align="center" fileref="images/prioList/sortAsc.png" format="PNG"/></imageobject> Ascending Sort
                 </term>
                 <listitem>Rows are sorted from the lowest value on top to the highest value at the bottom.</listitem>
               </varlistentry>
@@ -458,7 +470,7 @@ Compare schools that have water with those that do not.</entry>
           <varlistentry>
             <term>Step 3: Select Location</term>
             <listitem>The location for which you want to run the report.
-                <para>Each report applies to one type of location - for example the school location. If you select a higher location, for example a district, then the Toolbox generates one report for each school within the district. </para>
+                <para>Each report applies to one type of location - for example the school location. If you select a higher location, for example a &MidLevel;, then the Toolbox generates one report for each school within the &MidLevel;. </para>
             </listitem>
           </varlistentry>
           <varlistentry>
@@ -473,7 +485,7 @@ Compare schools that have water with those that do not.</entry>
         <para>To find out how to create a Report Template, visit the chapter <link linkend="reportModule">Report Templates</link>.</para>
     </section>
 
-    <section>
+    <section id="excelReports">
         <title>Showing Excel Reports</title>
         <para></para>
         <para>To run an Excel report, somebody needs to create an Excel Template first. For many users this has already happened as part of the 
@@ -491,8 +503,8 @@ Compare schools that have water with those that do not.</entry>
           </varlistentry>
           <varlistentry>
             <term>Step 3: Select Location</term>
-            <listitem>The location for which you want to run the Excel report. Each report has a designated location to which it applies. You can create multiple reports at the same time but selecting a containing location. E. g. if you select a Zone for a School report, the system 
-            will generate a report for each of the schools in the zone.</listitem>
+            <listitem>The location for which you want to run the Excel report. Each report has a designated location to which it applies. You can create multiple reports at the same time but selecting a containing location. E. g. if you select a &MidLevel; for a School report, the system 
+            will generate a report for each of the schools in the &MidLevel;.</listitem>
           </varlistentry>
           <varlistentry>
             <term>Step 4: Select Date</term>
@@ -514,20 +526,20 @@ Compare schools that have water with those that do not.</entry>
     
     <section>
       <title>Data and Indicators</title>
-      <para>The EMIS Toolbox stores data at each location (e. g. the school, the district, etc). Data can be stored as text, as boolean, as number, as enumeration, as enumeration set or an table of these values. You can use the 'Browse Data' module to review the data stored for each school, zone, district.</para>
+      <para>The EMIS Toolbox stores data at each location (e. g. the school, the &MidLevel;, etc). Data can be stored as text, as boolean (yes/no), as number, as classification, or as a table of any of these values. You can use the 'Browse Data' module to review the data stored for each school, &MidLevel;.</para>
       <para>Each different data is put into a field. Each field has a unique name (e. g. the field 'name' stores the name of a school, the field 'enrollment' all 
         enrollment data). 
       </para>
       <para>To calculate an indicator we need to decide what type of indicator we use. For each part of the indicator we specify what field should be used. The next section will explain the type of indicators and how they use the different fields.</para>
     
     <informaltable>
-      <tgroup cols="2">
+      <tgroup cols="3">
         <tbody>
           <row>
             <entry>Ratio</entry>
             <entry>
-              <para>A ratio compares one count against another count. This allows us to compare different schools or zones even if they they have 
-              very different sizes. An example of a ratio is the pupils/teacher ratio.</para>
+              <para>A ratio compares one count against another count. This allows us to compare schools or &MidLevels; even if they they have 
+              a very different size. An example of a ratio is the pupils/teacher ratio.</para>
             </entry>
             <entry>
               <para>To calulate a ratio you need to specify the numerator and the denominator.</para>
@@ -537,11 +549,11 @@ Compare schools that have water with those that do not.</entry>
             <entry>Time Ratio</entry>
             <entry>A time ratio is like a ratio, but data for numerate and denominator are taken at different times. For example, you could 
             compare the number of second grade students to the number of last year's first year students.</entry>
-            <entry>To calulate a time ratio you need to specify the numerator and the denominator and the time differenc between them.</entry>
+            <entry>To calulate a time ratio you need to specify the numerator and the denominator and the time difference between them.</entry>
           </row>
           <row>
             <entry>Count</entry>
-            <entry>A count tells you how many items of a given there are.</entry>
+            <entry>A count tells you how many items there are.</entry>
             <entry>To calculate a count you need to specify which field you are counting.</entry>
           </row>
         </tbody>
@@ -553,9 +565,9 @@ Compare schools that have water with those that do not.</entry>
       <title>Creating a new Indicator</title>
       <section>
         <title>Step 1: Decide which type of indicator to add</title>
-        <para>To createa new indicator select the appropriate add button:</para>
+        <para>To create a new indicator select the appropriate add button:</para>
         <imageobject>
-          <imagedata align="center" fileref="images\indicators\buttons.png" format="PNG"/>
+          <imagedata width="13cm" align="center" fileref="images/indicators/buttons.png" format="PNG"/>
         </imageobject>
         <para>The EMIS Toolbox will give your indicator a default name and display an empty indicator details form. </para>
       </section>
@@ -567,7 +579,7 @@ Compare schools that have water with those that do not.</entry>
         <para>In this example, the indicator is named "% attempted score" and has a group name "LAT". You can see that in the hierarchy the indicator 
         is shown under the heading "LAT"</para>
         <imageobject>
-          <imagedata align="center" fileref="images\indicators\name.png" format="PNG"/>
+          <imagedata width="13cm" align="center" fileref="images/indicators/name.png" format="PNG"/>
         </imageobject>
       </section>
       
@@ -576,20 +588,20 @@ Compare schools that have water with those that do not.</entry>
         <para>Finally you need to select which fields are used in the calculation of the indicator.</para>
         <para>For a count indicator you just specify the field that contains the data to count:</para>
         <imageobject>
-          <imagedata align="center" fileref="images\indicators\addCount.png" format="PNG"/>
+          <imagedata width="13cm" align="center" fileref="images/indicators/addCount.png" format="PNG"/>
         </imageobject>
         <para>For a ratio indicator you need to specify the numerate and the denominator. Select a field for the numerator and a field for the denominator. 
          The EMIS Toolbox will calculate the ratio by adding all values in the numerator field and divide it by the sum of all values in the denominator field. 
         </para>
         <imageobject>
-           <imagedata align="center" fileref="images\indicators\addRatio.png" format="PNG"/>
+           <imagedata width="13cm" align="center" fileref="images/indicators/addRatio.png" format="PNG"/>
         </imageobject>
 
         <section>
           <title>Selecting a field</title>
           <para>To select a field, you click on "(select data field)" and the EMIS Toolbox will display a field browser: </para>
           <imageobject>
-           <imagedata align="center" fileref="images\indicators\field.png" format="PNG"/>
+           <imagedata width="13cm" align="center" fileref="images/indicators/field.png" format="PNG"/>
           </imageobject>
           <para>Data can be stored at any location. To find the data you want to use in your indicator, use the tabs on top to navigate to the location where
           the data is stored. </para>
@@ -606,7 +618,7 @@ Compare schools that have water with those that do not.</entry>
         the numerator of your indicator.</para>
         <para>You will notice that after selecting a field the EMIS Toolbox displays a set of filters - by defaut they are all set to "NONE"</para>
         <imageobject>
-         <imagedata align="center" fileref="images\indicators\filters.png" format="PNG"/>
+         <imagedata width="13cm" align="center" fileref="images/indicators/filters.png" format="PNG"/>
         </imageobject>
         <para>In this example our field (enrollment) stores data split by two classifications - gender and standard. You can now chose to only count some of the 
         enrollment data by saying data for which gender or data for which standard should be included.
@@ -614,7 +626,7 @@ Compare schools that have water with those that do not.</entry>
         <para>To activate a filter, click on "Filter" - the EMIS Toolbox will now display checkboxes for each values (by default all data is included). Just uncheck 
         the parts you don't want to include in the calculation of your indicator.</para>
         <imageobject>
-         <imagedata align="center" fileref="images\indicators\filterActive.png" format="PNG"/>
+         <imagedata width="13cm" align="center" fileref="images/indicators/filterActive.png" format="PNG"/>
         </imageobject>
         <para>You can also filter by other classification or boolean variables of your locations.</para>
         <para>In our example enrollment is collected at school level. We also have the yes/no fields called "anyTeacherObservations", "isLatSchool" and "isSISchool". </para>
@@ -623,34 +635,408 @@ Compare schools that have water with those that do not.</entry>
     </section>
   </chapter>
 
-<!--
   <chapter id="reportModule">
     <title>The 'Report Templates' Module</title>
-    <para></para>
-  </chapter>
-
-  <chapter id="excelModule">
-    <title>The 'Excel Templates' Module</title>
-    <para></para>
-  </chapter>
-
-  <chapter>
-    <title>The 'Browse Data' module</title>
-    <subtitle>Browsing the data within the EMIS Toolbox.</subtitle>
-    <para></para>
+    <subtitle>To create PDF reports</subtitle>
+    <para>Reports allow you to put multiple charts and tables into one printable report (using the PDF file format). You can create 
+    reports for a single school or a whole set of schools. 
+    </para>
+    <para>
+    </para>
+    <section>
+        <title>Create Reports by Example</title>
+        <para>Reports are create by example. This means you go to the Analysis Module and display the chart and table you want 
+        to use in your report. You then just tell the EMIS Toolbox to add the chart or table to your reports. 
+        </para>
+        <para>
+        For example: 
+        </para>
+        <section>
+            <title>To add a Chart to a new Report:</title>
+            <itemizedlist>
+                <listitem>Click on 'Analysis' in the top-level menu.</listitem>
+                <listitem>Select values to display any chart (e. g. display Enrolment for a school by grade and gender).</listitem>
+                <listitem>Once the chart displays, click on "[Add to report]" at the bottom.</listitem>
+                <listitem>Select "(new report)" and click "Add Chart".</listitem>
+                <listitem>Input the name of your new report (e. g. "Test Enrolment Report")</listitem>
+                <listitem>Click "Add Chart"</listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To add a Table to an existing Report:</title>
+            <itemizedlist>
+                <listitem>Click on 'Analysis' in the top-level menu.</listitem>
+                <listitem>Select values to display any chart (e. g. display Enrolment for a school by grade and gender).</listitem>
+                <listitem>Once the chart displays, click on "[Add to report]" at the bottom.</listitem>
+                <listitem>Select the name of the report to which you want to add a table (e. g. "Test Enrolment Report").</listitem>
+                <listitem>Click "Add Table"</listitem>
+            </itemizedlist>
+        </section>
+        
+        <para>Your chart and table has been added to your report. You can add as many charts and tables as you want.</para>
+        <para>Once your report has all the parts you want, you can run the report. That means you select a school (or set of schools) for
+        which you want to see the "Test Enrolment Report".
+        </para>
+        
+        <section>
+            <title>To run a PDF report:</title>
+            <itemizedlist>
+               <listitem>Click on "Analysis" in the top-level menu bar.</listitem>
+               <listitem>Click on the "Reports" tab.</listitem>
+               <listitem>Select the report you want to run (e. g. "Test Enrolment Report").</listitem>
+               <listitem>Select the location for which you want to run the reports. Note that if you run a school report and select a &MidLevel;, you 
+               will create reports for each of the schools in the &MidLevel;. </listitem>
+               <listitem>Click on the "download report" link once it is available to view or download the PDF report.</listitem>
+            </itemizedlist>
+            <para>You can also change the year of the report and the colours used in the charts. </para>
+        </section>
+    </section>
+    <section>
+        <title>Changing Report Settings</title>
+        <para>The 'Report Template' module allows you to change these settings:</para>
+        <variablelist>
+            <varlistentry>
+                <term>For Location</term>
+                <listitem>Each report is targeted at one particular level. The charts and tables should be compatible for this level. You can 
+                  change the designated level here - typically this is only done once at the beginning.</listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>Title</term>
+                <listitem>Report Title - displayed on top of each page.</listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>Footer</term>
+                <listitem>Report Footer - displayed at bottom of each page.</listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>Page set-up</term>
+                <listitem>
+                    <para>The page set-up has two settings:</para>
+                    <para>(1) The page size. This can be A4, A5 or LETTER (the US paper format). </para>
+                    <para>(2) The orientation of the page. This can be portrait or landscape.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>Layout</term>
+                <listitem>This setting says how the charts and tables should be arrange on the page. Each PDF report is split into a 
+                    set of rows and columns. This setting lists the different supported possibilties.</listitem>
+            </varlistentry>
+        </variablelist>
+    </section>
+    <section>
+        <title>Changing Report Content</title>
+        <para>The content of a report consists of the different charts and tables that were added through the 'Analysis' module. Content can also be static text, or a display of variables</para>
+        <para>The list of content used in the report is shown in the list of items. Each entry is placed into one cell in the layout of columns and rows. You can change the order of the list to place content in a different part of the report.</para>
+        <section>
+            <title>To add text to the report</title>
+            <para>You can put a titel and some text into a cell. This can be used to provide explanations for the whole report or individual charts and tables.</para>
+            <itemizedlist>
+                <listitem>Click on 'Add Text'</listitem>
+                <listitem>Enter the title and text you want to include in the report.</listitem>
+                <listitem>Enter the title and text you want to include in the report.</listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To add variables to the report</title>
+            <para>You can display additional information from the school (or other level) used in the report.</para>
+            <itemizedlist>
+                <listitem>Click on 'Add Variables'</listitem>
+                <listitem>Enter the title for the cell.</listitem>
+                <listitem>
+                    <para>You can now add multiple variables. For each you need to...</para>
+                    <itemizedlist>
+                        <listitem>Click on "Add"</listitem>
+                        <listitem>Enter the name you want to display with the variable.</listitem>
+                        <listitem>Select the variable you want to display.</listitem>
+                    </itemizedlist>
+                </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To change the order of content</title>
+            <para>The list of content shows the order in which we place items into each cell. The placement starts at the top row placing content into 
+            each cell from the left to the right, then moves on to the next row. </para>
+            <para>You can change the order shown by moving content up and down.</para>
+            <itemizedlist>
+               <listitem>Select the content to move.</listitem>
+               <listitem>Click the "Move Up" or the "Move Down" button. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To delete content</title>
+            <itemizedlist>
+               <listitem>Select the content to delete.</listitem>
+               <listitem>Click the "Delete" button. </listitem>
+            </itemizedlist>
+        </section>
+    </section>
   </chapter>
 
   <chapter>
     <title>The 'Manage Data' module</title>
     <subtitle>Loading and saving datasets.</subtitle>
-    <para></para>
+    <para>The EMIS Toolbox can work with multiple datasets. The Manage Data module allows you to save your current data set and load different ones.</para>
+    <section>
+        <title>To save the current dataset</title>
+        <itemizedlist>
+            <listitem>Click on "Manage Data" in the top-level menu bar.</listitem>
+            <listitem>Click on the "Save '..'" button to save the current dataset.</listitem>
+        </itemizedlist>
+        <para>IMPORTANT: Saving your dataset ensures all your changes to reports and indicators are saved.</para>
+    </section>
+    <section>
+        <title>To load a dataset</title>
+        <itemizedlist>
+            <listitem>Click on "Manage Data" in the top-level menu bar.</listitem>
+            <listitem>Select a dataset from the "Load Dataset" list.</listitem>
+            <listitem>Click the "Load" button.</listitem>
+        </itemizedlist>
+    </section>
   </chapter>
 
+  <chapter>
+    <title>The 'Browse Data' module</title>
+    <subtitle>Browsing the data within the EMIS Toolbox.</subtitle>
+    <para>Browse Data allows you to review the raw data stored in the EMIS Toolbox.</para>
+    <section>
+        <title>To display data</title>
+        <itemizedlist>
+            <listitem>Click on "Browse Data" in the top-level menu bar.</listitem>
+            <listitem>Select the location for which you want to display the data.</listitem>
+            <listitem>You can also change the data by clicking on the current value and select a new one.</listitem>
+        </itemizedlist>
+    </section>
+  </chapter>
+
+  <chapter id="excelModule">
+    <title>The 'Excel Templates' Module</title>
+    <para>Excel reports allow you to prepare an Excel spreadsheet with calculations and then fill the spreadsheet with data from the EMIS Toolbox. 
+    The result is a spreadsheet that uses data from the Toolbox within the Excel calculations. </para>
+    <para>There are three steps to create an Excel Report:</para>
+    <orderedlist>
+       <listitem>Create the Excel Template (in MS Excel)</listitem>
+       <listitem>Configure the Excel report</listitem>
+       <listitem>Run the Excel Report.</listitem>
+    </orderedlist>
+
+    <section>
+        <title>STEP 1: Create the Excel Template</title>
+
+        <para>You create the Excel Template in Excel. Decide in which column or row you want to place the EMIS Toolbox data, note the cell coordinate (i. e. B4) and create your calculations around those rows and columns. </para>
+    
+        <para>For example, to create a template that calculates allocations based on number of pupils and number of teachers, we can set-up the following spreadsheet (download excelTemplate.xls). In this example the black values and formulae are entered by us. The gray fields indicate where we want the EMIS Toolbox to place data. For now we just leave them empty. </para>
+
+ <informaltable>
+   <tgroup cols="7">
+     <thead>
+       <row>
+         <entry></entry>
+         <entry>A</entry>
+         <entry>B</entry>
+         <entry>C</entry>
+         <entry>D</entry>
+         <entry>E</entry>
+         <entry>F</entry>
+       </row>
+     </thead>
+     <tbody>
+       <row>
+         <entry>1</entry>
+         <entry>Name</entry>
+         <entry>Pupils</entry>
+         <entry>Pupil Allowance</entry>
+         <entry>Teachers</entry>
+         <entry>Teacher Allowance</entry>
+         <entry>Total Allowance</entry>
+       </row>
+       <row>
+         <entry>2</entry>
+         <entry></entry>
+         <entry></entry>
+         <entry>$30,000</entry>
+         <entry></entry>
+         <entry>$10,000</entry>
+         <entry></entry>
+       </row>
+       <row>
+         <entry>3</entry>
+         <entry></entry>
+         <entry>=sum(B4:B1000)</entry>
+         <entry></entry>
+         <entry>=sum(D4:D1000)</entry>
+         <entry></entry>
+         <entry></entry>
+       </row>
+       <row>
+         <entry>4</entry>
+         <entry>(fill name)</entry>
+         <entry>(fill pupil count)</entry>
+         <entry>=B4/B$3*C$2</entry>
+         <entry>(fill teacher count)</entry>
+         <entry>=D4/D$3*E$2</entry>
+         <entry>=E4+C4</entry>
+       </row>
+       <row>
+         <entry>5</entry>
+         <entry>(fill name)</entry>
+         <entry>(fill pupil count)</entry>
+         <entry>(copy formula)</entry>
+         <entry>(fill teacher count)</entry>
+         <entry>(copy formula)</entry>
+         <entry>(copy formula)</entry>
+       </row>
+       <row>
+         <entry>6</entry>
+         <entry>(fill name)</entry>
+         <entry>(fill pupil count)</entry>
+         <entry>(copy formula)</entry>
+         <entry>(fill teacher count)</entry>
+         <entry>(copy formula)</entry>
+         <entry>(copy formula)</entry>
+       </row>
+     </tbody>
+   </tgroup>
+ </informaltable>
+
+        <para>Note that you don't know how many rows the EMIS Toolbox will fill - so you have to put sums at the top of the area to be filled.</para>
+    </section>
+    <section>
+        <title>STEP 2: Configure the Excel Report</title>
+        <para>Next we need to configure the Excel Report in the EMIS Toolbox. Follow these steps to create a new report:</para>
+        <section>
+            <title>Create a new configuration</title>
+            <itemizedlist>
+                <listitem>Copy the Excel file to the directory c:\emistoolbox\default\excel directory.</listitem>
+                <listitem>Click on the "Excel Reports" tab. </listitem>
+                <listitem>Click the "Add" button and provide a name for your new report. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>Configure the Report</title>
+            <itemizedlist>
+                <listitem>Select the Excel Template you want to use. </listitem>
+                <listitem>Select the level at which to aggregate data (in this example we use Cercle).</listitem>
+                <listitem>Select where to place the data from the cercles. In this example we want to place the data on the first sheet at cell A4. </listitem>
+                <listitem>Select whether the fill data by rows or by columns. By row means that the different values for one indicator are all placed in one row. By column means that they are placed into one column. In our example we want to place them into columns. </listitem>
+            </itemizedlist>
+        </section>
+        <para>
+            <mediaobject>
+               <imageobject>
+                  <imagedata width="13cm" fileref="images/excel/config.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+        </para>
+ 
+        <section>
+            <title>Adding Values</title>
+            <para>Finally we need to specify where in the report we want to place which value. The EMIS Toolbox helps you by prompting the next location that can have a data value and giving you a choice of data to place in that field. </para>
+            <para>In our example we want to place name of cercle, number of pupils, number of teachers and a copy of the formulas. </para>
+            <para>We configure the these settings:</para>
+            
+            <itemizedlist>
+                <listitem>The cercle name in A4.</listitem>
+                <listitem>The count of students in B4.</listitem>
+                <listitem>Copy the formula from cell C4 for each row. </listitem>
+                <listitem>The count of teachers in D4. </listitem>
+                <listitem>Copy the formula from cell E4 and F4. </listitem>
+            </itemizedlist>
+            
+            <para>The Excel Template is now ready to be used. </para>
+        </section>
+    </section>
+    <section>
+        <title>STEP 3: Running an Excel Report</title>
+        <para>You can now run the Excel report for different locations and years. This manual explains how to run Excel Reports in the <link linkend="excelReports">Showing Excel Reports</link> section.</para>
+        <para>In our example the result would be an Excel file with this content: </para>
+            
+ <informaltable>
+   <tgroup cols="7">
+     <thead>
+       <row>
+         <entry></entry>
+         <entry>A</entry>
+         <entry>B</entry>
+         <entry>C</entry>
+         <entry>D</entry>
+         <entry>E</entry>
+         <entry>F</entry>
+       </row>
+     </thead>
+     <tbody>
+       <row>
+         <entry>1</entry>
+         <entry>Name</entry>
+         <entry>Pupils</entry>
+         <entry>Pupil Allowance</entry>
+         <entry>Teachers</entry>
+         <entry>Teacher Allowance</entry>
+         <entry>Total Allowance</entry>
+       </row>
+       <row>
+         <entry>2</entry>
+         <entry></entry>
+         <entry></entry>
+         <entry>$30,000</entry>
+         <entry></entry>
+         <entry>$10,000</entry>
+         <entry></entry>
+       </row>
+       <row>
+         <entry>3</entry>
+         <entry></entry>
+         <entry>70696</entry>
+         <entry></entry>
+         <entry>1960</entry>
+         <entry></entry>
+         <entry></entry>
+       </row>
+       <row>
+         <entry>4</entry>
+         <entry>Menaka</entry>
+         <entry>8986</entry>
+         <entry>$3,813</entry>
+         <entry>217</entry>
+         <entry>$1,107</entry>
+         <entry>$4,920</entry>
+       </row>
+       <row>
+         <entry>5</entry>
+         <entry>ANSONGO</entry>
+         <entry>13270</entry>
+         <entry>$5,631</entry>
+         <entry>305</entry>
+         <entry>$1,556</entry>
+         <entry>$7,187</entry>
+       </row>
+       <row>
+         <entry>6</entry>
+         <entry>GAO</entry>
+         <entry>38414</entry>
+         <entry>$16,301</entry>
+         <entry>1098</entry>
+         <entry>$5,602</entry>
+         <entry>$21,903</entry>
+       </row>
+       <row>
+         <entry>7</entry>
+         <entry>BOUREM</entry>
+         <entry>10026</entry>
+         <entry>$4,255</entry>
+         <entry>340</entry>
+         <entry>$1,735</entry>
+         <entry>$5,989</entry>
+       </row>
+     </tbody>
+   </tgroup>
+ </informaltable>
+    </section>
+  </chapter>
+<!--
   <chapter>
     <title>Validating Data</title>
     <subtitle>Creating validation reports for a set of validation rules.</subtitle>
     <para></para>
   </chapter>
 -->
-  <!-- TODO - glossary --> 
 </book>

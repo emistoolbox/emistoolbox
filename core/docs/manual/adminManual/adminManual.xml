@@ -1,5 +1,1291 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
-  <title>Sample article</title>
-  <para>This is a very short article.</para>
-</article>
+<!DOCTYPE book [
+<!ENTITY LocaleCountry "nigeria">
+<!ENTITY MidLevel "LGA">
+<!ENTITY MidLevels "LGAs">
+<!ENTITY TopLevel "State">
+<!ENTITY TopLevels "States">
+]>
+<book xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
+  <info>
+    <title>EMIS Toolbox Administrator Manual</title>
+    <author>
+        <personname>Jorg Bauer</personname>
+        <email>murkhog@googlemail.com</email>
+        <uri>http://emistoolbox.com</uri>
+    </author>
+    <legalnotice>
+        <mediaobject>
+          <imageobject><imagedata fileref="images/usaid.png" /></imageobject>
+        </mediaobject>
+    </legalnotice>
+  </info>
+  <chapter>
+    <title>Overview of EMIS Toolbox Configuration</title>
+    <section>
+        <title>Overview</title>
+        <para>
+        EMIS Toolbox is used to look at educational data. It is easy to create indicators, show charts and tables, create lists and create reports. All these tasks need data to be in the EMIS Toolbox. Adding data into the EMIS Toolbox is a task done by a technical member of staff. The person needs access to all data sources, know source data is structured and needs good knowledge of SQL. 
+        </para>
+        <para>
+        The EMIS Toolbox configuration has two parts: The Model and the Mapping. The Model describes the format of the data. The Mapping describes from where the data is
+        imported into the EMIS Toolbox. 
+        </para>
+    </section>
+    <section>
+        <title>The Model</title>
+        <para>
+        The Model describes the format of the data. 
+        </para>
+        <para>
+For example: 
+
+<itemizedlist>
+    <listitem>The Model says that there are schools, &MidLevels; and &TopLevels;. </listitem>
+    <listitem>The Model says that there is a data collection once a year in 2014, 2013 and 2012. </listitem>
+    <listitem>The Model says that there is a yearly collection of enrolment data for each school. Enrollment data is collected by gender  and grade. </listitem>
+    <listitem>The Model says that there is a yearly collection of population data for each district. Population data is collected by gender and age. </listitem>
+</itemizedlist>
+        </para>
+        <para>
+        The EMIS Toolbox uses the model to help users when they analyse data and it knows how data can be analysed. For example, when looking at enrollment the Toolbox knows that the data can be split by gender. 
+        </para>
+    </section>
+    <section>
+        <title>The Mapping</title>
+        <para>
+        The mapping describes from where data is imported into the EMIS Toolbox. 
+        </para>
+        <para>
+For example: 
+
+<itemizedlist>
+   <listitem>The mapping says that we use an Excel file and a MS Access database. </listitem>
+   <listitem>The mapping says that the list of schools in the Access database. </listitem>
+   <listitem>The mapping says that the list of LGAs is stored in an Excel file. </listitem>
+   <listitem>The mapping says that the population data is stored in the Excel file. It says in which column we store the school id, the year, the gender and the population count.</listitem>
+   <listitem>The mapping says that a list of schools is stored in the Access database. It says in which column we store the school id, the school name, the LGA code and other school information (for example the school type, or school location). </listitem>
+</itemizedlist>
+
+   </para>
+        <para>
+        The EMIS Toolbox uses the mapping to import data from the data sources into the internal EMIS Toolbox data store. After performing the import the EMIS Toolbox no longer requires the other data sources. All data is stored internally. 
+         </para>
+    </section>
+    <section>
+        <title>User Interface: Administration and Datasets</title>
+        <para>
+The EMIS Toolbox allows you to work with multiple sets of data. These are called a "Dataset". A dataset contains the configuration for the model, mapping, all imported data and all indicator and report configurations. 
+        </para><para>
+To configure the EMIS Toolbox you need to enter the Admin part of the Toolbox: 
+    <itemizedlist>
+        <listitem>change your browser to go to http://localhost:8888/emistoolbox/EmisToolboxAdmin.html (or use the base url of your installation). </listitem>
+    </itemizedlist>
+You can now create a new dataset or load an existing dataset: 
+        </para>
+        <para>
+            <mediaobject>
+               <imageobject>
+                  <imagedata width="13cm" fileref="images/overview/datasets.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+        </para>
+        <para>
+To create a new dataset:
+    <itemizedlist>
+        <listitem>Click on "Manage Data"</listitem>
+        <listitem>In the "Dataset" tab click on the "New" button</listitem>
+        <listitem>Enter the name of the new dataset and click "Ok"</listitem>
+    </itemizedlist>
+To load an existing dataset: 
+    <itemizedlist>
+        <listitem>Click on "Manage Data"</listitem>
+        <listitem>In the "Dataset" tab select the dataset you want to load and click "Load". </listitem>
+    </itemizedlist>
+You can now configure the model and mapping. 
+        </para>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Configuring the Model</title>
+    <para>
+    The model describes the format of the data. There are 5 things you need to specify for a working model: 
+    </para>
+    <itemizedlist>
+        <listitem>Classifications - describes how data is split (e. g. enrollment uses gender and grade, population uses gender and age). </listitem>
+        <listitem>Dates - describes when data is collected (e. g. yearly in 2014, 2013 and 2012). </listitem>
+        <listitem>Locations - describes where data is collected or grouped (e. g. school, district, province). </listitem>
+        <listitem>Location Variables - describes what data is collected at each location (e. g. enrollment at school level, popluation at district level). </listitem>
+        <listitem>Hierarchies - describes how the locations are organized (e. g. schools belong into a district. Districts belong into a Province). </listitem>
+    </itemizedlist>
+    <section>
+        <title>Configuring Classifications</title>
+        <para>
+Classifications have a name and a set of values. 
+        </para><para>
+For example we can create the classification "gender" and give it the values "male" and "female". It shows that for "gender" there are only two possible values. 
+    </para><para>
+Classifications are used in two places in the EMIS Toolbox: 
+<itemizedlist>
+    <listitem>To restrict the possible values a variable can have. For example, we can record whether a school is located in a rural or an urban environment. To do this, we can create a classification called "school location" and give it the values "urban" and "rural". Later we will see how the variable is configured. </listitem>
+    <listitem>To collect data in an array. For example, instead of collecting one total number for enrollment we can tell the EMIS Toolbox that we want to split the enrollment data by gender - this means we'll collect a seperate value for each value of "gender" - i. e. one value for "male" and another for "female". We are creating an array of data.</listitem>
+</itemizedlist>  
+    </para><para>
+Next we'll explain how to create and modify classifications. In the section about "Location Variables" we explain how to use the classifications.  
+        </para>
+    </section>
+    <section>
+        <title>User Interface: Classification Editor</title>
+        <para>
+To go to the Classification Editor click on "Data Model" tab in the top menu then click the "Classifications" tab in the model editor
+        </para><para>
+In the Classification Editor you see a list of all classifications. 
+        </para>
+        <para>
+            <mediaobject>
+               <imageobject>
+                  <imagedata width="13cm" fileref="images/model/classifications.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+        </para>
+        <para>
+To review a classification: 
+<itemizedlist>
+    <listitem>Click on the classification.</listitem>
+</itemizedlist>
+You can see all values of the classification in the list on the right. 
+        </para><para>
+To delete a classification: 
+<itemizedlist>
+  <listitem>Click on the classification. </listitem>
+  <listitem>Click on "Delete Classif." button. </listitem>
+</itemizedlist>
+        </para><para>
+To create a new classification: 
+<itemizedlist>
+    <listitem>Click on "New Classif." button. </listitem>
+    <listitem>Enter the name of the new classification. </listitem>
+    <listitem>For each value in the classification: 
+        <itemizedlist>
+            <listitem>Click on the "Add" button. </listitem>
+            <listitem>Enter the name of the value. </listitem>
+        </itemizedlist>
+    </listitem>
+</itemizedlist>
+        </para><para>
+You can also change the order of the values by moving them up and down. Simply select the value and click on the "Up" and "Down" buttons. 
+        </para>
+    </section>
+    <section>
+        <title>Configuring Dates</title>
+        <para>
+The Date definitions describe how often and when data is collected. Each Date definitions has a name and a set of values. 
+        </para><para>
+For example, we can create the date definition "Year" and then specify "2012", "2013", "2014" as values. This means we collect data annual and we 
+expect data for the years 2012 to 2014. 
+        </para><para>
+Dates are used to specify when data is collected. We will see in the section about "Location Variables" how you use these Date definition
+to specify when data is collected. 
+        </para><para>
+Dates can have child Dates. This is important if, for example, you have data collections once a year and then others once a month. The monthly collection take part in a particular year and then in a particular month. We create the "Year" Date (maybe with values "2012", "2013", "2014") and then create a child Date "Month" (with values "Jan", "Feb", "Mar" ...). Each "Month" exists within the Year - together they form a calendar month - e. g. Mar 2012.  
+        </para><para>
+Next we'll explain how to create and modify dates. 
+        </para>
+    </section>
+    <section>
+        <title>User Interface: Date Editor</title>
+        <para>
+To go to the Date Editor click on "Data Model" tab in the top menu then click the "Dates" tab in the model editor
+        </para><para>
+In the Date Editor you see a tree of all dates.  
+        </para>
+        <para>
+            <mediaobject>
+               <imageobject>
+                  <imagedata width="13cm" fileref="images/model/dates.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+        </para>
+        <section>
+            <title>To review a date</title>
+            <itemizedlist>
+            <listitem>Click on the Date.</listitem>
+            </itemizedlist>
+You can see all values of the Date in the list on the right. 
+        </section>
+        <section>
+            <title>To delete a Date</title>
+            <itemizedlist>
+                <listitem>Click on the Date. </listitem>
+                <listitem>Click on "Del Date" button. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To create a new Date</title>
+            <itemizedlist>
+                <listitem>Click on "Add Date" button. </listitem>
+                <listitem>Enter the name of the new Date. </listitem>
+                <listitem>For each value in the Date: </listitem>
+                <listitem>Click on the "Add" button. </listitem>
+                <listitem>Enter the name of the value.</listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To create a new child Date</title>
+            <itemizedlist>
+                <listitem>Select the parent Date. </listitem>
+                <listitem>Click on "Add Date" button. </listitem>
+                <listitem>Enter the name of the new child Date. </listitem>
+                <listitem>For each value in the Date: </listitem>
+                <listitem>Click on the "Add" button.</listitem>
+                <listitem>Enter the name of the value.</listitem>
+            </itemizedlist>
+        </section>
+        <para>
+You can also change the order of the values by moving them up and down. Simply select the value and click on the "Up" and "Down" buttons. 
+        </para><para>
+        <section>
+            <title>Loading Date values</title>
+Often we don't know the range of Date values - they depend on the data stored in the data sources. The EMIS Toolbox allows you to load the 
+values from a data source. 
+        </section>
+        </para><para>
+To enable Date value loading select the checkbox "Loading Date values from the database:". You can then specify in the Mapping section 
+from where the values need to be loaded. 
+        </para>
+    </section>
+    <section>
+        <title>Configuring Locations</title>
+        <para>
+Locations are places where data is collected or data is aggregated. For example, we might collect enrollment data at School and population data at District level We might also want to aggregate the data at &TopLevel; level. In this example we use three locations: School, District and &TopLevel;. 
+        </para><para>
+The location configuration just specifies which locations we want to use. It does not provide information how they relate to each other. 
+        </para>
+        <section>
+            <title>GIS Configuration</title>
+            <para>
+For each location you can specify if we have GIS (Geographical Information Systems - mapping information) and in what form. A location can be represented either as area (POLYGON) or a location (COORDINATE). 
+            </para><para>
+The GIS configuration is only required if you want to display maps of indicator values. 
+            </para>
+        </section>
+    </section>
+    <section>
+        <title>User Interface: Location Editor (for Locations)</title>
+        <para>
+To go to the Location Editor click on "Data Model" tab in the top menu then click the "Locations" tab in the model editor. 
+        </para><para>
+The Location Editor has two functions: 
+(1) To configure locations. 
+(2) To configure the variables at each location. 
+        </para><para>
+In this section we will only discuss the location configuration.
+        </para>
+        <para>
+            <mediaobject>
+               <imageobject>
+                  <imagedata width="13cm" fileref="images/model/locations.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+        </para>
+        <section>
+            <title>To create a new Location</title>
+        <itemizedlist>
+           <listitem>Click the "Add Location" button. </listitem>
+           <listitem>Enter the name of the new location. </listitem>
+        </itemizedlist>
+        </section>
+        <section>
+            <title>To delete a Location</title>
+        <itemizedlist>
+            <listitem>Select the location you want to delete. </listitem>
+            <listitem>Click on the "Delete" button. </listitem>
+        </itemizedlist>
+        </section>
+        <section>
+            <title>To modify the GIS setting for a Location</title>
+            <itemizedlist>
+                <listitem>Select the location you want to modify. </listitem>
+                <listitem>On the right side, select the type of GIS data that shows the position of this location. </listitem>
+            </itemizedlist>
+        <para>
+Changing the GIS setting for a location specifies what type of data we will import in the Mapping section. 
+        </para>
+        </section>
+    </section>
+
+    <section>
+        <title>Configuring Location Variables</title>
+        <para>
+Variables are used to store data. For example, you might want to store enrollment data - for this you create a variable that is called "Enrollment". 
+        </para>
+        <section>
+            <title>Variable Location</title>
+            <para>
+Each variable is associated to a location. This is the location where the data is collected. For example, enrollment data can be collected in a school so 
+we associate this variable with the school location. 
+            </para>
+        </section>
+        <section>
+            <title>Variable Types</title>
+There are 6 different types of data you can store - for each variable you need to decide what type of data you want to store. 
+            <variablelist>
+              <varlistentry>
+                <term>BOOLEAN</term>
+                <listitem>Stores 'yes' or 'no'.</listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>BYTE</term>
+                <listitem>Stores a small number (valid values from -128 to 127). </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>INTEGER</term>
+                <listitem>Stores a large number (valid values from -2,147,483,648 to 2,147,483,647). </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>STRING</term>
+                <listitem>Stores a text.</listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>ENUM</term>
+                <listitem>Stores a value from a classification. </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>ENUM_SET</term>
+                <listitem>Stores any combination of values from a classification (e. g. if you have a classification called 'Shifts' with the values 'morning', 'afternoon', 'evening', an ENUM_SET of this classification could store 'morning and evening' or 'afternoon and evening' or 'morning, afternoon and evening' or any other combination of the values).</listitem>
+              </varlistentry>
+            </variablelist>
+        </section>
+        <para>
+        Some examples: 
+        </para>
+        <itemizedlist>
+            <listitem>To store enrollment you use the INTEGER type - it allows you to store the number of students. </listitem>
+            <listitem>To store the school name you use the STRING type - it allows you to store the text of the name. </listitem>
+            <listitem>To store if a school has a parent association or not you use the BOOLEAN type - it allows you to store a yes or no value. </listitem>
+            <listitem>To store whether a school is run by government or by a community or by a charity you use the ENUM type. You also need to create a classification (named 'school owner') that has three values: 'government', 'community' and 'charity'. </listitem>
+        </itemizedlist>
+        <section>
+            <title>Variable Dimension</title>
+            <para>
+Data can also be stored as array. For example, enrollment data often is supplied by gender and by grade - thus we want to store it in a two-dimensional array like this: 
+            </para>
+            <para>
+male    female
+I
+II
+III
+IV
+V
+VI
+            </para><para>
+            In the EMIS Toolbox each dimension of an array is defined by a classification. It stores as many data values as there are values in the classification. For example, if you use the classification gender for a dimension it will expect a value each for 'male' and for 'female'. 
+            </para>
+        </section>
+    </section>
+
+    <section>
+        <title>User Interface: Location Editor (for Variables)</title>
+        <para>
+To go to the Location Editor click on "Data Model" tab in the top menu then click the "Locations" tab in the model editor. 
+        </para><para>
+In this section we will only discuss the configuration of location variables. The Location Editor can also be used to create and modify locations (see previous section). 
+        </para>
+        <section>
+            <title>To create a new variable to store a number</title>
+            <para>
+As example we will create a variable to store the number of classrooms. 
+            </para>
+            <para>
+                <mediaobject>
+                   <imageobject>
+                      <imagedata width="13cm" fileref="images/model/varsClassrooms.png" format="PNG"/>
+                   </imageobject>
+                </mediaobject>
+            </para>
+            <itemizedlist>
+                <listitem>Select the location for which you want to add a variable - in this example the School.</listitem>
+                <listitem>Click the "Add Variable" button. </listitem>
+                <listitem>Enter the name of the new variable - in this example "Classrooms". </listitem>
+                <listitem>Select how often you collect data - in this example "Year". </listitem>
+                <listitem>Set the "Value Type" to BYTE. </listitem>
+                <listitem>Leave the "As Array" setting on "(no array)". </listitem>
+            </itemizedlist>
+        </section>
+        
+        <section>
+            <title>To create a new variable to store a value of a classification</title>
+            <para>
+As example we will create a variable to store where a school is located - using the "school_location" classification with values "urban" and "rural". (see section XYZ on how to create the classification).
+            </para>
+            <para>
+                <mediaobject>
+                   <imageobject>
+                      <imagedata width="13cm" fileref="images/model/varsLocation.png" format="PNG"/>
+                   </imageobject>
+                </mediaobject>
+            </para>
+            <itemizedlist>
+                <listitem>Select the location for which you want to add a variable. </listitem>
+                <listitem>Click the "Add Variable" button. </listitem>
+                <listitem>Enter the name of the new variable - in this example "Location". </listitem>
+                <listitem>Select how often you collect data - in this example "Year". </listitem>
+                <listitem>Set the "Value Type" to ENUM.</listitem>
+                <listitem>Select the "Classification" that says which values you want to store - in this case "school_location". </listitem>
+                <listitem>Leave the "As Array" setting on "(no array)".  </listitem>
+            </itemizedlist>
+        </section>
+        
+        <section>
+            <title>To create a new variable to store an array of values</title>
+            <para>As example we will create a variable to store the number of teachers in a school. This data is provided for male and female teachers. We can use the classification "gender" with values "male" and "female". 
+            </para>
+            <para>
+                <mediaobject>
+                   <imageobject>
+                      <imagedata width="13cm" fileref="images/model/varsEnrolment.png" format="PNG"/>
+                   </imageobject>
+                </mediaobject>
+            </para>
+            <itemizedlist>
+                <listitem>Select the location for which you want to add a variable. </listitem>
+                <listitem>Click the "Add Variable" button. </listitem>
+                <listitem>Enter the name of the new variable - in this example "Teachers". </listitem>
+                <listitem>Select how often you collect data - in this example "Year". </listitem>
+                <listitem>Set the "Value Type" to INTEGER - we want to store numbers.</listitem>
+                <listitem>Set the "As Array" setting to "1 dimensional". </listitem>
+                <listitem>Select "gender from the list of classifications for the first dimension. </listitem>
+            </itemizedlist>
+        </section>
+        
+        <section>
+            <title>To delete a location variable</title>
+            <itemizedlist>
+                <listitem>Select the variable you want to delete. </listitem>
+                <listitem>Click the "Delete" button. </listitem>
+            </itemizedlist>
+        </section>
+    </section>
+
+    <section>
+        <title>Configuring Hierarchies</title>
+        <para>
+Hierarchies are used to define what relationships exist between different locations. Hierarchies should be the same as the geographical or organizational structure in the education system - however, often there exist more than one hierarchy (maybe a political hierarchy and an administrative hierarchy). The EMIS Toolbox allows you to define different hierarchies. 
+        </para><para>
+Example: Often each school belongs to one district, each district to one province and each province to the nation. The hierarchy configuration specifies this order and then the EMIS Toolbox knows how to aggregate data and how to allow users to browse for data. 
+        </para>
+    </section>
+
+    <section>
+        <title>User Interface: Hierarchy Editor</title>
+        <para>
+To go to the Hierarchy Editor click on "Data Model" tab in the top menu then click the "Hierarchies" tab in the model editor. 
+        </para>
+        <para>
+            <mediaobject>
+               <imageobject>
+                  <imagedata width="13cm" fileref="images/model/hierarchy.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+        </para>
+        <section>
+            <title>To create a new hierarchy</title>
+            <itemizedlist>
+                <listitem>Click "Add Hierarchy" button. </listitem>
+                <listitem>Enter the name of the new hierarchy. </listitem>
+                <listitem>Now add all locations that are part of the new hierarchy. </listitem>
+            </itemizedlist>
+        </section>
+        
+        <section>
+            <title>To delete a hierarchy</title>
+            <itemizedlist>
+                <listitem>Select the hierarchy you want to delete. </listitem>
+                <listitem>Click on "Delete" button. </listitem>
+            </itemizedlist>
+        </section>
+
+        <section>
+            <title>To add a Location to a Hierarchy</title>
+            <itemizedlist>
+                <listitem>Select the hierarchy you want to add a Location to. </listitem>
+                <listitem>Click "Add Location" button. </listitem>
+                <listitem>Select the Location you want to add from the drop-down list. </listitem>
+            </itemizedlist>
+        </section>
+
+        <section>
+            <title>To delete a Location from a Hierarchy</title>
+            <itemizedlist>
+                <listitem>Select the Location you want to delete. </listitem>
+                <listitem>Click on "Delete" button.</listitem>
+            </itemizedlist>
+        </section>
+        
+        <section>
+            <title>Order of Hierarchy</title>
+            <para>Locations are displayed from top to bottom. This means the location shown first in the list is the highest in the hierarchy - it contains all the other Locations. 
+            </para>
+            <para>You can change the order by selecting a Location and then use the "Up" and "Down" buttons. </para>
+        </section>
+    </section>
+
+    <section>
+        <title>User Interface: GIS Options</title>
+        <para>
+To go to the GIS Setting Editor click on "Data Model" tab in the top menu then click the "GIS" tab in the model editor. 
+        </para>
+        <para>
+            <mediaobject>
+               <imageobject>
+                  <imagedata width="13cm" fileref="images/model/gis.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+        </para>
+        <para>
+This editor allows you to configure the GIS usage. It offers these settings: 
+        </para>
+        <itemizedlist>
+            <listitem>Projection: Enter projection string - in most cases this can be left empty. </listitem>
+        </itemizedlist>
+        <itemizedlist>
+            <listitem>Base Image: You can specify an image that is placed below your map. The EMIS Toolbox needs to know the name of the image and then the dimension of the image and the real-world area it covers:</listitem>
+            <listitem>Map base image: Name of the image that is located in the specified directory. </listitem>
+            <listitem>West/south/east/north: Real world extend of image. Entered as longitude and latitude values. </listitem>
+            <listitem>x/y: Width and height of the image in pixels. </listitem>
+        </itemizedlist>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Configuring the Mapping</title>
+    <section>
+        <para>
+        The EMIS Toolbox runs all analysis from data stored within the EMIS Toolbox. Storing data in the EMIS Toolbox allows us to run analysis and reports without the need to have access to external data sources - the Toolbox can be used as an independent tool. 
+        </para><para>
+        To import data into the EMIS Toolbox we need to define rules that say how we can import the data into the Toolbox. These rules are called "The Mapping" - it maps external data sources to the model of the EMIS Toolbox. 
+        </para><para>
+        Creating the rules for the Mapping is a technical task and needs to be done by somebody who understands the external data sources and who has a good knowledge of SQL. 
+        </para><para>
+        The first step in configuring the Mapping is to say from where you want to use data - these are the data sources. 
+        </para>
+    </section>
+    <section>
+        <title>Data Sources</title>
+        <para>
+The data sources are the databases or spreadsheets that store your data outside of the EMIS Toolbox. You can use multiple data sources and combine its data in the EMIS Toolbox. 
+        </para><para>
+The data sources are only used when you import data into the EMIS Toolbox. During the import the EMIS Toolbox stores all data internally and from then on is able to run without having to access the external data sources. 
+        </para><para>
+The EMIS Toolbox supports these data sources: 
+        </para>
+        <variablelist>
+          <varlistentry>
+            <term>MS Excel spreadsheets</term>
+            <listitem>data can be read from any Excel spreadsheets and you can select which worksheet to use. Data should use the first row to name each column and 
+then store each record in one row.</listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>MS Access database</term>
+            <listitem>data can be read from any table or view. You can specify your own SQL queries. </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>MySQL/MSSQL/PostgreSQL/ODBC</term>
+           <listitem>data can be queried from any of these databases. You can specify your own SQL queries. </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>CSV file</term>
+            <listitem>data can be read from a comma separated files. </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Multiple CSV files with HSQL queries</term>
+            <listitem>data can be read from a set of comma separated file. You can specify your own SQL queries using data in all of these files. </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>GIS Shape files</term>
+            <listitem>data and geographical data can be read from ESRI shape files. </listitem>
+          </varlistentry>
+        </variablelist>
+    </section>
+    <section>
+        <title>Loading Files</title>
+        <para>
+Some data sources read data from a file. As part of the configuration we need to say where that file is located. 
+        </para><para>
+The EMIS Toolbox supports loading of files from different sources: 
+        <itemizedlist>
+            <listitem>From the dataset directory: Loads your data from your local computer. The files need to be stored in the dataset directory (e. g. c:\emistoolbox\default on a Windows computer).</listitem>
+            <listitem>From the Internet (using HTTP or HTTPS): Loads the data from a publicly accessible location on the Internet - you can use this to ensure you are always accessing the latest dataset available. </listitem>
+            <listitem>From Magpi (an online data collection tool - see www.magpi.com for more information). </listitem>
+        </itemizedlist>
+        </para>
+    </section>
+    <section>
+        <title>User Interface: Data Sources</title>
+        <para>
+To go to the "Data Mapping Configuration" click on "Data Mapping" tab in the top menu. 
+        </para>
+        <section>
+            <title>To create a data source for a database (e. g. MySQL, MS-SQL, PostgreSQL or ODBC)</title>
+            <para>
+                <mediaobject>
+                   <imageobject>
+                      <imagedata width="13cm" fileref="images/mapping/data_db.png" format="PNG"/>
+                   </imageobject>
+                </mediaobject>
+            </para>
+            <itemizedlist>
+                <listitem>Select "Data Sources" in the tree on the left. </listitem>
+                <listitem>Click "Add Data Source". </listitem>
+                <listitem>Select the type of data source you want to add (MYSQL/MSSQL/POSTGRESQL/ODBC). </listitem>
+                <listitem>Input the connection details. 
+                    <para>
+                    Your database administrator will be able to provide you with connection details. These consist of a hostname (with optional port number), database name, username, and password. For ODBC databases no hostname is required. 
+                    </para>
+                </listitem>
+                <listitem>Databases allow you to configure your own queries - we explain this in a later section. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To create a data source for a file (e. g. MS Excel, MS Access, CSV file, CSV files with HSQL support, GIS shape file) </title>
+            <para>
+                <mediaobject>
+                   <imageobject>
+                      <imagedata width="13cm" fileref="images/mapping/data_file.png" format="PNG"/>
+                   </imageobject>
+                </mediaobject>
+            </para>
+            <itemizedlist>
+                <listitem>Select "Data Sources" in the tree on the left. </listitem>
+                <listitem>Click "Add Data Source". </listitem>
+                <listitem>Select the type of data source you want to add (EXCEL, ACCESS, CSV, HSQL, GIS_SHAPE)</listitem>
+                <listitem>Select the file (see the sections "To load a file from..." below). </listitem>
+                <listitem>To add additional files of the same data format click on the "[add]" links.</listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To load a file from the dataset directory</title>
+            <para>
+                <mediaobject>
+                   <imageobject>
+                      <imagedata width="13cm" fileref="images/mapping/browse_file.png" format="PNG"/>
+                   </imageobject>
+                </mediaobject>
+            </para>
+            <itemizedlist>
+                <listitem>Select "emistoolbox://".</listitem>
+                <listitem>Click the "Browse" button. </listitem>
+                <listitem>Find the directory with your file and select the file. </listitem>
+                <listitem>Click the "Open" button. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To load a file from the Internet</title>
+            <para>
+        <itemizedlist>
+            <listitem>Select "http://" or "https://". </listitem>
+            <listitem>Enter the URL of the file. </listitem>
+            <listitem>Enter a local file name (the file will be stored under this name in the dataset directory). </listitem>
+        </itemizedlist>
+            </para>
+        </section>
+        <section>
+            <title>To load a file from Magpi</title>
+            <itemizedlist>
+                <listitem>Select "magpi://"</listitem>
+                <listitem>Click the "Set" button. </listitem>
+                <listitem>Input the details to access your Magpi account. </listitem>
+                <listitem>The Toolbox will display the correct URL to access the data. </listitem>
+            </itemizedlist>
+        </section>
+        
+        <para>
+            We will cover settings for Queries and Context Variables in a later section. 
+        </para>
+
+        <section>
+            <title>To verify your data source</title>
+            <para>
+            Whenever the EMIS Toolbox enters the Mapping Editor it tries to access each of the data sources (this is used to get information on the tables and fields available). 
+            </para>
+            <para>
+            If the access fails it displays an error message. We can use this to check our data source configurations: 
+            </para>
+            <para>
+            <itemizedlist>
+                <listitem>Click on "Data Mapping" in the top-level menu.  </listitem>
+                <listitem>Read any error message and remember which data source it affects. </listitem>
+                <listitem>Click on "Data Sources"</listitem>
+                <listitem>Click on the data source with problems. </listitem>
+                <listitem>Review the data sources settings. </listitem>
+            </itemizedlist>
+            </para>
+        </section>
+    </section>
+    <section>
+        <title>Mapping Overview</title>
+        <para>
+The Mapping rules are used to import data from external data sources into the EMIS Toolbox. In the model we created many location variables and now we need to 
+add a rule for each to import data into this variable. 
+        </para><para>
+We also need to create a mappings to define the hierarchy - i. e. which school belongs to which district and which district belongs to which province. 
+        </para><para>
+Each Mapping has two important pieces of data: 
+        <itemizedlist>
+            <listitem>The ID of the location - it uniquely identifies a location. </listitem>
+            <listitem>The Date of the data - it specifies when the data was collected. </listitem>
+        </itemizedlist>
+        </para><para>
+For each Mapping rule you need to specify how to get the ID and the Date. In addition there will be rule specific data (for example the count of classrooms, the enrollment count or the gender for the enrollment count). 
+        </para>
+    </section>
+    <section>
+        <title>Mapping Basics</title>
+        <para>
+All mapping rules read data from a data source. We now explain how to use the most common user interface elements in the mapping editors. You will 
+see them again and again. 
+        </para>
+
+        <section>
+            <title>How to specify a data source</title>
+            <para>
+Each mapping needs to know from where to read it's data. You need to specify the data source and table: 
+            </para>
+            <para>
+                <mediaobject>
+                   <imageobject>
+                      <imagedata width="13cm" fileref="images/mapping/map_datasource.png" format="PNG"/>
+                   </imageobject>
+                </mediaobject>
+            </para>
+            <itemizedlist>
+                <listitem>Select the data source. </listitem>
+                <listitem>Select the table in the data source (this can also be a query or worksheet). </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>How to read a single value</title>
+            <para>
+Mappings read data from different fields. After selecting the data source and table there are three ways to read a value: 
+            </para>
+            <orderedlist>
+                <listitem>Read the data from a field: 
+                    <para>
+                        <mediaobject>
+                           <imageobject>
+                              <imagedata width="13cm" fileref="images/mapping/map_var_field.png" format="PNG"/>
+                           </imageobject>
+                        </mediaobject>
+                    </para>
+                    <itemizedlist>
+                        <listitem>Select as "Type of source" the value "The value is stored in a field."</listitem>
+                        <listitem>Select the field from the drop-down list. </listitem>
+                    </itemizedlist>
+                </listitem>
+                <listitem>Use a fixed value:
+                    <para>
+                        <mediaobject>
+                           <imageobject>
+                              <imagedata width="13cm" fileref="images/mapping/map_var_const.png" format="PNG"/>
+                           </imageobject>
+                        </mediaobject>
+                    </para>
+                    <itemizedlist>
+                        <listitem>Select as "Type of source" the value "The value is a constant."</listitem>
+                        <listitem>Input the value you want to use. If you are reading a classification you can select the value from a drop-down list. </listitem>
+                    </itemizedlist>
+                </listitem>
+                <listitem>From a context variable: 
+                    <para>
+                    Some data sources store additional data in a context variable (we explain this in a later section). You can use these values by: 
+                    </para>
+                    <para>
+                        <mediaobject>
+                           <imageobject>
+                              <imagedata width="13cm" fileref="images/mapping/map_var_context.png" format="PNG"/>
+                           </imageobject>
+                        </mediaobject>
+                    </para>
+                    <itemizedlist>
+                        <listitem>Select as "Type of source" the value "The value is stored in a context variable."</listitem>
+                        <listitem>Input the name of the context variable. </listitem>
+                    </itemizedlist>
+                </listitem>
+            </orderedlist>
+        </section>
+
+        <section>
+            <title>How to read a classification</title>
+            <para>
+When reading a classifications only the values of the classification are allowed values (e. g. the classification 'gender' would only allow 'male' and 'female'). Often data sources encode these values differently (for example male/female could be encoded as 0/1 or M/F. The EMIS Toolbox needs additional information to read a classification from the data source: 
+            </para><para>
+There are three ways to interpret classifications: 
+            </para>
+            <orderedlist>
+                <listitem>Using the actual name: Only the values of the classification are accepted. In our example only "male" and "female" are accepted. 
+                    <para>
+                        <mediaobject>
+                           <imageobject>
+                              <imagedata width="13cm" fileref="images/mapping/map_enum_values.png" format="PNG"/>
+                           </imageobject>
+                        </mediaobject>
+                    </para>
+                </listitem>
+                <listitem>Using the index of the values: The index specifies the position of the value in our model. A classification with the values "male", 
+                    "female"  would use index 0 for "male" and index 1 for "female. Only these index values are accepted. 
+                    <para>
+                        <mediaobject>
+                           <imageobject>
+                              <imagedata width="13cm" fileref="images/mapping/map_enum_index.png" format="PNG"/>
+                           </imageobject>
+                        </mediaobject>
+                    </para>
+                    <para>
+                    We can also add an offset to the index. For example, with an offset of "2", we would interpret 2 as "male" and 3 as "female". The offset is simply added to the index.
+                    </para>
+                </listitem>
+                <listitem>Using a custom mapping: If none of the other rules work then we can define our own custom mapping. For each classification value we define a list of values that the database uses to store that particular value. For example, we could say that "male" is stored as "m,male,boys" and "female" as "f,female,girls". Now the EMIS Toolbox accepts the values "m", "male", "boys", "f", "female" and "girls". 
+                    <para>
+                        <mediaobject>
+                           <imageobject>
+                              <imagedata width="13cm" fileref="images/mapping/map_enum_mapped.png" format="PNG"/>
+                           </imageobject>
+                        </mediaobject>
+                    </para>
+                </listitem>
+            </orderedlist>
+        </section>
+        <section>
+            <title>How to map arrays</title>
+            <para>
+            Some variables can store more than one value. For these variables we specified in the model how many dimensions they use and what classification is used in each dimension. 
+            </para><para>
+            To import data into an array we need to know from where we get the value of the variable and the values of each dimension. For example, the variable "enrollment" stores the number of pupils. The variable has two dimensions - "gender" and "grade". During the import we now need to know from where we get the value (the number of pupils) and for which grade and gender we have read the value. There are now three fields you need to map. 
+            </para>
+            <section>
+                <title>By Column mapping</title>
+                <para>
+                Databases can store array data in different ways: 
+                </para>
+                <para>Data example 1:</para>
+                 <informaltable frame="none">
+                  <tgroup cols="4">
+                    <thead>
+                      <row>
+                        <entry>SchoolID</entry>
+                        <entry>gender</entry>
+                        <entry>grade</entry>
+                        <entry>count</entry>
+                      </row>
+                    </thead>
+                   <tbody>
+                      <row>
+                        <entry>12345</entry>
+                        <entry>male</entry>
+                        <entry>I</entry>
+                        <entry>50</entry>
+                      </row>
+                      <row>
+                        <entry>12345</entry>
+                        <entry>female</entry>
+                        <entry>I</entry>
+                        <entry>34</entry>
+                      </row>
+                      <row>
+                        <entry>12345</entry>
+                        <entry>male</entry>
+                        <entry>II</entry>
+                        <entry>49</entry>
+                      </row>
+                      <row>
+                       <entry>12345</entry>
+                        <entry>female</entry>
+                        <entry>II</entry>
+                        <entry>43</entry>
+                      </row>
+                    </tbody>
+                  </tgroup>
+                </informaltable>
+                
+                <para>Data example 2:</para>
+                <informaltable frame="none">
+                  <tgroup cols="5">
+                    <thead>
+                      <row>
+                        <entry>SchoolID</entry>
+                        <entry>male_I</entry>
+                        <entry>male_II</entry>
+                        <entry>female_I</entry>
+                        <entry>female_II</entry>
+                      </row>
+                    </thead>
+                   <tbody>
+                      <row>
+                        <entry>12345</entry>
+                        <entry>50</entry>
+                        <entry>49</entry>
+                        <entry>34</entry>
+                        <entry>43</entry>
+                      </row>
+                    </tbody>
+                  </tgroup>
+                </informaltable>
+                <para>
+                To load this data into our enrollment variable we need to tell the EMIS Toolbox how to read the gender, the grade and the value. 
+                </para><para>
+                For example 1 we can retrieve this information from fields: 
+                </para>
+                <itemizedlist>
+                    <listitem>gender: Load value from field "gender" - using enum values. </listitem>
+                    <listitem>grade: Load value from field "grade" - using enum values. </listitem>
+                    <listitem>enrollment value: Load from field "count". </listitem>
+                </itemizedlist>
+                <para>
+                For example 2 we the grade and gender depends from which column we load the data - there is no explicit field that stores this information. 
+                </para><para>
+                For this case the EMIS Toolbox has a fourth case to read a value called "By Column". 
+                </para>
+                <para>
+                    <mediaobject>
+                       <imageobject>
+                          <imagedata width="13cm" fileref="images/mapping/map_array.png" format="PNG"/>
+                       </imageobject>
+                    </mediaobject>
+                </para>
+                <itemizedlist>
+                    <listitem>gender: Load value "By Column"</listitem>
+                    <listitem>grade: Load value "By Column"</listitem>
+                    <listitem>enrollment value: Add the fields "male_I", "male_II", "female_I" and "female_II" - then select the appropriate value of gender and grade for each. </listitem>
+                </itemizedlist>
+            </section>
+        </section>
+    </section>
+    
+    <section>
+        <title>Mapping Date Values</title>
+        <para>
+Date values are mapped just like classifications. You can load the data from a field, constant value or context value and need to specify how the values are 
+interpreted. 
+        </para><para>
+Dates with multiple parts (for example Month and Year) have a mapping for each part. 
+        </para>
+    </section>
+    
+    <section>
+        <title>Data sources without Dates</title>
+        <para>
+Some data sources don't store any date information. However, the EMIS Toolbox requires date information. 
+        </para><para>
+There are different strategies to give the EMIS Toolbox a date. 
+        </para>
+        <section>
+          <title>Using a constant value: </title>
+          <para>
+If the data applies to a single year you can specify the current year as constant value in your mappings. 
+          </para>
+        </section>
+        <section>
+          <title>Using a context variable: </title>
+          <para>
+Sometimes data for each year is stored in a separate file (for example, an annual school census can be stored in separate Access databases). When importing we want to make sure that each dataset is assigned to the correct year. 
+          </para><para>
+The data source configuration for files allows you to specify the name of a context variable and then assign a different value for each file. For example, if we have a separate Access database for each year, we name the context variable "year" and then enter a different year for of the files. 
+          </para>
+          <para>
+            <mediaobject>
+               <imageobject>
+                  <imagedata width="13cm" fileref="images/mapping/data_context_var.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+        </para>
+          <para>
+In the mapping we can then read the value from the context variable. The EMIS Toolbox will set the context variable to the appropriate value when reading from each file. 
+          </para>
+        </section>
+        <section>
+          <title>Loop through all values: </title>
+          <para>
+In some cases data doesn't change over time. For example a list of districts does not change from year to year. In this case we want to use the same data in each year. 
+          </para>
+          <para>
+            <mediaobject>
+               <imageobject>
+                  <imagedata width="13cm" fileref="images/mapping/map_datasource_loop.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+          </para>
+          <para>
+The mappings allow us to repeat the data import for each year. The data source configuration has a check-box "Loop across 'Year' (using context variable 'year')". After checking this control, the import will be repeated for each year. Each time the context variable 'year' contains the value of the current year. You can now use the context variable in your mapping. 
+          </para>
+        </section>
+    </section>
+    
+    <section>
+        <title>Create mapping for Location Variables</title>
+        <para>
+Using the explanations in the section "Mapping Basics" we can now start to map each location variable we created in the Model. 
+        </para><para>
+Mappings for a location variable are always created for a specific location and a specific Date type. One mapping can't be for both a School and a District. It also can't be for both Yearly and Monthly data collections. The reason for this is that you need to specify the ID of the location (i. e. the School or the District) - having two would be confusing. You also need to specify the date - again, having two Date Types would be confusing. 
+        </para><para>
+In the following examples we are trying to map the location variable "Classrooms", which records the number of classrooms for a school. The data is collected once a year. 
+        </para>
+    </section>
+    
+    <section>
+        <title>User Interface: Create mapping for Location Variables</title>
+        <section>
+          <title>To create a new Location Variable Mapping</title>
+          <para>
+        <itemizedlist>
+            <listitem>In the "Data Mapping Configuration" expand the "Location" and click on "School" - the location for which you want to create a new mapping. </listitem>
+            <listitem>Click the "Add Year mapping". </listitem>
+        </itemizedlist>
+          </para><para>
+You can now configure the mapping for the location variable. 
+          </para>
+        </section>
+    </section>
+    
+    <section>
+        <title>Configure Mapping for Location Variables</title>
+        <para>
+        You need tell the EMIS Toolbox where to find the data for the location variable - there are four parts to this: 
+        </para>
+        <orderedlist>
+            <listitem>Data is loaded from one of the data sources you defined. You need to tell the EMIS Toolbox which one and which table / query.  </listitem>
+            <listitem>Imported data is loaded for a specific location. The Toolbox uses numeric IDs to identify the different locations (e. g. a school's EMIS code). You need to tell the EMIS Toolbox which field in your table/query contains the ID. </listitem>
+            <listitem>Imported data is loaded for a specific date. You need to tell the Toolbox which fields contain the date of the data. </listitem>
+            <listitem>You data itself. You need to tell the EMIS Toolbox where to find the location variables data and (if the data is stored as an array) the values for each dimension. </listitem>
+        </orderedlist>
+        <para>
+        Often data for multiple variables are stored in the same table - you can map more than one Location Variable in the same Mapping, as long as it is for the same Location and the same Date type. 
+        </para>
+    </section>
+    
+    <section>
+        <title>User Interface: Configure Mapping for Location Variables</title>
+        <para>
+        After creating a mapping for a location variable (see previous sections) you define the four parts of the mapping: 
+        </para>
+
+        <para>
+            <mediaobject>
+               <imageobject>
+                    <imagedata width="13cm" fileref="images/mapping/map_full.png" format="PNG"/>
+               </imageobject>
+            </mediaobject>
+        </para>
+
+          <section>
+            <title>(1) The Data Source</title>
+            <itemizedlist>
+                <listitem>Select the data source. </listitem>
+                <listitem>Select the table/query from which to load the data. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>(2) The Location ID</title>
+            <itemizedlist>
+                <listitem>Select the type of source ("The value is stored in a field."). </listitem>
+                <listitem>Select the field name. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>(3) The Date</title>
+            <itemizedlist>
+                <listitem>Select the type of the source (a field if the table contains the data, or a context variable or constant value in other cases - read the section "TODO" for more information). </listitem>
+                <listitem>Select the field name, enter context variable name or enter the constant value. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>(4) The data</title>
+            <para>
+Finally you need to select which location variable you can load data for and configure it. 
+            </para>
+            <itemizedlist>
+                <listitem>Select the variable name and click "Add". </listitem>
+                <listitem>Configure the variable (refer to the section "Mapping Basics" to read on how to configure the different type of variables) </listitem>
+            </itemizedlist>
+            <para>
+        You can add more variables in the same mapping if they are for the same location, the same date and the selected table contains data for them. Otherwise you need to create a new location variable mapping. 
+            </para>
+        </section>
+    </section>
+    
+    <section>
+        <title>Using Queries</title>
+        <para>
+Databases and CSV files with HSQL can use queries which join multiple tables. The EMIS Toolbox allows you to define these queries and give them a name. 
+        </para>
+        <section>
+            <title>Some uses for queries</title>
+            <itemizedlist>
+                <listitem>Filter tables with rows you don't want to import (for example, to only import certain years, or to exclude rows with missing data). </listitem>
+                <listitem>To aggregate data (for example, maybe you have a table that lists individual classrooms but you only want the number of classrooms per school). </listitem>
+                <listitem>Combine data from two tables (for example to bring data together that has been normalized, or to look-up values from a different table). </listitem>
+                <listitem>To perform calculations (for example to calculate a performance score from multiple fields). </listitem>
+            </itemizedlist>
+        </section>
+    </section>
+    <section>
+        <title>User Interface: Using Queries</title>
+        <para>
+Queries are defined as part of the data source. Make sure your queries work by running them in a database client before you enter them in the EMIS Toolbox. 
+        </para><para>
+To go to the Data Mapping Configuration click on the "Data Mapping" tab in the top menu then select "Data Source". 
+        </para>
+        <para>
+            <mediaobject>
+                <imageobject>
+                    <imagedata width="13cm" fileref="images/mapping/map_queries.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </para>
+        <section>
+            <title>To create a new Query</title>
+            <itemizedlist>
+                <listitem>Click  on the data source for which you want to add a query. </listitem>
+                <listitem>In the "Queries:" section click the "Add" button. </listitem>
+                <listitem>Input the name of the new query. </listitem>
+                <listitem>The new query appears in the list of queries - you can now write the query in the text area at the bottom. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To delete a Query</title>
+            <itemizedlist>
+                <listitem>Click on the data source for which you want to delete a query. </listitem>
+                <listitem>Select the query you want to delete. </listitem>
+                <listitem>Click the "Del" button. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>To change a Query</title>
+            <itemizedlist>
+                <listitem>Click on the data source for which you want to delete a query. </listitem>
+                <listitem>Select the query you want to change. </listitem>
+                <listitem>The EMIS Toolbox now displays the query in the bottom text area. You can  make any changes you want in there. </listitem>
+            </itemizedlist>
+        </section>
+        <section>
+            <title>Verifying Queries</title>
+            <para>
+            After adding or changing queries you should make sure that the data sources still work. Simply click on the "Data Mapping" tab in the top menu  and the EMIS Toolbox will test each data source and all their queries again. 
+            </para>
+        </section>
+    </section>
+    <section>
+        <title>Hierarchy Mapping</title>
+        <para>
+The hierarchy mapping is used to tell the EMIS Toolbox how the different locations are placed. For each location you need to tell the EMIS Toolbox what its parent location is. For example, each school needs to be tied to a district and each district to a province. 
+        </para><para>
+The configuration of the hierarchy mapping is very similar to that of the location variable mapping - for each location you need to tell the EMIS Toolbox these four parts of information: 
+        </para>
+            <orderedlist>
+                <listitem>The hierarchy is loaded from one of the data sources you defined. You need to tell the EMIS Toolbox which one and which table / query.  </listitem>
+                <listitem>Hierachy data is loaded for a specific date. You need to tell the Toolbox which fields contain the date of the data. </listitem>
+                <listitem>The parent location is identified by an ID. You need to tell the EMIS Toolbox which field in your table/query contains the ID. </listitem>
+                <listitem>The child location is identified by an ID. You need to tell the EMIS Toolbox  which field in your table/query contains the ID. </listitem>
+            </orderedlist>
+    </section>
+    <section>
+      <title>User Interface: Hierarchy Mapping</title>
+      <para>
+The Mapping Editor needs one mapping for each location (apart from the top location). If you are using multiple hierarchies then you need to provide a mapping for each location in each hierarchy. 
+      </para><para>
+To go to the Data Mapping Configuration click on the "Data Mapping" tab in the top menu then select "Hierarchies". 
+      </para>
+      <para>
+        <mediaobject>
+           <imageobject>
+              <imagedata width="13cm" fileref="images/mapping/map_hierarchy.png" format="PNG"/>
+           </imageobject>
+        </mediaobject>
+      </para>
+        <section>
+          <title>To configure a hierarchy mapping with dates</title>
+          <para>
+    Note: This example explains how to configure the mapping where the data contains date information. 
+        <itemizedlist>
+        <listitem>Select the hierarchy for which you want to configure a mapping. </listitem>
+        <listitem>Select the mapping you want to configure. </listitem>
+        <listitem>Configure the four parts of the mapping:
+            <orderedlist>
+                <listitem>Select the data source and the table/query from which to load the data. </listitem>
+                <listitem>For the date access select "The value is stored in a field" and the field from your table/query.</listitem>
+                <listitem>For the parent location ID select "The value is stored in a field" and the field which contains the ID of the parent location. </listitem>
+                <listitem>For the parent location ID select "The value is stored in a field" and the field which contains the ID of the child location. </listitem>
+            </orderedlist>
+        </listitem>
+        </itemizedlist>
+          </para>
+        </section>
+        <section>
+            <title>To configure a hierarchy mapping without dates</title>
+            <para>
+            Note: This example explains how to configure the mapping if the data doesn't have any date information. This is typically the case in  mappings that don't change from year to year (e. g. district to province normally doesn't change)
+            </para>
+            <itemizedlist>
+                <listitem>Select the hierarchy for which you want to configure a mapping (e. g. default). </listitem>
+                <listitem>Select the mapping you want to configure (e. g. School > Province). </listitem>
+                <listitem>Configure the four parts of the mapping: 
+                    <orderedlist>
+                        <listitem>Select the data source and the table/query from which to load the data. Click the "Loop across 'Year'". </listitem>
+                        <listitem>For the date access select "The value is stored in a context variable" and input the name 'year' (use the same as specified in "using context variable 'year'")</listitem>    
+                        <listitem>For the parent location ID select "The value is stored in a field" and the field which contains the ID of the parent location. </listitem>
+                        <listitem>For the parent location ID select "The value is stored in a field" and the field which contains the ID of the child location. </listitem>
+                    </orderedlist>
+                </listitem>
+            </itemizedlist>
+        </section>
+    </section>
+  </chapter>
+  <chapter>
+    <title>User Interface: Running the Import</title>
+    <section>
+      <para>
+After configuring the model and the mapping you can now run the import. This step will read data from all the data sources and put the data into the EMIS Toolbox.
+      </para>
+      <para>
+        <mediaobject>
+           <imageobject>
+              <imagedata width="13cm" fileref="images/mapping/import.png" format="PNG"/>
+           </imageobject>
+        </mediaobject>
+      </para>
+      <para>
+The Toolbox allows you to run the import in two ways: 
+      </para>
+      <orderedlist>
+          <listitem>Complete Import: This will create the dataset to be used by the end-user. </listitem>
+          <listitem>Partial Import: This allows you to run just a part of the import and to investigate any errors you might have. </listitem>
+      </orderedlist>
+      <para>
+        To go to the Data Mapping Configuration click on the "Manage Data" tab in the top menu. 
+      </para>
+      <section>
+        <title>To perform a complete import</title>
+        <para>
+            <itemizedlist>
+                <listitem>Click on the "Import" tab.</listitem>
+                <listitem>Click on the "Import" button (under "Full Import")</listitem>
+            </itemizedlist>
+        </para><para>
+The EMIS Toolbox will run the import and provide information on its progress. At the end you can review the errors and data (click on the links). 
+        </para><para>
+The data is now ready to be used in the user module. 
+        </para>
+      </section>
+      <section>
+        <title>To perform a test import</title>
+        <para>
+            <itemizedlist>
+                <listitem>Click on the "Import" tab. </listitem>
+                <listitem>Select the imports you want to test. You can also include the hierarchy or GIS testing by selecting their check boxes. </listitem>
+                <listitem>Click on the "Test Import" button at the bottom. </listitem>
+            </itemizedlist>
+        </para><para>
+The EMIS Toolbox will only run the imports you selected and provide information on its progress. 
+        </para>
+      </section>
+    </section>
+  </chapter>
+</book>
