@@ -22,6 +22,7 @@ public class PdfReportConfigImpl extends NamedImpl implements PdfReportConfig, S
     private String subtitle;
     private int rows = 1;
     private int cols = 1;
+    private boolean shortTitles; 
 
     private List<PdfContentConfig> contentConfigs = new ArrayList();
 
@@ -202,4 +203,12 @@ public class PdfReportConfigImpl extends NamedImpl implements PdfReportConfig, S
 
         return result;
     }
+
+	@Override
+	public void setShortTitles(boolean shortTitles) 
+	{ this.shortTitles = shortTitles; } 
+
+	@Override
+	public boolean hasShortTitles() 
+	{ return shortTitles; } 
 }

@@ -1,11 +1,12 @@
 package com.emistoolbox.client.ui.analysis;
 
+import com.emistoolbox.client.EmisEditor;
+
 import com.emistoolbox.client.Message;
-import com.emistoolbox.client.MessageReport;
 import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.google.gwt.user.client.ui.ListBox;
 
-public class BoolFilterEditor extends ListBox
+public class BoolFilterEditor extends ListBox implements EmisEditor<Boolean>
 {
     private EmisMetaData field;
 
@@ -29,14 +30,14 @@ public class BoolFilterEditor extends ListBox
     {
         int index = getSelectedIndex();
         if ((index == -1) || (index == 0))
-        {
             return null;
-        }
+
         return Boolean.valueOf(index == 1);
     }
 
     public EmisMetaData getMetaData()
-    {
-        return this.field;
-    }
+    { return this.field; }
+
+	public void commit() 
+	{}
 }

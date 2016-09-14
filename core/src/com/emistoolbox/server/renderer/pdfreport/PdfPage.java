@@ -26,9 +26,3 @@ public abstract interface PdfPage
 
     public abstract String getFooter();
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.server.renderer.pdfreport.PdfPage JD-Core
- * Version: 0.6.0
- */

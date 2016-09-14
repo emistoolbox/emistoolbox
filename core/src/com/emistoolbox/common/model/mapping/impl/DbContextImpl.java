@@ -15,58 +15,39 @@ public class DbContextImpl implements DbContext, Serializable
     private String[] loopValues;
 
     public DbDataSourceConfig getDataSource()
-    {
-        return this.config;
-    }
+    { return this.config; }
 
     public String getQuery()
-    {
-        return this.query;
-    }
+    { return this.query; }
 
     public void setDataSource(DbDataSourceConfig datasource)
-    {
-        this.config = datasource;
-    }
+    { this.config = datasource; }
 
     public void setQuery(String query)
-    {
-        this.query = query;
-    }
+    { this.query = query; }
 
     public String[] getLoopValues()
     {
-        return this.loopValues;
+    	if (loopEnum != null)
+    		return loopEnum.getValues(); 
+    	else
+    		return this.loopValues;
     }
 
     public String getLoopVariable()
-    {
-        return this.loopVariable;
-    }
+    { return this.loopVariable; }
 
     public EmisMetaDateEnum getLoopEnum()
-    {
-        return this.loopEnum;
-    }
+    { return this.loopEnum; }
 
     public void setLoopEnum(EmisMetaDateEnum dateEnum)
-    {
-        this.loopEnum = dateEnum;
-        if (dateEnum != null)
-            this.loopValues = dateEnum.getValues();
-        else
-            this.loopValues = new String[0]; 
-    }
+    { this.loopEnum = dateEnum; }
 
     public void setLoopValues(String[] values)
-    {
-        this.loopValues = values;
-    }
+    { this.loopValues = values; }
 
     public void setLoopVariable(String variable)
-    {
-        this.loopVariable = variable;
-    }
+    { this.loopVariable = variable; }
 }
 
 /*

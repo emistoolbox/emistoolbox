@@ -7,4 +7,8 @@ public abstract interface EmisMetaDateEnum extends EmisMetaEnum, EmisMetaEnumTup
     public abstract void setParent(EmisMetaDateEnum paramEmisMetaDateEnum);
 
     public abstract boolean isAncestor(EmisMetaDateEnum paramEmisMetaDateEnum);
+    
+    public boolean hasAllowDynamicInit(); 
+
+    public void setAllowDynamicInit(boolean allow); 
 }

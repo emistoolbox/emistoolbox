@@ -60,25 +60,25 @@ public class EntityDataSet implements EmisEntityDataSet, Serializable
 
     public Map<Integer, String> getAllValues(int dateIndex, String field, int[] ids)
     {
-        Map result = new HashMap();
+        Map<Integer, String> result = new HashMap<Integer, String>();
         if (ids == null)
-        {
             return result;
-        }
+
         EntityDataAccess valueAccess = (EntityDataAccess) this.access.get(field);
         Map map = this.data[dateIndex];
         if (map == null)
-        {
             return result;
-        }
+
         for (int id : ids)
         {
+        	if (id == -1) 
+        		continue; 
+        	
             EmisEntityData entityData = (EmisEntityData) map.get(Integer.valueOf(id));
             if (entityData != null)
-            {
                 result.put(Integer.valueOf(id), valueAccess.getAsString(entityData.getMasterArray()));
-            }
         }
+
         return result;
     }
 

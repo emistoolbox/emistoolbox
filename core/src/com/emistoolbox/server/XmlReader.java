@@ -52,6 +52,7 @@ import com.emistoolbox.common.model.mapping.DbRowContextAccess;
 import com.emistoolbox.common.model.mapping.DbRowDateAccess;
 import com.emistoolbox.common.model.mapping.DbRowFieldAccess;
 import com.emistoolbox.common.model.mapping.DbRowMultipleAccess;
+import com.emistoolbox.common.model.mapping.EmisDateInitDbMap;
 import com.emistoolbox.common.model.mapping.EmisDbMap;
 import com.emistoolbox.common.model.mapping.EmisEntityDbMap;
 import com.emistoolbox.common.model.mapping.EmisHierarchyDbMap;
@@ -73,6 +74,7 @@ import com.emistoolbox.common.model.mapping.impl.DbRowContextAccessImpl;
 import com.emistoolbox.common.model.mapping.impl.DbRowEnumAccess;
 import com.emistoolbox.common.model.mapping.impl.DbRowFieldAccessImpl;
 import com.emistoolbox.common.model.mapping.impl.DbRowMultipleAccessImpl;
+import com.emistoolbox.common.model.mapping.impl.EmisDateInitDbMapImpl;
 import com.emistoolbox.common.model.mapping.impl.EmisDbMapImpl;
 import com.emistoolbox.common.model.mapping.impl.EmisEntityDbMapImpl;
 import com.emistoolbox.common.model.mapping.impl.EmisHierarchyDbMapEntryImpl;
@@ -122,6 +124,7 @@ import com.emistoolbox.common.results.impl.MetaResultDimensionEntity;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityAncestors;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityFilter;
+import com.emistoolbox.common.results.impl.MetaResultDimensionEntityGrandChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEnum;
 import com.emistoolbox.common.results.impl.MetaResultValueImpl;
 import com.emistoolbox.common.results.impl.TableMetaResultImpl;
@@ -248,6 +251,7 @@ public class XmlReader
 		result.setName(getAttr(tag, "id"));
 		result.setValues(getIdsAsArray(tag, "values"));
 		result.setParent((EmisMetaDateEnum) find(tag, "parent", dates));
+		result.setAllowDynamicInit("true".equalsIgnoreCase(getAttr(tag, "dateInit"))); 
 
 		return result;
 	}
@@ -400,6 +404,11 @@ public class XmlReader
 			add(configs, getDbDataSourceConfig(configTag, meta.getDatasetName()));
 		result.setDataSources(configs);
 
+		List<EmisDateInitDbMap> dateInits = new ArrayList<EmisDateInitDbMap>(); 
+		for (Element dateInitTag : getElements(tag, "dateInits", "dateInit"))
+			add(dateInits, getEmisDateInitDbMap(dateInitTag, configs)); 
+		result.setDateInitMappings(dateInits);
+		
 		List<EmisEntityDbMap> entities = new ArrayList<EmisEntityDbMap>();
 		for (Element entityTag : getElements(tag, "entityMaps", "entityMap"))
 			add(entities, getEmisEntityDbMap(entityTag, configs));
@@ -559,6 +568,19 @@ public class XmlReader
 
 		return result;
 	}
+	
+	private EmisDateInitDbMap getEmisDateInitDbMap(Element tag, List<DbDataSourceConfig> dbconfigs)
+	{
+		verifyTagName(tag, "dateInit"); 
+		
+		EmisDateInitDbMap result = new EmisDateInitDbMapImpl(); 
+		result.setDbContext(getDbContext(getElement(tag, "dbContext"), dbconfigs));
+		result.setValueAccess(getDbRowAccess(getElement(tag, "dateInit"), dbconfigs));
+		result.setDateType(find(tag, "dateType", this.meta.getDateEnums())); 
+
+		return result; 
+	}
+	
 
 	private EmisEntityDbMap getEmisEntityDbMap(Element tag, List<DbDataSourceConfig> dbconfigs) 
 	{
@@ -604,8 +626,7 @@ public class XmlReader
 
 		result.setLoopVariable(getAttr(tag, "loopVariable"));
 		if (tag.hasAttribute("loopEnum"))
-			result.setLoopEnum((EmisMetaDateEnum) find(tag, "loopEnum",
-					this.meta.getDateEnums()));
+			result.setLoopEnum((EmisMetaDateEnum) find(tag, "loopEnum", this.meta.getDateEnums()));
 		else
 			result.setLoopVariable(getAttr(tag, "loopValues"));
 
@@ -898,29 +919,25 @@ public class XmlReader
 		return result;
 	}
 
-	private PdfReportConfig getPdfReportConfig(Element tag,
-			List<EmisIndicator> indicators) {
+	private PdfReportConfig getPdfReportConfig(Element tag, List<EmisIndicator> indicators) 
+	{
 		verifyTagName(tag, "pdfReport");
 
 		PdfReportConfig result = new PdfReportConfigImpl();
-		result.setEntityType((EmisMetaEntity) find(tag, "entityType",
-				this.meta.getEntities()));
-		result.setLayout(getAttrAsInt(tag, "rows").intValue(),
-				getAttrAsInt(tag, "cols").intValue());
+		result.setEntityType((EmisMetaEntity) find(tag, "entityType", this.meta.getEntities()));
+		result.setLayout(getAttrAsInt(tag, "rows").intValue(), getAttrAsInt(tag, "cols").intValue());
 
 		PdfReportConfig.PageOrientation orientation = PdfReportConfig.PageOrientation.PORTRAIT;
 		PdfReportConfig.PageSize size = PdfReportConfig.PageSize.A4;
 		if (tag.getAttributeNode("pageSize") != null)
-			size = PdfReportConfig.PageSize.valueOf(tag
-					.getAttribute("pageSize"));
+			size = PdfReportConfig.PageSize.valueOf(tag.getAttribute("pageSize"));
 		if (tag.getAttributeNode("pageOrientation") != null)
-			orientation = PdfReportConfig.PageOrientation.valueOf(tag
-					.getAttribute("pageOrientation"));
+			orientation = PdfReportConfig.PageOrientation.valueOf(tag.getAttribute("pageOrientation"));
 		result.setPage(size, orientation);
 
 		result.setFooter(getElementText(tag, "footer"));
-		result.setTitle(getElementText(tag, "title"),
-				getElementText(tag, "subtitle"));
+		result.setTitle(getElementText(tag, "title"), getElementText(tag, "subtitle"));
+		result.setShortTitles(getAttrAsBoolean(tag, "shortTitles"));
 
 		List<PdfContentConfig> contents = new ArrayList<PdfContentConfig>();
 		for (Element contentTag : getElements(tag, null, "pdfContent"))
@@ -1035,19 +1052,28 @@ public class XmlReader
 			tmp.setEnumType((EmisMetaEnum) find(tag, "enum",
 					this.meta.getEnums()));
 			result = tmp;
-		} else if (type.equals("entityFilter")) {
+		}
+		else if (type.equals("entityFilter")) 
+		{
 			MetaResultDimensionEntityFilter tmp = new MetaResultDimensionEntityFilter();
 
 			EmisMetaEntity entity = (EmisMetaEntity) find(tag, "entity",
 					this.meta.getEntities());
 			tmp.setField((EmisMetaData) find(tag, "field", entity.getData()));
 			result = tmp;
-		} else if (type.equals("entityAncestors")) {
+		}
+		else if (type.equals("entityAncestors")) 
+		{
 			MetaResultDimensionEntityAncestors tmp = new MetaResultDimensionEntityAncestors();
 			updateMetaResultDimensionEntity(tag, tmp);
 			result = tmp;
-		} else if (type.equals("entityChildren")) {
+		}
+		else if (type.equals("entityChildren")) {
 			MetaResultDimensionEntityChildren tmp = new MetaResultDimensionEntityChildren();
+			updateMetaResultDimensionEntity(tag, tmp);
+			result = tmp;
+		} else if (type.equals("entityGrandChildren")) {
+			MetaResultDimensionEntityGrandChildren tmp = new MetaResultDimensionEntityGrandChildren();
 			updateMetaResultDimensionEntity(tag, tmp);
 			result = tmp;
 		}
@@ -1057,8 +1083,8 @@ public class XmlReader
 		return result;
 	}
 
-	private void updateMetaResultDimensionEntity(Element tag,
-			MetaResultDimensionEntity result) {
+	private void updateMetaResultDimensionEntity(Element tag, MetaResultDimensionEntity result) 
+	{
 		result.setHierarchy((EmisMetaHierarchy) find(tag, "hierarchy",
 				this.meta.getHierarchies()));
 		result.setEntityType((EmisMetaEntity) find(tag, "entityType",
@@ -1066,7 +1092,8 @@ public class XmlReader
 
 		List<Integer> ids = new ArrayList<Integer>();
 		List<String> names = new ArrayList<String>();
-		for (Element entityTag : getElements(tag, null, "entity")) {
+		for (Element entityTag : getElements(tag, null, "entity")) 
+		{
 			ids.add(getAttrAsInt(entityTag, "id"));
 			names.add(getAttr(entityTag, "name"));
 		}
@@ -1097,13 +1124,15 @@ public class XmlReader
 			result.setIndicator(indicator);
 		else {
 			List<MetaResultValue> values = new ArrayList<MetaResultValue>();
-			for (Element metaResultTag : getElements(tag, "metaResultValues",
-					"metaResultValue"))
+			for (Element metaResultTag : getElements(tag, "metaResultValues", "metaResultValue"))
 				values.add(getMetaResultValue(metaResultTag, indicators));
 			result.setMetaResultValues(values);
 		}
 
 		result.setContext(getEmisContext(getElement(tag, "context")));
+		Element globalFilterTag = getElement(tag, "globalFilter"); 
+		if (globalFilterTag != null)
+			result.setGlobalFilter(getEmisContext(getElement(tag, "context")));  
 	}
 
 	private MetaResultValue getMetaResultValue(Element tag,
@@ -1167,6 +1196,7 @@ public class XmlReader
 
 		indicator.setName(getAttr(tag, "name"));
 		indicator.setGroupName(getAttr(tag, "groupName"));
+		indicator.setYAxisLabel(getAttr(tag, "yAxis"));
 
 		indicator.setMaxValue(getAttrAsDouble(tag, "max").doubleValue());
 
@@ -1214,7 +1244,13 @@ public class XmlReader
 			result.setMetaData((EmisMetaData) find(tag, "field", entity.getData()));
 		
 		if (result.getMetaData() == null)
-			result.setCountDateType(find(tag, "countDateType", this.meta.getDateEnums())); 
+		{
+			EmisMetaDateEnum dateType = find(tag, "countDateType", this.meta.getDateEnums()); 
+			if (dateType == null && meta.getDateEnums().size() > 0)
+				dateType = meta.getDateEnums().get(0); 
+
+			result.setCountDateType(dateType); 
+		}
 
 		result.setContext(getEmisContext(getElement(tag, "context")));
 
@@ -1313,10 +1349,20 @@ public class XmlReader
 			result.addEnumFilter(value);
 		}
 
-		for (Element enumFilterTag : getElements(tag, null, "entityFilter")) {
+		for (Element enumFilterTag : getElements(tag, null, "entityFilter")) 
+		{
 			result.addEntityFilter(getAttr(enumFilterTag, "key"),
 					getBytes(getIdsAsIntArray(enumFilterTag, "values")));
 		}
+		
+		for (Element dateFilterTag : getElements(tag, null, "dateFilter")) 
+		{
+			EmisMetaDateEnum dateEnumType = NamedUtil.find(getAttr(dateFilterTag, "key"), meta.getDateEnums()); 
+			
+			EmisEnumSet values = new EnumSetImpl(dateEnumType, getBytes(getIdsAsIntArray(dateFilterTag, "values"))); 
+			result.addDateEnumFilter(values);
+		}
+		
 		return result;
 	}
 

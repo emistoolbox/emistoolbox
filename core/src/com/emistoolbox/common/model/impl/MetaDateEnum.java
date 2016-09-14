@@ -10,6 +10,8 @@ public class MetaDateEnum extends MetaEnum implements EmisMetaDateEnum, Serializ
 {
     private static final long serialVersionUID = 1L;
     private EmisMetaDateEnum parent;
+    
+    private boolean allowDynamicInit = false; 
 
     @Override
 	public int findEnumPosition(EmisMetaEnum e) 
@@ -21,6 +23,13 @@ public class MetaDateEnum extends MetaEnum implements EmisMetaDateEnum, Serializ
     	
     	return -1; 
 	}
+
+	public boolean hasAllowDynamicInit() 
+	{ return allowDynamicInit; }
+
+	public void setAllowDynamicInit(boolean allowDynamicInit) 
+	{ this.allowDynamicInit = allowDynamicInit; }
+
 
 	public int getCombinations()
     { return this.parent == null ? getSize() : this.parent.getCombinations() * getSize(); }

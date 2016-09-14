@@ -5,6 +5,7 @@ import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.client.admin.ui.OpenLayersUtil;
 import com.emistoolbox.client.ui.ActionPanel;
 import com.emistoolbox.client.ui.BlockingScreen;
+import com.emistoolbox.client.ui.GlobalFilterUi;
 import com.emistoolbox.client.ui.ManageReportDatasetDialog;
 import com.emistoolbox.client.ui.DataMetaResultEditor;
 import com.emistoolbox.client.ui.DownloadPanel;
@@ -82,6 +83,7 @@ public class ReportModule
     private HTML uiDataSetName = new HTML("default");  
 
     private int dataBrowserButtonIndex; 
+    private GlobalFilterUi uiGlobalFilter = new GlobalFilterUi();
     
     public ReportModule(final EmisToolbox toolbox, String dataset, String fixedDataset, final String showUi) 
     {
@@ -102,6 +104,7 @@ public class ReportModule
         toolbox.getService().loadData(datasetName, screen.getCallback(actions.getCallback(Message.messageReport().loadingData(), new StatusAsyncCallback<EmisReportModuleData>("Fetch data") {
             public void onSuccess(EmisReportModuleData result)
             {
+            	uiGlobalFilter.setMeta(result.getModel()); 
                 config = result;
                 config.getModel().setDatasetName(datasetName); 
                 
@@ -193,7 +196,7 @@ public class ReportModule
         this.uiMetaResultTabs.selectTab(hasAnyGis() ? 3 : 2); 
         if (reportConfig != null)
         {
-	        ReportMetaResultEditor reportEditor = (ReportMetaResultEditor) this.uiMetaResultTabs.getWidget(3);
+	        ReportMetaResultEditor reportEditor = (ReportMetaResultEditor) this.uiMetaResultTabs.getWidget(hasAnyGis() ? 3 : 2);
 	        ReportMetaResult metaResult = new ReportMetaResultImpl();
 	        metaResult.setReportConfig(reportConfig);
 	        reportEditor.set(metaResult);
@@ -344,6 +347,7 @@ public class ReportModule
     private void showCharts()
     {
         selectButton(0);
+        uiGlobalFilter.resetValueChangeHandlers();
 
         if ((this.config.getReportConfig().getIndicators() == null) || (this.config.getReportConfig().getIndicators().size() == 0))
         {
@@ -357,6 +361,7 @@ public class ReportModule
         };
 
         final TableMetaResultEditor editor = new TableMetaResultEditor(this.toolbox, this.config.getModel(), this.config.getReportConfig(), getRootEntities());
+        uiGlobalFilter.addValueChangeHandler(new GlobalFilterValueChangeHandler<TableMetaResult>(editor));
         editor.addShowReportHandler(showReportHandler);
         editor.addValueChangeHandler(new ValueChangeHandler<TableMetaResult>() {
             public void onValueChange(ValueChangeEvent<TableMetaResult> event)
@@ -371,6 +376,7 @@ public class ReportModule
         if (hasAnyGis())
         {
             gisEditor = new GisMetaResultEditor(this.toolbox, this.config.getModel(), this.config.getReportConfig(), getRootEntities());
+            uiGlobalFilter.addValueChangeHandler(new GlobalFilterValueChangeHandler<GisMetaResult>(gisEditor));
             final GisMetaResultEditor gisEditor2 = gisEditor; 
             gisEditor.addShowReportHandler(showReportHandler);
             gisEditor.addValueChangeHandler(new ValueChangeHandler<GisMetaResult>() {
@@ -385,6 +391,7 @@ public class ReportModule
         }
 
         PriorityMetaResultEditor prioEditor = new PriorityMetaResultEditor(this.toolbox, this.config.getModel(), this.config.getReportConfig(), getRootEntities());
+        uiGlobalFilter.addValueChangeHandler(new GlobalFilterValueChangeHandler<PriorityMetaResult>(prioEditor));
         prioEditor.addValueChangeHandler(new ValueChangeHandler<PriorityMetaResult>() {
             public void onValueChange(ValueChangeEvent<PriorityMetaResult> event)
             {
@@ -395,6 +402,7 @@ public class ReportModule
         prioEditor.set(new PriorityMetaResultImpl());
 
         ReportMetaResultEditor reportEditor = new ReportMetaResultEditor(this.toolbox, this.config.getModel(), this.config.getReportConfig(), getRootEntities());
+        uiGlobalFilter.addValueChangeHandler(new GlobalFilterValueChangeHandler<ReportMetaResult>(reportEditor));
         reportEditor.addValueChangeHandler(new ValueChangeHandler<ReportMetaResult>() {
             public void onValueChange(ValueChangeEvent<ReportMetaResult> event)
             { ReportModule.this.loadReport(event.getValue(), uiChartContainer); }
@@ -403,6 +411,7 @@ public class ReportModule
         reportEditor.set(new ReportMetaResultImpl());
 
         ExcelReportMetaResultEditor excelReportEditor = new ExcelReportMetaResultEditor(toolbox, config.getModel(), config.getReportConfig(), getRootEntities()); 
+        uiGlobalFilter.addValueChangeHandler(new GlobalFilterValueChangeHandler<ExcelReportMetaResult>(excelReportEditor));
         excelReportEditor.addValueChangeHandler(new ValueChangeHandler<ExcelReportMetaResult>() {
             public void onValueChange(ValueChangeEvent<ExcelReportMetaResult> event)
             { loadExcelReport(event.getValue(), uiChartContainer); }        
@@ -421,6 +430,7 @@ public class ReportModule
         this.uiMetaResultTabs.selectTab(0);
 
         VerticalPanel vp = new VerticalPanel();
+        vp.add(uiGlobalFilter); 
         vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         vp.add(this.uiMetaResultTabs);
 
@@ -447,11 +457,16 @@ public class ReportModule
 
         buttons.add(btn);
 
+//        LOAD/SAVE MetaResult. 
+//        vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+//        vp.add(buttons); 
+        
         HorizontalPanel hp = new HorizontalPanel();
         hp.add(vp);
         hp.setSpacing(5);
+        
         this.uiChartContainer.clear();
-        hp.add(this.uiChartContainer);
+        hp.add(uiChartContainer);
 //        hp.setCellWidth(editor, "200px");
 
         this.toolbox.setWidget(hp);
@@ -635,7 +650,6 @@ public class ReportModule
 
         ManageReportDatasetDialog ui = new ManageReportDatasetDialog(withSave ? datasetName : null, fixedDataset, toolbox, config); 
         ui.addValueChangeHandler(new ValueChangeHandler<String>() {
-			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
 				datasetName = event.getValue(); 
 				uiDataSetName.setHTML(event.getValue()); 
@@ -666,6 +680,7 @@ public class ReportModule
 
             public void onSuccess(EmisReportModuleData result)
             {
+            	uiGlobalFilter.setMeta(result.getModel());
                 config = result;
                 config.getModel().setDatasetName(datasetName);  
                 actions.setMessage(Message.messageReport().dataLoadedTitle(), Message.messageReport().dataLoadedMessage(), true);
@@ -689,6 +704,7 @@ public class ReportModule
     private void loadChart(final TableMetaResult metaResult, int chartStyle, final SimplePanel uiChartContainer)
     {
         uiChartContainer.setWidget(new HTML(Message.messageReport().chartLoading()));
+        metaResult.setGlobalFilter(uiGlobalFilter.createCopy());
         this.toolbox.getService().getRenderedResult(datasetName, metaResult, chartStyle, new StatusAsyncCallback<String[]>(Message.messageReport().collectingResult()) {
             public void onSuccess(String[] result)
             {
@@ -814,12 +830,14 @@ public class ReportModule
             }
         };
         
+        gisMetaResult.setGlobalFilter(uiGlobalFilter.createCopy());
         this.toolbox.getService().getRenderedGisResult(datasetName, gisMetaResult, mapType, callback); 
     }
 
     private void loadPriorityList(final PriorityMetaResult prioMetaResult, final SimplePanel uiContainer)
     {
         uiContainer.setWidget(new HTML(Message.messageReport().chartLoading()));
+        prioMetaResult.setGlobalFilter(uiGlobalFilter.createCopy());
         this.toolbox.getService().getPriorityList(datasetName, prioMetaResult, new StatusAsyncCallback<List<PriorityListItem>>(Message.messageReport().collectingResult()) {
             public void onSuccess(List<PriorityListItem> result)
             {
@@ -832,6 +850,7 @@ public class ReportModule
     private void loadReport(ReportMetaResult reportMetaResult, final SimplePanel uiContainer)
     {
         uiContainer.setWidget(new HTML(Message.messageReport().reportLoading()));
+        reportMetaResult.setGlobalFilter(uiGlobalFilter.createCopy()); 
         this.toolbox.getService().getRenderedReportResult(datasetName, reportMetaResult, new StatusAsyncCallback<String>(Message.messageReport().collectingResult()) {
             public void onSuccess(String result)
             {
@@ -851,6 +870,7 @@ public class ReportModule
     private void loadExcelReport(ExcelReportMetaResult metaResult, final SimplePanel uiContainer)
     {
         uiContainer.setWidget(new HTML(Message.messageReport().reportLoading())); 
+        metaResult.setGlobalFilter(uiGlobalFilter.createCopy());
         toolbox.getService().getRenderedExcelReportResult(datasetName, metaResult, config.getReportConfig().getIndicators(), new StatusAsyncCallback<String>(Message.messageReport().collectingResult()) {
             public void onSuccess(String result)
             {
@@ -865,4 +885,16 @@ public class ReportModule
             }
         });
     }
+}
+
+class GlobalFilterValueChangeHandler<T extends MetaResult> implements ValueChangeHandler<EmisContext>
+{
+	private MetaResultEditor<T> editor; 
+	
+	public GlobalFilterValueChangeHandler(MetaResultEditor<T> editor)
+	{ this.editor = editor; } 
+	
+	@Override
+	public void onValueChange(ValueChangeEvent<EmisContext> event) 
+	{ editor.setGlobalFilter(event.getValue()); }
 }

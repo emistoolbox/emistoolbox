@@ -8,13 +8,9 @@ public class Message
     private static MessageReport messageReport = (MessageReport) GWT.create(MessageReport.class);
 
     public static MessageAdmin messageAdmin()
-    {
-        return messageAdmin;
-    }
+    { return messageAdmin; }
 
     public static MessageReport messageReport()
-    {
-        return messageReport;
-    }
+    { return messageReport; }
 }
 

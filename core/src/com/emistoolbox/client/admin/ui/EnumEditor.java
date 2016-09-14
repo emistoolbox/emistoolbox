@@ -1,12 +1,14 @@
 package com.emistoolbox.client.admin.ui;
 
 import com.emistoolbox.client.Message;
+import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEnum;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.ListBox;
@@ -22,7 +24,16 @@ public class EnumEditor extends FlexTable
     private PushButton uiUpButton = new PushButton(Message.messageAdmin().enumEditBtnUp());
     private PushButton uiDownButton = new PushButton(Message.messageAdmin().enumEditBtnDown());
 
-    public EnumEditor() {
+    private CheckBox uiDynamicInit = null;  
+
+    public EnumEditor() 
+    { this(false); }
+    
+    public EnumEditor(boolean showDynamicInitUi) 
+    {
+    	if (showDynamicInitUi)
+    		uiDynamicInit = new CheckBox(Message.messageAdmin().enumAllowDynamicInit());
+    	
         EmisUtils.init(this.uiAddButton, 40);
         EmisUtils.init(this.uiDelButton, 40);
         EmisUtils.init(this.uiUpButton, 40);
@@ -107,6 +118,9 @@ public class EnumEditor extends FlexTable
         vp.add(this.uiDownButton);
         setWidget(1, 1, vp);
 
+        if (uiDynamicInit != null)
+        	setWidget(2, 0, uiDynamicInit); 
+
     	getCellFormatter().setStyleName(0, 0, "sectionBar"); 
     	getFlexCellFormatter().setColSpan(0, 0, 2);
     	getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
@@ -138,6 +152,9 @@ public class EnumEditor extends FlexTable
             this.uiValues.addItem(value);
         }
         enableButtons();
+        
+        if (uiDynamicInit != null && metaEnum instanceof EmisMetaDateEnum)
+        	uiDynamicInit.setValue(((EmisMetaDateEnum) metaEnum).hasAllowDynamicInit()); 
     }
 
     public EmisMetaEnum get()
@@ -146,12 +163,15 @@ public class EnumEditor extends FlexTable
         {
             return null;
         }
+
         String[] values = new String[this.uiValues.getItemCount()];
         for (int i = 0; i < values.length; i++)
-        {
             values[i] = this.uiValues.getItemText(i);
-        }
+
         this.metaEnum.setValues(values);
+
+        if (uiDynamicInit != null && metaEnum instanceof EmisMetaDateEnum)
+        	((EmisMetaDateEnum) metaEnum).setAllowDynamicInit(uiDynamicInit.getValue()); 
 
         return this.metaEnum;
     }

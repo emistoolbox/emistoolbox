@@ -24,36 +24,29 @@ public class PdfPageImpl implements PdfPage
     private void addContent(int row, int col, PdfContent content, boolean clearing)
     {
         if ((row >= this.rows) || (col >= this.cols))
-        {
             throw new IllegalArgumentException("Invalid Row or Column");
-        }
+
         PdfContent currentContent = this.content[row][col];
 
         if (currentContent != null)
         {
             if (((currentContent instanceof PdfNullContent)) && (!clearing))
-            {
                 throw new IllegalStateException("Position currently occupied from a row/col span");
-            }
+
             clearContent(row, col, currentContent);
             setContent(row, col, content);
         }
         else
-        {
             setContent(row, col, content);
-        }
     }
 
     private void clearContent(int row, int col, PdfContent currentContent)
     {
         if (currentContent.getSpanRows() > 1)
-        {
             setSpanRows(row, col, currentContent.getSpanRows(), null, true);
-        }
+
         if (currentContent.getSpanCols() > 1)
-        {
             setSpanColumns(row, col, currentContent.getSpanRows(), null, true);
-        }
 
         setContent(row, col, null);
     }

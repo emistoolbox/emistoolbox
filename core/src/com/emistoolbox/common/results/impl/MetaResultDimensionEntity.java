@@ -66,7 +66,7 @@ public abstract class MetaResultDimensionEntity extends NamedImpl implements Met
 
     public String getName()
     {
-        String result = super.getName();
+        String result = normalize(super.getName());
         if (this.entityType == null)
             return result;
 

@@ -1,6 +1,7 @@
 package com.emistoolbox.common.util.impl;
 
 import com.emistoolbox.common.util.Named;
+
 import java.io.Serializable;
 
 public class NamedImpl implements Named, Serializable
@@ -17,10 +18,30 @@ public class NamedImpl implements Named, Serializable
     {
         this.name = name;
     }
-}
 
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.common.util.impl.NamedImpl JD-Core Version:
- * 0.6.0
- */
+    
+    protected String normalize(String name)
+    {
+    	if (name == null)
+    		return null; 
+    	
+    	int startPos = name.indexOf("'");
+    	int endPos = name.indexOf("'", startPos + 1); 
+    	while (startPos != -1 || endPos != -1)
+    	{
+    		if (endPos == -1)
+    			return name; 
+    		
+    		String tmp = name.substring(0, startPos);
+    		if (endPos + 1 != name.length())
+    			tmp += name.substring(endPos + 1); 
+
+    		name = tmp; 
+    		
+    		startPos = name.indexOf("'"); 
+    		endPos = name.indexOf("'", startPos + 1); 
+    	}
+    	
+    	return name.trim(); 
+    }
+}

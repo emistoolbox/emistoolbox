@@ -17,10 +17,3 @@ public class PdfChartContentConfigImpl extends PdfMetaResultContentConfigImpl<Ta
         this.chartType = chartType;
     }
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name:
- * com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl
- * JD-Core Version: 0.6.0
- */

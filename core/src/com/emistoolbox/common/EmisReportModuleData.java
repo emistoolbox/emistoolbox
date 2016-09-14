@@ -3,7 +3,10 @@ package com.emistoolbox.common;
 import com.emistoolbox.common.model.analysis.EmisReportConfig;
 import com.emistoolbox.common.model.analysis.impl.ReportConfig;
 import com.emistoolbox.common.model.meta.EmisMeta;
+
 import java.io.Serializable;
+import java.util.Map;
+import java.util.Properties;
 
 public class EmisReportModuleData implements Serializable
 {
@@ -11,6 +14,7 @@ public class EmisReportModuleData implements Serializable
     private String datasetName; 
     private EmisMeta model;
     private EmisReportConfig reportConfig = new ReportConfig();
+    private Map<String, String> config; 
 
     public String getDatasetName()
     { return datasetName; } 
@@ -34,4 +38,24 @@ public class EmisReportModuleData implements Serializable
 
     public void setReportConfig(EmisReportConfig reportConfig)
     { this.reportConfig = reportConfig; }
+
+	public Map<String, String> getConfig() 
+	{ return config; }
+
+	public String getConfig(String key)
+	{ return config.get(key); } 
+	
+	public boolean getConfigAsBoolean(String key, boolean defaultValue)
+	{
+		String value = getConfig(key); 
+		if (value == null || value.trim().equals(""))
+			return defaultValue; 
+		
+		try { return new Boolean(value); }
+		catch (Throwable err)
+		{ return defaultValue; } 
+	}
+
+	public void setConfig(Map<String, String> config) 
+	{ this.config = config; }
 }

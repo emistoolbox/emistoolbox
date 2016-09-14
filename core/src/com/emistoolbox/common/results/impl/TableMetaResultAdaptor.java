@@ -6,7 +6,7 @@ import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.results.MetaResultDimension;
 import com.emistoolbox.common.results.TableMetaResult;
 
-public class TableMetaResultAdaptor extends MetaResultAdaptor implements TableMetaResult
+public abstract class TableMetaResultAdaptor extends MetaResultAdaptor implements TableMetaResult
 {
     private TableMetaResult tableMetaResult;
 

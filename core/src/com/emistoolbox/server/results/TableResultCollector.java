@@ -14,9 +14,11 @@ import com.emistoolbox.common.results.Result;
 import com.emistoolbox.common.results.TableMetaResult;
 import com.emistoolbox.common.results.impl.ExpandedTableMetaResult;
 import com.emistoolbox.common.results.impl.MetaResultDimensionDate;
+import com.emistoolbox.common.results.impl.MetaResultDimensionEntity;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityAncestors;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityFilter;
+import com.emistoolbox.common.results.impl.MetaResultDimensionEntityGrandChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEnum;
 import com.emistoolbox.common.results.impl.ResultImpl;
 import com.emistoolbox.common.results.impl.ResultSorted;
@@ -30,6 +32,7 @@ import com.emistoolbox.server.results.impl.ResultDimensionEnum;
 import com.emistoolbox.server.results.impl.ResultDimensionMetaResultValues;
 import com.emistoolbox.server.util.IntIndex;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +59,7 @@ public class TableResultCollector extends ResultCollector
             if (i == dimensionCount)
                 dimensions[i] = new ResultDimensionMetaResultValues(metaValues);
             else
-                dimensions[i] = getResultDimension(this.metaResult.getDimension(i));
+                dimensions[i] = getResultDimension(metaResult.getDimension(i), metaResult.getGlobalFilter());
             sizes[i] = dimensions[i].getItemCount();
         }
 
@@ -84,8 +87,11 @@ public class TableResultCollector extends ResultCollector
             if ((metaValueDimension == 1) && (indexes[dimensionCount] != 0))
                 continue;
 
-            EmisContext[] contexts = new EmisContext[dimensionCount + 1];
-            contexts[dimensionCount] = this.metaResult.getContext();
+            int globalFilterCount = metaResult.getGlobalFilter() == null ? 0 : 1; 
+            EmisContext[] contexts = new EmisContext[dimensionCount + 1 + globalFilterCount];
+            contexts[contexts.length - 1] = metaResult.getContext();
+            if (globalFilterCount > 0)
+            	contexts[contexts.length - 2] = metaResult.getGlobalFilter(); 
             for (int i = 0; i < dimensionCount; i++)
                 contexts[i] = dimensions[i].getContext(indexes[i]);
 
@@ -114,11 +120,11 @@ public class TableResultCollector extends ResultCollector
         return new Result[] { new ResultSorted(collector.getResult(), 0, metaResult.getSortOrder() == 1), new ResultSorted(collectorExpanded.getResult(), 0, metaResult.getSortOrder() == 1) };
     }
 
-    private ResultDimension getResultDimension(MetaResultDimension metaDimension)
+    private ResultDimension getResultDimension(MetaResultDimension metaDimension, EmisContext globalFilter)
     {
         ResultDimension result = null;
         if ((metaDimension instanceof MetaResultDimensionDate))
-            result = new ResultDimensionDateEnum((MetaResultDimensionDate) metaDimension);
+            result = new ResultDimensionDateEnum((MetaResultDimensionDate) metaDimension, metaResult.getGlobalFilter());
         else if ((metaDimension instanceof MetaResultDimensionEntityAncestors))
         {
             MetaResultDimensionEntityAncestors ancestorDimension = (MetaResultDimensionEntityAncestors) metaDimension;
@@ -136,43 +142,102 @@ public class TableResultCollector extends ResultCollector
 
             result = new ResultDimensionEntity(entities, ancestorDimension.getHierarchyDateIndex());
         }
+        else if (metaDimension instanceof MetaResultDimensionEntityGrandChildren)
+        	result = getEntityDimension((MetaResultDimensionEntity) metaDimension, 2);  
         else if ((metaDimension instanceof MetaResultDimensionEntityChildren))
-        {
-            MetaResultDimensionEntityChildren childrenDimension = (MetaResultDimensionEntityChildren) metaDimension;
-            List entityOrder = this.metaResult.getHierarchy().getEntityOrder();
-
-            int[] ancestorIds = childrenDimension.getEntityPath();
-            if (ancestorIds == null)
-                ancestorIds = new int[0]; 
-            
-            int[] ids = null;
-            if (ancestorIds.length == 0)
-                ids = getHierarchy().getRootElements(childrenDimension.getHierarchyDateIndex());
-            else
-                ids = getHierarchy().getChildren(childrenDimension.getHierarchyDateIndex(), (EmisMetaEntity) entityOrder.get(ancestorIds.length - 1), ancestorIds[(ancestorIds.length - 1)]);
-
-            EmisMetaEntity entityType = (EmisMetaEntity) entityOrder.get(ancestorIds.length);
-            EmisEntity[] entities = new EmisEntity[ids == null ? 0 : ids.length];
-
-            int entityTypeIndex = NamedUtil.findIndex(entityType, getDataSet().getMetaDataSet().getEntities());
-            EmisEntityDataSet dataset = getDataSet().getEntityDataSet(entityTypeIndex, getDataSet().getMetaDataSet().getDefaultDateTypeIndex());
-            Map names = dataset.getAllValues(childrenDimension.getHierarchyDateIndex(), "name", ids);
-            for (int i = 0; i < (ids == null ? 0 : ids.length); i++)
-            {
-                entities[i] = new Entity(entityType, ids[i]);
-                String name = (String) names.get(Integer.valueOf(ids[i]));
-                if (name == null)
-                    name = entityType.getName() + " " + ids[i];
-                entities[i].setName(name);
-            }
-
-            result = new ResultDimensionEntity(entities, childrenDimension.getHierarchyDateIndex());
-        }
+        	result = getEntityDimension((MetaResultDimensionEntity) metaDimension, 1);  
         else if ((metaDimension instanceof MetaResultDimensionEnum))
-            result = new ResultDimensionEnum((MetaResultDimensionEnum) metaDimension);
+            result = new ResultDimensionEnum((MetaResultDimensionEnum) metaDimension, metaResult.getGlobalFilter());
         else if ((metaDimension instanceof MetaResultDimensionEntityFilter))
             result = new ResultDimensionEntityFilter((MetaResultDimensionEntityFilter) metaDimension);
 
         return result;
+    }
+    
+    private ResultDimensionEntity getEntityDimension(MetaResultDimensionEntity entityDimension, int descendantLevel)
+    {
+    	int dateIndex = entityDimension.getHierarchyDateIndex(); 
+    	EmisEntity[] entities = getDescendants(entityDimension, descendantLevel); 
+
+    	if (entities.length > 0)
+    	{
+	    	EmisMetaEntity entityType = entities[0].getEntityType(); 
+	        int entityTypeIndex = NamedUtil.findIndex(entityType, getDataSet().getMetaDataSet().getEntities());
+	
+	        EmisEntityDataSet dataset = getDataSet().getEntityDataSet(entityTypeIndex, getDataSet().getMetaDataSet().getDefaultDateTypeIndex());
+	        Map<Integer, String> names = dataset.getAllValues(dateIndex, "name", getIds(entities));
+	        for (int i = 0; i < entities.length; i++)
+	        {
+	            String name = names.get(entities[i].getId());
+	            if (name == null)
+	                name = entityType.getName() + " " + entities[i].getId();
+	
+	            entities[i].setName(name);
+	        }
+    	}
+    	
+        return new ResultDimensionEntity(entities, dateIndex); 
+    }
+    
+    private int[] getIds(EmisEntity[] entities)
+    {
+    	int[] result = new int[entities.length]; 
+    	for (int i = 0; i < result.length; i++)
+    		result[i] = entities[i].getId(); 
+    	
+    	return result; 
+    }
+    
+    private EmisEntity[] getDescendants(MetaResultDimensionEntity entityDimension, int descendantLevel)
+    {
+        int dateIndex = entityDimension.getHierarchyDateIndex(); 
+        List<EmisMetaEntity> entityOrder = this.metaResult.getHierarchy().getEntityOrder();
+
+        int entityTypeIndex = 0; 
+        List<Integer> entityIds = new ArrayList<Integer>();
+        
+        int[] selectedEntityPath = entityDimension.getEntityPath();
+        if (selectedEntityPath == null || selectedEntityPath.length == 0)
+        {
+        	for (int id : getHierarchy().getRootElements(dateIndex))
+        		entityIds.add(id); 
+
+        	descendantLevel--; 
+        }
+        else
+        {
+        	entityTypeIndex = selectedEntityPath.length - 1; 
+        	entityIds.add(selectedEntityPath[entityTypeIndex]); 
+        }
+
+        while (descendantLevel > 0)
+        {
+        	entityIds = getChildrenIds(dateIndex, entityOrder.get(entityTypeIndex), entityIds); 
+        	entityTypeIndex++; 
+        	descendantLevel--; 
+        }
+
+        EmisEntity[] result = new EmisEntity[entityIds.size()]; 
+        EmisMetaEntity entityType = entityOrder.get(entityTypeIndex); 
+        for (int i = 0; i < entityIds.size(); i++) 
+        	result[i] = new Entity(entityType, entityIds.get(i)); 
+        
+        return result; 
+    }
+    
+    private List<Integer> getChildrenIds(int hierarchyIndex, EmisMetaEntity entityType, List<Integer> parentIds)
+    {
+    	List<Integer> result = new ArrayList<Integer>();
+    	for (int parentId : parentIds)
+    	{
+        	int[] ids = getHierarchy().getChildren(hierarchyIndex, entityType, parentId); 
+        	if (ids != null)
+        	{
+        		for (int id : ids)
+            		result.add(id); 
+        	}
+    	}
+    	
+    	return result; 
     }
 }

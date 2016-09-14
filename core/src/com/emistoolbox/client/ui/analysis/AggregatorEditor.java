@@ -16,6 +16,7 @@ import com.emistoolbox.common.model.analysis.impl.WeightedAggregatorDef;
 import com.emistoolbox.common.model.impl.EnumSetImpl;
 import com.emistoolbox.common.model.meta.EmisMeta;
 import com.emistoolbox.common.model.meta.EmisMetaData;
+import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEnumTuple;
@@ -440,21 +441,22 @@ public class AggregatorEditor extends FlexTable implements EmisEditor<EmisAggreg
             	getCellFormatter().setVerticalAlignment(row, 0, HasVerticalAlignment.ALIGN_TOP);
                 setHTML(row, 0, EmisToolbox.span(EmisToolbox.CSS_SUBSECTION, "Value (" + data.getEnumType().getName() + "):"));
                 setWidget(row, 1, fieldEnumFilter);
+                row++; 
         	}
         	else
         		fieldEnumFilter = null; 
         	
         	row = initEnumEditors(data, enumTuple, row);
-        	row = initEntityFilters(data.getEntity(), row);
+        	row = initEntityFilters(data.getEntity(), data.getDateType(), row);
         } 
         else
-        	row = initEntityFilters(entity, row);
+        	row = initEntityFilters(entity, aggregator.getCountDateType(), row);
 
         if (!weightUi)
         	uiWeighted.setValue(weightEditor.get() != null);
     }
 
-    private int initEntityFilters(EmisMetaEntity entity, int row)
+    private int initEntityFilters(EmisMetaEntity entity, EmisMetaDateEnum dateType, int row)
     {
         if (entity == null)
             return row;
@@ -467,6 +469,9 @@ public class AggregatorEditor extends FlexTable implements EmisEditor<EmisAggreg
         {
             if (field.getType() != EmisMetaData.EmisDataType.BOOLEAN)
                 continue;
+
+            if (!canUseField(field, dateType))
+            	continue; 
             
             FilterPanel<BoolFilterEditor> panel = findBoolFilterPanel(field, this.entityBoolFilterEditors);
             if (true)
@@ -498,6 +503,9 @@ public class AggregatorEditor extends FlexTable implements EmisEditor<EmisAggreg
             if (field.getType() != EmisMetaData.EmisDataType.ENUM && field.getType() != EmisMetaData.EmisDataType.ENUM_SET)
                 continue;
 
+            if (!canUseField(field, dateType))
+            	continue; 
+            
             FilterPanel<EnumSetEditor> panel = findFilterPanel(field, this.entityEnumFilterEditors);
             if (panel == null && field.getEnumType() != null)
             	panel = initEnumFilterPanel(null, field, field.getEnumType(), null);
@@ -527,6 +535,20 @@ public class AggregatorEditor extends FlexTable implements EmisEditor<EmisAggreg
         return row;
     }
 
+    private boolean canUseField(EmisMetaData field, EmisMetaDateEnum dateType)
+    {
+    	EmisMetaDateEnum fieldDateType = field.getDateType(); 
+    	while (dateType != null)
+    	{
+    		if (NamedUtil.sameName(dateType, fieldDateType))
+    			return true; 
+    		
+    		dateType = dateType.getParent(); 
+    	}
+    	
+    	return false; 
+    }
+    
     private FilterPanel<BoolFilterEditor> findBoolFilterPanel(EmisMetaData field, FilterPanel<BoolFilterEditor>[] panels)
     {
         if (panels == null)

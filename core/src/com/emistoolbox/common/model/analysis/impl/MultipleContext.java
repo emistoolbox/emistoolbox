@@ -42,20 +42,6 @@ public class MultipleContext extends ContextBase implements EmisContext, Seriali
     public EmisMetaDateEnum getDateType()
     { return targetDateType; }
     
-/* TODO remove?
- *     	EmisMetaDateEnum result = null; 
-        for (EmisContext c : this.contexts)
-        {
-            if (c.getDateType() == null)
-            	continue; 
-            
-            if (result == null || result.getDimensions() < c.getDateType().getDimensions())
-            	result = c.getDateType(); 
-        }
-
-        return result;
-    }
-*/ 
     public List<EmisEnumTupleValue> getDates()
     {
     	List<EmisEnumTupleValue> results = new ArrayList<EmisEnumTupleValue>(); 
@@ -64,11 +50,14 @@ public class MultipleContext extends ContextBase implements EmisContext, Seriali
         for (EmisContext c : this.contexts)
         {
         	List<EmisEnumTupleValue> newDates = c.getDates(); 
-        	if (newDates == null)
+        	if (newDates == null || newDates.size() == 0)
         		continue; 
         	
         	for (EmisEnumTupleValue date : newDates)
         	{
+        		if (date == null)
+        			continue; 
+        		
         		if (isMask(date))
         			overrides.add(date);
         		else
@@ -77,7 +66,11 @@ public class MultipleContext extends ContextBase implements EmisContext, Seriali
         }
 
         if (results.size() == 0)
-        	results.add(getDefaultDate()); 
+        {
+        	EmisEnumTupleValue defaultDate = getDefaultDate(); 
+        	if (defaultDate != null) 
+        		results.add(defaultDate); 
+        }
         
         for (EmisEnumTupleValue result : results)
         {
@@ -90,6 +83,9 @@ public class MultipleContext extends ContextBase implements EmisContext, Seriali
     
     private EmisEnumTupleValue getDefaultDate()
     {
+    	if (targetDateType == null)
+    		return null; 
+    	
     	EmisEnumTupleValue value = new EnumTupleValueImpl();
     	value.setEnumTuple(targetDateType);
     	    	
@@ -123,6 +119,9 @@ public class MultipleContext extends ContextBase implements EmisContext, Seriali
     
     private boolean isMask(EmisEnumTupleValue date)
     {
+    	if (date == null)
+    		return false; 
+    	
     	if (date.getEnumTuple().getDimensions() < targetDateType.getDimensions())
     		return true; 
     	
@@ -157,14 +156,34 @@ public class MultipleContext extends ContextBase implements EmisContext, Seriali
         return null;
     }
 
-    public EmisEnumSet getEnumFilter(String name)
+    @Override
+	public EmisEnumSet getDateEnumFilter(String dateEnumName) 
     {
+		// TODO: Need to do a bitwise AND. 
+    	for (EmisContext c : contexts)
+    		if (c.getEnumFilter(dateEnumName) != null)
+    			return c.getEnumFilter(dateEnumName); 
+
+		return null; 
+	}
+
+	@Override
+	public Map<String, EmisEnumSet> getDateEnumFilters() 
+	{
+		Map<String, EmisEnumSet> result= new HashMap<String, EmisEnumSet>(); 
+		for (EmisContext c : contexts)
+			result.putAll(c.getDateEnumFilters());
+	
+		return result; 
+	}
+
+	public EmisEnumSet getEnumFilter(String name)
+    {
+		// TODO: Need to do a bitwise AND. 
         for (EmisContext c : this.contexts)
         {
             if (c.getEnumFilter(name) != null)
-            {
                 return c.getEnumFilter(name);
-            }
         }
         return null;
     }

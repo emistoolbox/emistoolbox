@@ -52,9 +52,38 @@ public class BitSet implements Serializable
         }
         return index;
     }
-}
+    
+    public void and(BitSet bits)
+    {
+    	if (values.length != bits.values.length)
+    		return; 
+    	
+    	for (int i = 0; i < values.length; i++)
+    		values[i] = values[i] && bits.values[i]; 
+    }
+    
+    public void or(BitSet bits)
+    {
+    	if (values.length != bits.values.length)
+    		return; 
+    	
+    	for (int i = 0; i < values.length; i++)
+    		values[i] = values[i] || bits.values[i]; 
+    }
+    
+    public void not()
+    { 
+    	for (int i = 0; i < values.length; i++)
+    		values[i] = !values[i]; 
+    }
+    
+    public BitSet createCopy()
+    {
+    	BitSet result = new BitSet(values.length);
+    	result.values = new boolean[values.length];
+    	for (int i = 0; i < values.length; i++)
+    		result.values[i] = values[i]; 
 
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.common.BitSet JD-Core Version: 0.6.0
- */
+    	return result; 
+    }
+}

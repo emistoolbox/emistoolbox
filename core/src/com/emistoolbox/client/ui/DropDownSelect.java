@@ -8,14 +8,19 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class DropDownSelect extends HTML implements HasValueChangeHandlers<Integer>
+public class DropDownSelect extends SimplePanel implements HasValueChangeHandlers<Integer>
 {
-    private List<String> items = new ArrayList();
-    private List<String> values = new ArrayList();
+	private HTML currentHtml = new HTML(); 
+	
+    private List<String> items = new ArrayList<String>();
+    private List<String> values = new ArrayList<String>();
 
     private int selectedIndex = -1;
     private ClickHandler clickHandler; 
@@ -52,7 +57,8 @@ public class DropDownSelect extends HTML implements HasValueChangeHandlers<Integ
             }
         };
 
-        addClickHandler(clickHandler); 
+        currentHtml.addClickHandler(clickHandler); 
+        setWidget(currentHtml); 
     }
 
     public ClickHandler getClickHandler()
@@ -103,7 +109,7 @@ public class DropDownSelect extends HTML implements HasValueChangeHandlers<Integ
     public void updateUi()
     {
         String html = this.selectedIndex == -1 ? "-" : (String) this.items.get(this.selectedIndex);
-        setHTML("<b>" + html + "</b>");
+        currentHtml.setHTML("<b>" + html + "</b>");
     }
 
     public void clear()
@@ -123,3 +129,5 @@ public class DropDownSelect extends HTML implements HasValueChangeHandlers<Integ
         return addHandler(handler, ValueChangeEvent.getType());
     }
 }
+
+

@@ -101,29 +101,26 @@ public class Hierarchy implements EmisHierarchy, Serializable
 
     public List<int[]> getDescendants(int dateIndex, EmisMetaEntity ancestorType, int ancestorId, EmisMetaEntity descendantType)
     {
-        List result = new ArrayList();
+        List<int[]> result = new ArrayList<int[]>();
         if (ancestorType == null)
         {
             EmisMetaEntity rootEntity = (EmisMetaEntity) getMetaHierarchy().getEntityOrder().get(0);
             for (int tmpAncestorId : getRootElements(dateIndex))
-            {
                 result.addAll(getDescendants(dateIndex, rootEntity, tmpAncestorId, descendantType));
-            }
+
             return result;
         }
 
-        NamedIndexList entities = this.hierarchy.getEntityOrder();
+        NamedIndexList<EmisMetaEntity> entities = this.hierarchy.getEntityOrder();
         int startIndex = entities.getIndex(ancestorType);
         int endIndex = entities.getIndex(descendantType);
         if (startIndex > endIndex)
-        {
             return result;
-        }
+
         result.add(new int[] { ancestorId });
         for (int i = startIndex; i < endIndex; i++)
-        {
             result = getChildren(getMap(dateIndex, i, false), result);
-        }
+
         return result;
     }
 

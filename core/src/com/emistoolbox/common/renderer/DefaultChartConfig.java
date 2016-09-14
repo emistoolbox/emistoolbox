@@ -151,4 +151,12 @@ public class DefaultChartConfig implements ChartConfig
 
     public ChartFont getLabelFont()
     { return ChartConfigImpl.LABEL_FONT; }
+
+	@Override
+	public String getYAxisLabel() 
+	{ return null; } 
+
+	@Override
+	public void setYAxisLabel(String text) 
+	{}     
 }

@@ -221,7 +221,12 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
 
             process.importData(adminData.getMapping());
             if (saveResult)
+            {
+            	if (adminData.getMapping().getDateInitMappings().size() > 0)
+            		EmisToolboxIO.saveModelXml(filename, process.getData().getMetaDataSet());
+            	
                 EmisToolboxIO.saveDataset(process.getData(), filename);
+            }
             
             PrintStream out = null;
             try
@@ -402,6 +407,8 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
             EmisReportModuleData result = new EmisReportModuleData(); 
             result.setModel(EmisToolboxIO.loadDataset(name).getMetaDataSet());
             result.setReportConfig(EmisToolboxIO.loadReportXml(name, result.getModel())); 
+            
+            result.setConfig(EmisToolboxIO.loadProperties(name)); 
             
             return result; 
         }
@@ -720,6 +727,7 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
         File outputFile = ServerUtil.getNewFile("reports", "report", ".pdf");
 
         PdfReportWriter writer = new ItextPdfReportWriter();
+        writer.setDateInfo(metaResult); 
         try
         { writer.writeReport(PdfUtil.getPdfReport(metaResult, getDataSet(dataset)), outputFile); }
         catch (PdfReportWriterException ex)
@@ -806,7 +814,7 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
     	} 
     	catch (Throwable err)
     	{ 
-    		err = err; 
+    		err.printStackTrace();  
     		return null; 
     	}
     }

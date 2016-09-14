@@ -21,6 +21,7 @@ import com.emistoolbox.common.results.impl.MetaResultDimensionDate;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntity;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityAncestors;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityChildren;
+import com.emistoolbox.common.results.impl.MetaResultDimensionEntityGrandChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEnum;
 import com.emistoolbox.common.util.NamedUtil;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -81,7 +82,7 @@ public class MetaDimensionEditor extends VerticalPanel implements EmisEditor<Met
         else
             addDimensions(msgAdmin.metadeInfoEnumAnalysis(), MetaResultDimensionUtil.getEnumDimensions(msgAdmin, indicator, null, reportConfig)); 
 
-        addDimensions(msgAdmin.metadeInfoByEntityVariables(), MetaResultDimensionUtil.getEntityFilterDimensions(msgAdmin, indicator.getSeniorEntity(hierarchy), ignoreDimension));
+        addDimensions(msgAdmin.metadeInfoByEntityVariables(), MetaResultDimensionUtil.getEntityFilterDimensions(msgAdmin, indicator.getSeniorEntity(hierarchy), indicator, ignoreDimension));
 
         this.uiTypes.addChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent event)
@@ -136,9 +137,9 @@ public class MetaDimensionEditor extends VerticalPanel implements EmisEditor<Met
             setTypeLabel(metaDimension);
             this.uiContainer.setWidget(editor);
         }
-        else if ((metaDimension instanceof MetaResultDimensionEntityChildren))
+        else if (metaDimension instanceof MetaResultDimensionEntityChildren || metaDimension instanceof MetaResultDimensionEntityGrandChildren)
         {
-            final MetaResultDimensionEntityChildren childrenDimension = (MetaResultDimensionEntityChildren) metaDimension;
+            final MetaResultDimensionEntity childrenDimension = (MetaResultDimensionEntity) metaDimension;
             if (childrenDimension.getEntityType() == null)
             {
                 childrenDimension.setPath(new int[0], new String[0], 0);
@@ -257,6 +258,8 @@ public class MetaDimensionEditor extends VerticalPanel implements EmisEditor<Met
         if (((dim1 instanceof MetaResultDimensionEntityAncestors)) && ((dim2 instanceof MetaResultDimensionEntityAncestors)))
             return isSame((MetaResultDimensionEntity) dim1, (MetaResultDimensionEntity) dim2);
         if (((dim1 instanceof MetaResultDimensionEntityChildren)) && ((dim2 instanceof MetaResultDimensionEntityChildren)))
+            return isSame((MetaResultDimensionEntity) dim1, (MetaResultDimensionEntity) dim2);
+        if (((dim1 instanceof MetaResultDimensionEntityGrandChildren)) && ((dim2 instanceof MetaResultDimensionEntityGrandChildren)))
             return isSame((MetaResultDimensionEntity) dim1, (MetaResultDimensionEntity) dim2);
         if (((dim1 instanceof MetaResultDimensionEnum)) && ((dim2 instanceof MetaResultDimensionEnum)))
         {

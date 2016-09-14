@@ -10,7 +10,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -65,7 +68,29 @@ public class EmisToolboxIO
     	return null; 
     }
     
-    
+    public static Map<String, String> loadProperties(String dataset)
+    	throws IOException
+    {
+    	InputStream is = null;  
+    	try { 
+    		File propFile = ServerUtil.getFile(dataset, "emistoolbox.properties", false); 
+    		if (!propFile.exists())
+    			return null; 
+    		
+    		is = new FileInputStream(propFile);
+        	Properties result = new Properties(); 
+    		result.load(is); 
+
+            Map<String, String> config = new HashMap<String, String>(); 
+            for (Map.Entry entry : result.entrySet())
+            	config.put((String) entry.getKey(), (String) entry.getValue()); 
+
+            return config; 
+    	}
+    	finally 
+    	{ IOUtils.closeQuietly(is); }
+    }
+
     public static EmisDataSet loadDataset(String dataset)
         throws IOException
     {
@@ -188,7 +213,8 @@ public class EmisToolboxIO
     static class XmlFileOps implements CacheFileOps<Object>
     {
         @Override
-        public Object read(File f) throws IOException
+        public Object read(File f) 
+        	throws IOException
         { return parseDocument(f.getName(), EmisToolboxIO.readDocument(f)); }
 
         private Object parseDocument(String filename, Document doc)

@@ -1,14 +1,18 @@
 package com.emistoolbox.server.renderer.pdfreport.impl;
 
-import com.emistoolbox.client.admin.ReportModule;
 import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.model.EmisEntity;
+import com.emistoolbox.common.model.EmisEnumSet;
 import com.emistoolbox.common.model.EmisEnumTupleValue;
 import com.emistoolbox.common.model.EmisHierarchy;
 import com.emistoolbox.common.model.analysis.EmisContext;
+import com.emistoolbox.common.model.analysis.impl.Context;
 import com.emistoolbox.common.model.impl.Entity;
+import com.emistoolbox.common.model.impl.EnumSetImpl;
+import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
+import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.renderer.ChartConfig;
 import com.emistoolbox.common.renderer.ChartConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
@@ -39,12 +43,15 @@ import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfImageContent;
 import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfTableContent;
+import com.emistoolbox.server.results.ResultCollector;
 import com.emistoolbox.server.results.TableResultCollector;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -62,20 +69,22 @@ public class PdfUtil
         if (contents.size() % (metaResult.getReportConfig().getRows() * metaResult.getReportConfig().getColumns()) != 0)
             totalPages++;
 
+        EmisContext context = metaResult.getContextWithGlobalFilter();
+        
         // Need to multiple totalPages by number of EmisEntities
-        List<EmisEntity> entities = metaResult.getContext().getEntities();
+        List<EmisEntity> entities = context.getEntities(); // global-changed: metaResult.getContext().getEntities();
         if (entities.size() == 0)
             totalPages = 0;
         else
-            totalPages *= getEntityCount(entities.get(0), metaResult.getReportConfig().getEntityType(), getDateIndex(metaResult), dataSet.getHierarchy(metaResult.getHierarchy().getName()), dataSet); 
+            totalPages *= getEntityCount(context, entities.get(0), metaResult.getReportConfig().getEntityType(), getDateIndex(context), dataSet.getHierarchy(metaResult.getHierarchy().getName()), dataSet); 
 
         int indexEntityType = NamedUtil.findIndex(metaResult.getReportConfig().getEntityType(), metaResult.getHierarchy().getEntityOrder());
         if (indexEntityType == -1)
             return report;
 
         // Remember current context values.
-        EmisMetaEntity oldEntityType = metaResult.getContext().getEntityType(); 
-        List<EmisEntity> oldEntities = metaResult.getContext().getEntities(); 
+        EmisMetaEntity oldEntityType = context.getEntityType(); 
+        List<EmisEntity> oldEntities = context.getEntities(); 
         int[] oldIds = metaResult.getEntityPathIds(); 
         String[] oldNames = metaResult.getEntityPathNames(); 
         
@@ -89,17 +98,19 @@ public class PdfUtil
         return report;
     }
 
-    private static int getEntityCount(EmisEntity parent, EmisMetaEntity childEntityType, int dateIndex, EmisHierarchy hierarchy, EmisDataSet dataSet)
+    private static int getEntityCount(EmisContext context, EmisEntity parent, EmisMetaEntity childEntityType, int dateIndex, EmisHierarchy hierarchy, EmisDataSet dataSet)
     {
-        
         List<int[]> items = hierarchy.getDescendants(dateIndex, parent.getEntityType(), parent.getId(), childEntityType);
+        items = ResultCollector.filter(context, childEntityType, items, dataSet); 
         if (items == null)
             return 0; 
         
         int result = 0; 
         for (int[] ints : items)
-            result += ints.length; 
-                
+        	for(int i : ints)
+        		if (i > -1)
+        			result += ints.length; 
+        
         return result; 
     }
 
@@ -132,14 +143,18 @@ public class PdfUtil
         EmisHierarchy hierarchy = dataSet.getHierarchy(report.getReportConfig().getHierarchy().getName());
         int dateTypeIndex = NamedUtil.findIndex((EmisMetaDateEnum) hierarchy.getDateType(), dataSet.getMetaDataSet().getDateEnums());
         int[] childIds = hierarchy.getChildren(dateTypeIndex, hierarchy.getMetaHierarchy().getEntityOrder().get(ids.length - 1), ids[ids.length - 1]);
+        childIds = ResultCollector.filter(metaResult.getContextWithGlobalFilter(), hierarchy.getMetaHierarchy().getEntityOrder().get(ids.length), childIds, dataSet); 
 
         if (childIds == null || childIds.length == 0)
             return 0;
 
-        EmisEntityDataSet entityDataSet = dataSet.getEntityDataSet((EmisMetaEntity) hierarchy.getMetaHierarchy().getEntityOrder().get(ids.length), (EmisMetaDateEnum) hierarchy.getDateType());
-        Map<Integer, String> childNames = entityDataSet.getAllValues(getDateIndex(metaResult), "name", childIds);
+        EmisEntityDataSet entityDataSet = dataSet.getEntityDataSet(hierarchy.getMetaHierarchy().getEntityOrder().get(ids.length), (EmisMetaDateEnum) hierarchy.getDateType());
+        Map<Integer, String> childNames = entityDataSet.getAllValues(getDateIndex(metaResult.getContext()), "name", childIds);
         for (int i = 0; i < childIds.length; i++)
         {
+        	if (childIds[i] == -1)
+        		continue; 
+        	
             newIds[newIds.length - 1] = childIds[i];
             newNames[newNames.length - 1] = childNames.get(childIds[i]);
 
@@ -149,11 +164,11 @@ public class PdfUtil
         return startPage;
     }
 
-    private static int getDateIndex(ReportMetaResult metaResult)
+    private static int getDateIndex(EmisContext context)
     {
-        List<EmisEnumTupleValue> dates = metaResult.getContext().getDates();
-        if (dates.size() == 0)
-            return -1;
+        List<EmisEnumTupleValue> dates = context.getDates();
+        if (dates == null || dates.size() == 0)
+            return 0;
 
         byte[] indexes = dates.get(0).getIndex();
         return indexes[indexes.length - 1];
@@ -199,12 +214,112 @@ public class PdfUtil
         else if (StringUtils.isEmpty(footer))
             page.setFooter(config.getFooter());
         else
-        {
             page.setFooter(config.getFooter() + " - " + footer);
-        }
+
         return page;
     }
 
+    private static Set<Byte> merge(byte[] value1, byte[] value2)
+    {
+    	Set<Byte> result = new HashSet<Byte>(); 
+    	if (value1 == null)
+    	{
+    		for (byte v : value2)
+    			result.add(v); 
+    		return result; 
+    	}
+    	
+    	if (value2 == null)
+    	{
+    		for (byte v : value1)
+    			result.add(v); 
+    		return result; 
+    	}
+
+    	for (byte val : value1)
+    		result.add(val); 
+    	
+    	Set<Byte> set2= new HashSet<Byte>(); 
+    	for (byte val : value2)
+    		set2.add(val); 
+    	
+    	result.retainAll(set2); 
+    	return result; 
+    }
+    
+    private static EmisEnumSet merge(EmisEnumSet value1, EmisEnumSet value2)
+    {
+    	if (value1 == null)
+    		return value2; 
+    	
+    	if (value2 == null)
+    		return value1; 
+    	
+    	if (!NamedUtil.sameName(value1.getEnum(), value2.getEnum()))
+    		throw new IllegalArgumentException("Mismatching EmisMetaEnum."); 
+    	
+    	EmisEnumSet result = new EnumSetImpl(); 
+    	result.setEnum(value1.getEnum());
+    	result.setAllIndexes(value1.getAllIndexes());
+    	result.opAnd(value2);
+
+    	return result; 
+    }
+    
+    private static EmisContext mergeFilters(EmisContext context1, EmisContext context2, EmisMetaHierarchy hierarchy)
+    {
+    	if (context1 == null)
+    		return context2; 
+    	
+    	if (context2 == null)
+    		return context1; 
+    	
+    	EmisContext result = new Context();
+    	for (EmisEnumSet filter : context1.getDateEnumFilters().values())
+    		result.addDateEnumFilter(merge(filter, context2.getDateEnumFilter(filter.getEnum().getName())));
+    		
+		for (EmisEnumSet filter: context2.getDateEnumFilters().values())
+		{
+			if (result.getDateEnumFilter(filter.getEnum().getName()) == null)
+				result.addDateEnumFilter(filter);
+   		}
+    		
+		if (context1.getEnumFilters() != null)
+			for (EmisEnumSet filter : context1.getEnumFilters().values())
+				result.addEnumFilter(merge(filter, context2.getDateEnumFilter(filter.getEnum().getName())));
+		
+		if (context2.getEnumFilters() != null)
+			for (EmisEnumSet filter : context2.getEnumFilters().values())
+			{
+				if (result.getEnumFilter(filter.getEnum().getName()) == null)
+					result.addEnumFilter(filter); 
+			}
+		
+		for (EmisMetaEntity entity : hierarchy.getEntityOrder())
+		{
+			for (String fieldName : context1.getEntityFilterNames(entity))
+			{
+				EmisMetaData field = NamedUtil.find(fieldName, entity.getData()); 
+				Set<Byte> values = merge(context1.getEntityFilterValues(field), context2.getEntityFilterValues(field));  
+				if (values != null)
+					result.addEnumEntityFilter(field, new EnumSetImpl(field.getEnumType(), values)); 
+			}
+			
+			for (String fieldName : context2.getEntityFilterNames(entity))
+			{
+				EmisMetaData field = NamedUtil.find(fieldName, entity.getData()); 
+				if (result.getEntityFilterValues(field) == null)
+				{
+					byte[] values =  context2.getEntityFilterValues(field); 
+					if (values != null)
+						result.addEnumEntityFilter(field, new EnumSetImpl(field.getEnumType(), values)); 
+				}
+			}
+		}
+		
+    	return result; 
+    }
+    
     private static PdfContent getNewContent(ReportMetaResult metaResult, PdfContentConfig contentConfig, EmisDataSet dataSet)
     {
         PdfContent result = null;
@@ -225,12 +340,20 @@ public class PdfUtil
 
             TableMetaResult tableMetaResult = (TableMetaResult) chartContentConfig.getMetaResult();
             adapt(metaResult, tableMetaResult);
-            Result[] results = TableResultCollector.getMultiResult(dataSet, tableMetaResult);
-
-            chartResult.setResult(results[0]);
-            result = chartResult;
-//            result.setTitle(MetaResultDimensionUtil.getTitle(tableMetaResult, MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NONE, false));
-            result.setTitle(MetaResultDimensionUtil.getTitle(tableMetaResult, MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NAMES, false));
+            
+            EmisContext oldGlobalFilter = tableMetaResult.getGlobalFilter(); 
+            tableMetaResult.setGlobalFilter(mergeFilters(oldGlobalFilter, metaResult.getGlobalFilter(), metaResult.getHierarchy())); 
+            try {
+	            Result[] results = TableResultCollector.getMultiResult(dataSet, tableMetaResult);
+	            chartResult.setResult(results[0]);
+	            result = chartResult;
+	            if (metaResult.getReportConfig().hasShortTitles())
+	            	result.setTitle(MetaResultDimensionUtil.getSimpleTitle(tableMetaResult, false, null).toString()); 
+	            else
+	            	result.setTitle(MetaResultDimensionUtil.getTitle(tableMetaResult, MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NAMES, false));
+            }
+            finally 
+            { tableMetaResult.setGlobalFilter(oldGlobalFilter); }
         }
         else if ((contentConfig instanceof PdfTableContentConfigImpl))
         {
@@ -239,11 +362,22 @@ public class PdfUtil
 
             TableMetaResult tableMetaResult = (TableMetaResult) tableContentConfig.getMetaResult();
             adapt(metaResult, tableMetaResult);
-            Result[] results = TableResultCollector.getMultiResult(dataSet, tableMetaResult);
-            tableResult.setResult(results[1]);
-
-            result = tableResult;
-            result.setTitle(MetaResultDimensionUtil.getTitle(tableMetaResult, MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NONE, false));
+            
+            EmisContext oldGlobalFilter = tableMetaResult.getGlobalFilter(); 
+            tableMetaResult.setGlobalFilter(mergeFilters(oldGlobalFilter, metaResult.getGlobalFilter(), metaResult.getHierarchy())); 
+            try { 
+	            Result[] results = TableResultCollector.getMultiResult(dataSet, tableMetaResult);
+	            tableResult.setResult(results[1]);
+	
+	            result = tableResult;
+	            
+	            if (metaResult.getReportConfig().hasShortTitles())
+	            	result.setTitle(MetaResultDimensionUtil.getSimpleTitle(tableMetaResult, false, null).toString()); 
+	            else
+	            	result.setTitle(MetaResultDimensionUtil.getTitle(tableMetaResult, MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NONE, false));
+            }
+            finally 
+            { tableMetaResult.setGlobalFilter(oldGlobalFilter); } 
         }
         else if ((contentConfig instanceof PdfTextContentConfigImpl))
             result = new PdfTextContent(contentConfig.getTitle(), ((PdfTextContentConfigImpl) contentConfig).getText());
@@ -265,7 +399,10 @@ public class PdfUtil
                 gisResult.setImagePath(results[0]);
 
                 result = gisResult;
-                result.setTitle(MetaResultDimensionUtil.getTitle(gisContentConfig.getMetaResult(), MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NONE, false));
+                if (metaResult.getReportConfig().hasShortTitles())
+                	result.setTitle(MetaResultDimensionUtil.getSimpleTitle(gisContentConfig.getMetaResult(), false, null).toString()); 
+                else
+                	result.setTitle(MetaResultDimensionUtil.getTitle(gisContentConfig.getMetaResult(), MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NONE, false));
             }
             catch (IOException ex)
             {
@@ -293,7 +430,7 @@ public class PdfUtil
         {
             MetaResultDimensionDate dateDim = (MetaResultDimensionDate) dim;
             
-            List newDates = reportMetaResult.getContext().getDates();
+            List<EmisEnumTupleValue> newDates = reportMetaResult.getContext().getDates();
             if ((newDates == null) || (newDates.size() == 0))
             {
                 return false;
@@ -351,7 +488,7 @@ public class PdfUtil
         {
             return;
         }
-        List entities = new ArrayList();
+        List<EmisEntity> entities = new ArrayList<EmisEntity>();
         entities.add(newEntity);
         context.setEntities(entities);
     }
@@ -382,9 +519,3 @@ public class PdfUtil
         return result;
     }
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.server.renderer.pdfreport.impl.PdfUtil
- * JD-Core Version: 0.6.0
- */

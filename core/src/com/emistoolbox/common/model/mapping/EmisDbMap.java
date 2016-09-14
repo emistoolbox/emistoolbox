@@ -46,4 +46,10 @@ public abstract interface EmisDbMap extends Serializable
     public abstract EmisHierarchyDbMapEntry find(EmisMetaHierarchy paramEmisMetaHierarchy, EmisMetaEntity paramEmisMetaEntity1, EmisMetaEntity paramEmisMetaEntity2);
     
     public abstract void updateDimensions(); 
+    
+    public List<EmisDateInitDbMap> getDateInitMappings(); 
+
+    public void setDateInitMappings(List<EmisDateInitDbMap> mappings); 
+    
+    public EmisDateInitDbMap findDateInit(EmisMetaDateEnum dateType);     
 }

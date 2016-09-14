@@ -65,6 +65,8 @@ class AbstractBarChartRenderer extends AbstractChartRenderer
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         plot.getDomainAxis().setMaximumCategoryLabelWidthRatio(1.8F);
+        if (config.getYAxisLabel() != null)
+        	plot.getRangeAxis().setLabel(config.getYAxisLabel());
 
         CategoryItemRenderer itemRenderer = plot.getRenderer();
         if (itemRenderer instanceof BarRenderer)

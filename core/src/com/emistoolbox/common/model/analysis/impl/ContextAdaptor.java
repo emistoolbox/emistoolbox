@@ -7,6 +7,7 @@ import com.emistoolbox.common.model.analysis.EmisContext;
 import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,54 +16,47 @@ public class ContextAdaptor implements EmisContext
 {
     private EmisContext context;
 
-    public ContextAdaptor(EmisContext context) {
-        this.context = context;
-    }
+    public ContextAdaptor(EmisContext context) 
+    { this.context = context; }
 
     protected EmisContext getAdaptedContext()
-    {
-        return this.context;
-    }
+    { return this.context; }
 
     public void addBooleanEntityFilter(EmisMetaData field, Boolean selectTrue)
-    {
-        this.context.addBooleanEntityFilter(field, selectTrue);
-    }
+    { this.context.addBooleanEntityFilter(field, selectTrue); }
 
     public void addEnumEntityFilter(EmisMetaData field, EmisEnumSet values)
-    {
-        this.context.addEnumEntityFilter(field, values);
-    }
+    { this.context.addEnumEntityFilter(field, values); }
 
     public void addEnumFilter(EmisEnumSet values)
-    {
-        this.context.addEnumFilter(values);
-    }
+    { this.context.addEnumFilter(values); }
 
     public boolean allowEntityWithValue(EmisMetaData field, int value)
-    {
-        return this.context.allowEntityWithValue(field, value);
-    }
+    { return this.context.allowEntityWithValue(field, value); }
 
     public EmisMetaDateEnum getDateType()
-    {
-        return this.context.getDateType();
-    }
+    { return this.context.getDateType(); }
 
     public List<EmisEnumTupleValue> getDates()
-    {
-        return this.context.getDates();
-    }
+    { return this.context.getDates(); }
 
     public List<EmisEnumTupleValue> getDates(EmisMetaDateEnum dateEnum)
-    {
-        return this.context.getDates(dateEnum);
-    }
+    { return this.context.getDates(dateEnum); }
 
-    public List<EmisEntity> getEntities()
-    {
-        return this.context.getEntities();
-    }
+    @Override
+	public EmisEnumSet getDateEnumFilter(String dateEnumName) 
+    { return context.getDateEnumFilter(dateEnumName); } 
+
+	@Override
+	public void addDateEnumFilter(EmisEnumSet values) 
+	{ context.addDateEnumFilter(values); }
+
+	@Override
+	public Map<String, EmisEnumSet> getDateEnumFilters() 
+	{ return context.getDateEnumFilters(); } 
+
+	public List<EmisEntity> getEntities()
+    { return this.context.getEntities(); }
 
     public Set<String> getEntityFilterNames(EmisMetaEntity entity)
     {

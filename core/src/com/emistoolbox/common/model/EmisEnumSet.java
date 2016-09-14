@@ -4,37 +4,47 @@ import com.emistoolbox.common.model.meta.EmisMetaEnum;
 import java.io.Serializable;
 import java.util.Set;
 
-public abstract interface EmisEnumSet extends Serializable
+public interface EmisEnumSet extends Serializable
 {
-    public abstract EmisMetaEnum getEnum();
+    public EmisMetaEnum getEnum();
 
-    public abstract void setEnum(EmisMetaEnum paramEmisMetaEnum);
+    public void setEnum(EmisMetaEnum paramEmisMetaEnum);
 
-    public abstract void clear();
+    public void clear();
 
-    public abstract void setAll();
+    public void setAll();
 
-    public abstract void addValue(String paramString);
+    public void addValue(String paramString);
 
-    public abstract void addValue(byte paramByte);
+    public void addValue(byte paramByte);
 
-    public abstract void removeValue(String paramString);
+    public void removeValue(String paramString);
 
-    public abstract void removeValue(byte paramByte);
+    public void removeValue(byte paramByte);
 
-    public abstract boolean hasValue(String paramString);
+    public boolean hasValue(String paramString);
 
-    public abstract boolean hasValue(byte paramByte);
+    public boolean hasValue(byte paramByte);
 
-    public abstract boolean hasAllValues();
+    public boolean hasAllValues();
 
-    public abstract Set<String> getAll();
+    public Set<String> getAll();
 
-    public abstract void setAll(Set<String> paramSet);
+    public void setAll(Set<String> paramSet);
 
-    public abstract Set<Byte> getAllIndexes();
+    public Set<Byte> getAllIndexes();
 
-    public abstract void setAllIndexes(Set<Byte> paramSet);
+    public void setAllIndexes(Set<Byte> paramSet);
 
-    public abstract int size();
+    public int getTotalCount();
+
+    public int getSetCount();
+    
+    public void opAnd(EmisEnumSet values); 
+    
+    public void opOr(EmisEnumSet values); 
+    
+    public void opNot(); 
+    
+    public EmisEnumSet createCopy(); 
 }
