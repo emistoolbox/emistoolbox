@@ -8,13 +8,13 @@ public class PDFLayoutFontStyle {
 	public final static PDFLayoutFontStyle BOLD        = new PDFLayoutFontStyle (boldFlag); 
 	public final static PDFLayoutFontStyle ITALIC      = new PDFLayoutFontStyle (italicFlag); 
 	public final static PDFLayoutFontStyle BOLD_ITALIC = new PDFLayoutFontStyle (boldFlag | italicFlag); 
-	
+
 	private int attributes;
 
 	private PDFLayoutFontStyle (int attributes) {
 		this.attributes = attributes;
 	}
-	
+
 	public boolean isItalic () {
 		return (attributes & italicFlag) != 0;
 	}
