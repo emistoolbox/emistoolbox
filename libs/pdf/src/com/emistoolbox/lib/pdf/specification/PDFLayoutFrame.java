@@ -8,8 +8,8 @@ import java.util.List;
 public class PDFLayoutFrame extends PDFLayoutContent {
 	private List<PDFLayoutComponent> components;
 	private Rectangle rectangle;
-	private double borderRadius;
-	private double [] lineWidths;
-	private double [] margins;
-	private Color [] colors;
+	private Double borderRadius;
+	private PDFLayoutSides<Double>lineWidths;
+	private PDFLayoutSides<Double> margins;
+	private PDFLayoutSides<Color> colors;
 }
