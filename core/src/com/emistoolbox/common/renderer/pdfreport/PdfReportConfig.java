@@ -60,9 +60,3 @@ public abstract interface PdfReportConfig extends Named
         A4, A5, LETTER;
     }
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.common.renderer.pdfreport.PdfReportConfig
- * JD-Core Version: 0.6.0
- */

@@ -104,7 +104,7 @@ public class ResultToTableGeneratorImpl implements ResultToTableGenerator
                     indexes[0] = i;
                     indexes[1] = j;
                     indexes[2] = k;
-                    appendData(doc, tr, "td", ServerUtil.getFormattedValue(result, indexes));
+                    appendTaggedData(doc, tr, "td", ServerUtil.getFormattedValue(result, indexes), headings[j], rowHeadings[i]);
                 }
             }
 
@@ -134,7 +134,7 @@ public class ResultToTableGeneratorImpl implements ResultToTableGenerator
                 indexes[0] = i;
                 indexes[1] = j;
 
-                appendData(doc, tr, "td", ServerUtil.getFormattedValue(result, indexes));
+                appendTaggedData(doc, tr, "td", ServerUtil.getFormattedValue(result, indexes), headings[j], rowHeadings[i]);
             }
             tbody.appendChild(tr);
         }
@@ -152,7 +152,7 @@ public class ResultToTableGeneratorImpl implements ResultToTableGenerator
             indexes[0] = i;
             appendData(doc, tr, "th", headings[i]);
 
-            appendData(doc, tr, "td", ServerUtil.getFormattedValue(result, indexes));
+            appendTaggedData(doc, tr, "td", ServerUtil.getFormattedValue(result, indexes), "default", headings[i]);
             table.appendChild(tr);
         }
     }
@@ -188,8 +188,17 @@ public class ResultToTableGeneratorImpl implements ResultToTableGenerator
     }
 
     private Element appendData(Document doc, Element rootElement, String elementType, String data)
+    { return appendTaggedData(doc, rootElement, elementType, data, null, null); } 
+    
+    private Element appendTaggedData(Document doc, Element rootElement, String elementType, String data, String seriesName, String xName)
     {
         Element element = doc.createElement(elementType);
+        if (seriesName != null)
+        	element.setAttribute("data-series", seriesName);
+
+        if (seriesName != null)
+        	element.setAttribute("data-x", xName);
+        
         element.appendChild(doc.createTextNode(data));
         rootElement.appendChild(element);
         return element;

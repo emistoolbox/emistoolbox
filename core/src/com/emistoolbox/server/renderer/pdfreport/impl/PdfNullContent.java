@@ -2,9 +2,17 @@ package com.emistoolbox.server.renderer.pdfreport.impl;
 
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 
+import info.joriki.graphics.Rectangle;
+
 public class PdfNullContent implements PdfContent
 {
-    private static PdfNullContent instance = new PdfNullContent();
+	public void setPosition(Rectangle position) 
+    {}
+
+	public Rectangle getPosition() 
+	{ return null; }
+
+	private static PdfNullContent instance = new PdfNullContent();
 
     public void setTitle(String title)
     {

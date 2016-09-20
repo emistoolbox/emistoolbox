@@ -4,6 +4,15 @@ public class PDFLayoutTextContent extends PDFLayoutContent {
 	private String text;
 	private PDFLayoutFont font;
 
+	public PDFLayoutTextContent()
+	{}
+	
+	public PDFLayoutTextContent(String text, PDFLayoutFont font)
+	{
+		this.text = text; 
+		this.font = font; 
+	}
+	
 	public String getText () {
 		return text;
 	}

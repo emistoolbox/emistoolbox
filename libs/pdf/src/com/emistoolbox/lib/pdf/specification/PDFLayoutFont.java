@@ -1,10 +1,25 @@
 package com.emistoolbox.lib.pdf.specification;
 
 public class PDFLayoutFont {
+	
+	public static final String FONT_TIMES = "Times"; 
+	public static final String FONT_HELVETICA = "Helvetica"; 
+	public static final String FONT_COURIER= "Courier"; 
+	
 	private String fontName;
 	private double fontSize;
 	private PDFLayoutFontStyle fontStyle;
 
+	public PDFLayoutFont()
+	{}
+	
+	public PDFLayoutFont(String name, double size, PDFLayoutFontStyle style)
+	{
+		this.fontName = name; 
+		this.fontSize = size; 
+		this.fontStyle = style; 
+	}
+	
 	public String getFontName () {
 		return fontName;
 	}

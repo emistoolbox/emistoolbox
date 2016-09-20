@@ -49,6 +49,7 @@ import com.emistoolbox.common.results.impl.ValidationMetaResultImpl;
 import com.emistoolbox.common.user.EmisUser;
 import com.emistoolbox.common.user.EmisUser.AccessLevel;
 import com.emistoolbox.common.util.NamedUtil;
+import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -709,9 +710,19 @@ public class ReportModule
             public void onSuccess(String[] result)
             {
                 super.onSuccess(result);
+                
+        		String highchartConfigUrl = null; 
                 String html = MetaResultDimensionUtil.getTitle(metaResult);
                 if (result[0] != null)
-                    html = html + "<img src='/emistoolbox/content?chart=" + result[0] + "'>";
+                {
+                	if (result[0].endsWith(".json"))
+                	{
+                		highchartConfigUrl = result[0]; 
+                		html = html + "<div id='highchartChart'></div>";
+                	}
+                	else
+                		html = html + "<img src='/emistoolbox/content?chart=" + result[0] + "'>";
+                }
                 else
                     html = html + "<b>" + Message.messageReport().errorFailedToRenderChart() + "</b>";
                 html = html + "<p>";
@@ -724,13 +735,35 @@ public class ReportModule
                 if (result.length > 2 && result[2] != null)
                     html = html + "<a href='/emistoolbox/content?report=" + result[2] + "'><img src='css/icon_xls.gif'></a>";
 
-//                html = "<center>" + html + "</center>";
-
                 uiChartContainer.setWidget(new HTML(html));
+                if (highchartConfigUrl != null)
+                	initHighcharts(highchartConfigUrl); 
             }
         });
     }
 
+    private native void initHighcharts(String highchartConfigUrl) /*-{
+		$wnd.jQuery.ajax("/emistoolbox/content?chart=" + highchartConfigUrl).done(function(data) { 
+		console.log("JSON", data); 
+		if (!data.tooltip)
+			data.tooltip = {}; 
+			
+		data.tooltip.formatter = function() {
+			$wnd.jQuery("table.emisResult td").removeClass("selected");
+			var selector = "table.emisResult td[data-series='" + this.series.name + "'][data-x='" + this.x + "']"; 
+			console.log(this, selector); 
+			$wnd.jQuery(selector).addClass("selected"); 
+			
+			if (this.series.name == "default")
+				return this.x + ": " + this.y; 
+			else
+				return this.series.name + "<br />" + this.x + ": " + this.y; 
+		};
+
+		$wnd.jQuery("#highchartChart").highcharts(data); 
+		}); 
+	}-*/;
+    
     private void appendGisGmlHtml(StringBuffer html, String[] result)
     {
         html.append("-- gml --\n\n");  

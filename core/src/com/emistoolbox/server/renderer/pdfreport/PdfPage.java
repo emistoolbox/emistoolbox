@@ -1,6 +1,11 @@
 package com.emistoolbox.server.renderer.pdfreport;
 
+import java.util.List;
+
 import com.emistoolbox.common.ChartFont;
+
+import info.joriki.graphics.Point;
+import info.joriki.graphics.Rectangle;
 
 public abstract interface PdfPage
 {
@@ -14,6 +19,8 @@ public abstract interface PdfPage
 
     public abstract void setFont(FontIdentifier paramFontIdentifier, ChartFont paramChartFont);
 
+    public List<PdfContent> getContents();
+    
     public abstract PdfContent getContent(int paramInt1, int paramInt2);
 
     public abstract int getRows();
@@ -25,4 +32,6 @@ public abstract interface PdfPage
     public abstract String getSubtitle();
 
     public abstract String getFooter();
+    
+    public void layout(Point pageSize, Rectangle margins, Point cellMargin); 
 }

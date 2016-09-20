@@ -1,3 +1,7 @@
 libs/joriki/build
 libs/pdf/build
+libs/pdf/lib/joriki.jar
+core/emistoolbox.war
 core/build
+core/war/WEB-INF/classes
+core/war/emistoolbox

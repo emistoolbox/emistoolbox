@@ -44,6 +44,9 @@ import com.emistoolbox.common.user.EmisUser.AccessLevel;
 import com.emistoolbox.common.util.ImportStatus;
 import com.emistoolbox.common.util.NamedIndexList;
 import com.emistoolbox.common.util.NamedUtil;
+import com.emistoolbox.lib.highchart.renderer.HighchartPhantomJsFileRenderer;
+import com.emistoolbox.lib.highchart.renderer.HighchartPhantomJsPostRenderer;
+import com.emistoolbox.lib.highchart.renderer.HighchartRenderer;
 import com.emistoolbox.server.excelMerge.ExcelTemplate;
 import com.emistoolbox.server.excelMerge.impl.ExcelFileTemplateImpl;
 import com.emistoolbox.server.excelMerge.impl.ExcelMergeDataSourceImpl;
@@ -59,12 +62,14 @@ import com.emistoolbox.server.renderer.HtmlFieldRenderer;
 import com.emistoolbox.server.renderer.charts.ChartRenderer;
 import com.emistoolbox.server.renderer.charts.impl.ChartRendererImpl;
 import com.emistoolbox.server.renderer.charts.impl.ChartUtil;
+import com.emistoolbox.server.renderer.charts.impl.highcharts.HighchartChartRenderer;
 import com.emistoolbox.server.renderer.gis.GisUtil;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportWriter;
 import com.emistoolbox.server.renderer.pdfreport.html.ResultToTableGenerator;
 import com.emistoolbox.server.renderer.pdfreport.html.ResultToTableGeneratorImpl;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfUtil;
 import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfReportWriter;
+import com.emistoolbox.server.renderer.pdfreport.pdflayout.PDFLayoutReportWriter;
 import com.emistoolbox.server.results.ExcelResultCollector;
 import com.emistoolbox.server.results.PriorityResultCollector;
 import com.emistoolbox.server.results.TableResultCollector;
@@ -100,7 +105,56 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
     private static final long serialVersionUID = 1L;
     private ResultToTableGenerator tableGenerator = new ResultToTableGeneratorImpl();
 
-    private ChartRenderer renderer = new ChartRendererImpl();
+    private ChartRenderer renderer = getChartRenderer(); 
+    
+    private static ChartRenderer cachedChartRenderer = null; 
+    public synchronized static ChartRenderer getChartRenderer()
+    {
+    	if (cachedChartRenderer != null)
+    		return cachedChartRenderer; 
+    	
+    	String chartRenderer = EmisConfig.get(EmisConfig.EMISTOOLBOX_RENDERER_CHART, EmisConfig.RENDERER_CHART_JFREECHART);
+    	if (EmisConfig.RENDERER_CHART_JFREECHART.equals(chartRenderer))
+    		cachedChartRenderer = new ChartRendererImpl(); 
+    	else if (EmisConfig.RENDERER_CHART_HIGHCHART.equals(chartRenderer))
+    	{
+    		HighchartRenderer renderer = null; 
+    		
+    		String phantomHost = EmisConfig.get(EmisConfig.EMISTOOLBOX_PHANTOMJS_SERVER, null); 
+    		if (phantomHost == null)
+    		{
+    			String emisPath = EmisConfig.get(EmisConfig.EMISTOOLBOX_PATH, ServerUtil.ROOT_PATH); 
+	        	renderer = new HighchartPhantomJsFileRenderer(emisPath + "phantomjs",emisPath + "highcharts"); 
+    		}
+    		else
+    			renderer = new HighchartPhantomJsPostRenderer(phantomHost, new Integer(EmisConfig.get(EmisConfig.EMISTOOLBOX_PHANTOMJS_PORT, "9999"))); 
+    		
+    		cachedChartRenderer = new HighchartChartRenderer(renderer); 
+    	}
+    	else
+    		throw new IllegalArgumentException("Invalid chart renderer configuration."); 
+    	
+    	return cachedChartRenderer; 
+    }
+    
+    private static PdfReportWriter cachedPdfRenderer = null; 
+    
+    public synchronized static PdfReportWriter getPdfRenderer()
+    {
+    	if (cachedPdfRenderer != null)
+        	return cachedPdfRenderer; 
+
+    	String pdfRenderer = EmisConfig.get(EmisConfig.EMISTOOLBOX_RENDERER_PDF, EmisConfig.RENDERER_PDF_ITEXT);
+    	if (EmisConfig.RENDERER_PDF_ITEXT.equals(pdfRenderer))
+        	cachedPdfRenderer = new ItextPdfReportWriter();    	
+    	else if (EmisConfig.RENDERER_PDF_JORIKI.equals(pdfRenderer))
+    		cachedPdfRenderer = new PDFLayoutReportWriter(null);  
+    	else
+    		throw new IllegalArgumentException("Invalid pdf renderer configuration."); 
+
+    	return cachedPdfRenderer; 
+    }
+    
 
     public String[] getDataSets(final boolean forAdmin)
     {
@@ -667,7 +721,9 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
             Result[] result = getResult(dataset, metaResult);
 
             File chartOutputFile = ServerUtil.getNewFile("charts", "bar", ".png");
-
+            if (renderer instanceof HighchartChartRenderer)
+            	chartOutputFile = ServerUtil.getNewFile("charts", "bar",  ".json"); 
+            
             String chartResult = chartOutputFile.getName();
             if (((chartType == 1) || (chartType == 3)) && (result[0].getDimensions() == 1))
                 chartType = 0;
@@ -726,7 +782,7 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
     {
         File outputFile = ServerUtil.getNewFile("reports", "report", ".pdf");
 
-        PdfReportWriter writer = new ItextPdfReportWriter();
+        PdfReportWriter writer = getPdfRenderer(); 
         writer.setDateInfo(metaResult); 
         try
         { writer.writeReport(PdfUtil.getPdfReport(metaResult, getDataSet(dataset)), outputFile); }

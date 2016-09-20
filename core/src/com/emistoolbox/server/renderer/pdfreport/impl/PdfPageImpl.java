@@ -1,10 +1,18 @@
 package com.emistoolbox.server.renderer.pdfreport.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.Range;
+
 import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.server.renderer.pdfreport.FontIdentifier;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContentFontMap;
 import com.emistoolbox.server.renderer.pdfreport.PdfPage;
+
+import info.joriki.graphics.Point;
+import info.joriki.graphics.Rectangle;
 
 public class PdfPageImpl implements PdfPage
 {
@@ -130,39 +138,25 @@ public class PdfPageImpl implements PdfPage
     }
 
     public int getColumns()
-    {
-        return this.cols;
-    }
+    { return this.cols; }
 
     public PdfContent getContent(int row, int col)
-    {
-        return this.content[row][col];
-    }
+    { return this.content[row][col]; }
 
     public int getRows()
-    {
-        return this.rows;
-    }
+    { return this.rows; }
 
     public String getSubtitle()
-    {
-        return this.subtitle;
-    }
+    { return this.subtitle; }
 
     public String getTitle()
-    {
-        return this.title;
-    }
+    { return this.title; }
 
     public String getFooter()
-    {
-        return this.footer;
-    }
+    { return this.footer; }
 
     public void setFont(FontIdentifier identifier, ChartFont font)
-    {
-        this.fontMap.setFont(identifier, font);
-    }
+    { this.fontMap.setFont(identifier, font); }
 
     public String contentToString()
     {
@@ -183,4 +177,58 @@ public class PdfPageImpl implements PdfPage
     {
         return String.format("%s - %s : rows:%d  cols:%d", new Object[] { this.title, this.subtitle, Integer.valueOf(this.rows), Integer.valueOf(this.cols) });
     }
+    
+    public void layout(Point pageSize, Rectangle margins, Point cellMargin)
+    {
+    	for (int col = 0; col < cols; col++)
+    		for (int row = 0; row < rows; row++)
+    		    setLayout(getContent(row, col), row, col, pageSize, margins, cellMargin); 
+    }
+    
+	private void setLayout(PdfContent pdfContent, int row, int col, Point pageSize, Rectangle margins, Point cellMargin)
+	{
+		if (pdfContent == null)
+			return; 
+		
+		Range<Double> xRange = get1DLayout(pageSize.x, margins.xmin, margins.xmax, cellMargin.x, cols, col, pdfContent.getSpanCols()); 
+		Range<Double> yRange = get1DLayout(pageSize.y, margins.ymin, margins.ymax, cellMargin.y, rows, row, pdfContent.getSpanRows()); 
+		
+		Rectangle result = new Rectangle(); 
+		result.xmin = xRange.getMinimum(); 
+		result.xmax = xRange.getMaximum(); 
+		result.ymin = yRange.getMinimum(); 
+		result.ymax = yRange.getMaximum(); 
+
+		pdfContent.setPosition(result); 
+	}
+	
+	private Range<Double> get1DLayout(double size, double marginBefore, double marginAfter, double marginCell, int count, int index, int span)
+	{
+		double cell = (size - marginBefore - marginAfter - marginCell * (count - 1)) / (double) count; 
+		
+		double start = marginBefore + (cell + marginCell) * index; 
+		return Range.between(start, start + (cell + marginCell) * span - marginCell); 
+	}
+
+	@Override
+	public List<PdfContent> getContents() 
+	{
+		List<PdfContent> result = new ArrayList<PdfContent>();
+		for (int i = 0; i < content.length; i++)
+		{
+			PdfContent[] items = content[i]; 
+			if (items == null)
+				continue; 
+			
+			for (int j = 0; j < items.length; j++)
+			{
+				if (items[j] != null)
+					result.add(items[j]); 
+			}
+		}
+		
+		return result;
+	}
+	
+	
 }

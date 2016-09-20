@@ -319,14 +319,14 @@ public class EmisToolboxIO
         "png", "json", "js", "gml", 
         "xls", "csv", "pdf", 
         "xml", "txt", "log", 
-        "shp", "dbf"
+        "shp", "dbf", ".json"
     }; 
     
     private static final String[] contentTypes = { 
         "image/png", "application/json", "application/json", "text/xml", 
         "application/vnd.ms-excel", "text/csv", "application/pdf", 
         "text/xml", "text/plain", "text/plain", 
-        "application/octet-stream", "application/octet-stream"
+        "application/octet-stream", "application/octet-stream", "application/json"
     }; 
 
     public static String getContentType(String filename)

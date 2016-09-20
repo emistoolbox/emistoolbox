@@ -3,6 +3,9 @@ package com.emistoolbox.lib.pdf.specification;
 public class PDFLayoutCoordinatePlacement extends PDFLayoutPlacement {
 	private int x,y;
 
+	public PDFLayoutCoordinatePlacement(int x, int y)
+	{}
+	
 	public int getX () {
 		return x;
 	}

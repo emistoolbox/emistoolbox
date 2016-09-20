@@ -7,13 +7,18 @@ import java.io.IOException;
 
 public abstract interface ChartRenderer
 {
-    public abstract void renderBar(Result paramResult, ChartConfig paramChartConfig, File paramFile) throws IOException;
+    public abstract void renderBar(Result data, ChartConfig config, File out) 
+    	throws IOException;
 
-    public abstract void renderStackedBar(Result paramResult, ChartConfig paramChartConfig, File paramFile) throws IOException;
+    public abstract void renderStackedBar(Result data, ChartConfig config, File out) 
+    	throws IOException;
 
-    public abstract void renderPie(Result paramResult, ChartConfig paramChartConfig, File paramFile) throws IOException;
+    public abstract void renderPie(Result data, ChartConfig config, File out) 
+    	throws IOException;
     
-    public abstract void renderLines(Result result, ChartConfig chartconfig, File outFile) throws IOException; 
+    public abstract void renderLines(Result data, ChartConfig config, File out) 
+    	throws IOException; 
     
-    public abstract void renderNormalizedStackedBar(Result paramResult, ChartConfig paramChartConfig, File paramFile) throws IOException;
+    public abstract void renderNormalizedStackedBar(Result data, ChartConfig config, File out) 
+    	throws IOException;
 }

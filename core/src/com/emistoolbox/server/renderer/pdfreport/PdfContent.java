@@ -1,16 +1,22 @@
 package com.emistoolbox.server.renderer.pdfreport;
 
-public abstract interface PdfContent
+import info.joriki.graphics.Rectangle;
+
+public interface PdfContent
 {
-    public abstract void setTitle(String paramString);
+	public void setPosition(Rectangle position); 
+	
+	public Rectangle getPosition(); 
 
-    public abstract void setSpanRows(int paramInt);
+    public void setTitle(String paramString);
 
-    public abstract void setSpanCols(int paramInt);
+    public void setSpanRows(int paramInt);
 
-    public abstract int getSpanRows();
+    public void setSpanCols(int paramInt);
 
-    public abstract int getSpanCols();
+    public int getSpanRows();
 
-    public abstract String getTitle();
+    public int getSpanCols();
+
+    public String getTitle();
 }

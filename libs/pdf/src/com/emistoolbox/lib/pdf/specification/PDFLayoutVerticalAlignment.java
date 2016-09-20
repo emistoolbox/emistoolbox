@@ -5,5 +5,5 @@ public enum PDFLayoutVerticalAlignment {
 	CENTER,
 	BOTTOM,
 	ABOVE, // above the previous component
-	BELOW  // below the previous component
+	BELOW  // below the previous compo	nent
 }

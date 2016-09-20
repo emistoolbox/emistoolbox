@@ -548,3 +548,11 @@ b, .value {
 .prioHeaderSelected {
     background-color: #CCCCCC; 
 }
+
+table.emisResult td.selected {
+	background-color: #FFC971;
+}
+
+table.emisResult tbody tr:nth-child(2n) td.selected {
+    background-color: #FFC971;
+}

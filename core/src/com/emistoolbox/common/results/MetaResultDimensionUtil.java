@@ -321,6 +321,9 @@ public class MetaResultDimensionUtil
         getSimpleTitle(metaResult, asHtml, result); 
         if (result.length() > 0 && !asHtml)
         	result.append(" - "); 
+
+        if (asHtml)
+        	result.append("<div class='subtitle'>"); 
         
         boolean anyEntity = false;
 

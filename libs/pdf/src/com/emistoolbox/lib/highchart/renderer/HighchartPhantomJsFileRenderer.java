@@ -12,6 +12,15 @@ public class HighchartPhantomJsFileRenderer extends HighchartPhantomJsRenderer {
 	protected String phantomJSDirectory;
 	protected String highchartsDirectory;
 
+	public HighchartPhantomJsFileRenderer()
+	{}
+	
+	public HighchartPhantomJsFileRenderer(String phantomJSDirectory, String highchartsDirectory)
+	{
+		this.phantomJSDirectory = phantomJSDirectory; 
+		this.highchartsDirectory = highchartsDirectory; 
+	}
+	
 	public String getPhantomJSDirectory () {
 		return phantomJSDirectory;
 	}

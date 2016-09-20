@@ -21,6 +21,15 @@ public class HighchartPhantomJsPostRenderer extends HighchartPhantomJsRenderer {
 	private int port = -1;
 	private int timeout = 2000;
 
+	public HighchartPhantomJsPostRenderer()
+	{}
+	
+	public HighchartPhantomJsPostRenderer(String host, int port)
+	{
+		this.host = host; 
+		this.port = port; 
+	}
+	
 	public String getHost () {
 		return host;
 	}

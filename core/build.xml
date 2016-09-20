@@ -6,7 +6,7 @@
   </sound>
   
   <!-- Configure path to GWT SDK -->
-  <property name="gwt.sdk" location="c:/dev/java.old/gwt-2.0.4" />
+  <property name="gwt.sdk" location="c:/dev/java/gwt-2.0.4" />
 
   <path id="project.class.path">
     <pathelement location="war/WEB-INF/classes"/>
