@@ -60,4 +60,8 @@ public class PDFLayoutFrame extends PDFLayoutContent {
 	public void setColors (PDFLayoutSides<Color> colors) {
 		this.colors = colors;
 	}
+
+	public Rectangle getBoundingBox () {
+		return rectangle;
+	}
 }
