@@ -12,7 +12,7 @@ public class PDFLayoutComponent {
 	{ this(content, fit, new PDFLayoutAlignmentPlacement(horizontal, vertical)); }
 
 	public PDFLayoutComponent(PDFLayoutContent content, PDFLayoutObjectFit fit, double x, double y, double width, double height)
-	{ this(content, fit, new PDFLayoutCoordinatePlacement((int) x, (int) y)); }
+	{ this(content, fit, new PDFLayoutCoordinatePlacement(x, y, width, height)); }
 	
 	public PDFLayoutComponent(PDFLayoutContent content, PDFLayoutObjectFit fit, PDFLayoutPlacement placement)
 	{
