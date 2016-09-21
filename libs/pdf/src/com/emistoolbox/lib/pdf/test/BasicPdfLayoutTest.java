@@ -61,7 +61,7 @@ public class BasicPdfLayoutTest
 
 		// Charts along bottom 
 		components.add(getPositionedPdf("chart_bottom1.pdf", 0, cellHeight * 2 + gap, cellWidth * 2 + gap, cellHeight));
-		components.add(getPositionedPdf("chart_bottom2.png", 2 * (cellWidth + gap), cellHeight * 2 + gap, cellWidth, cellHeight));
+		components.add(getPositionedPdf("chart_bottom2.pdf", 2 * (cellWidth + gap), cellHeight * 2 + gap, cellWidth, cellHeight));
 		
 		// Big 2x2 chart
 		components.add(getPositionedPdf("chart_main.pdf", cellWidth + gap, 0, cellWidth * 2 + gap, cellHeight * 2 + gap)); 
@@ -72,18 +72,20 @@ public class BasicPdfLayoutTest
 		textFrame.setComponents(Collections.singletonList(new PDFLayoutComponent(textContent, null, PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.TOP)));
 		textFrame.setLineWidths(new PDFLayoutSides<Double>(2.0)); 
 		
-		components.add(new PDFLayoutComponent(textFrame, null, 0, 0, cellWidth, cellHeight * 2 + gap)); 
+		components.add(new PDFLayoutComponent(textFrame, null, 0, 0, cellWidth, cellHeight * 2 + gap));
+
+		outerFrame.setComponents (components);
 		
 		layout.setOuterFrame(outerFrame); 
 
 		return Collections.singletonList(layout); 
 	}
 	
-	private PDFLayoutComponent getPositionedPdf(String filename, double x, double y, double with, double height)
+	private PDFLayoutComponent getPositionedPdf(String filename, double x, double y, double width, double height)
 	{
 		PDFLayoutPDFContent content = new PDFLayoutPDFContent(); 
 		content.setInput(new IOFileInput(new File(testDir, filename)));
 		
-		return new PDFLayoutComponent(content, PDFLayoutObjectFit.CONTAIN, new PDFLayoutCoordinatePlacement((int) x, (int) y));  
+		return new PDFLayoutComponent(content, PDFLayoutObjectFit.CONTAIN, new PDFLayoutCoordinatePlacement(x, y, width, height));
 	}
 }

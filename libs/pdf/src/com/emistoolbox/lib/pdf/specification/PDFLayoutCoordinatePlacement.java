@@ -1,24 +1,45 @@
 package com.emistoolbox.lib.pdf.specification;
 
 public class PDFLayoutCoordinatePlacement extends PDFLayoutPlacement {
-	private int x,y;
-
-	public PDFLayoutCoordinatePlacement(int x, int y)
-	{}
+	private double x,y;
+	private double width,height;
 	
-	public int getX () {
+	public PDFLayoutCoordinatePlacement (double x,double y,double width,double height) {
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	}
+
+	public double getX () {
 		return x;
 	}
 
-	public void setX (int x) {
+	public void setX (double x) {
 		this.x = x;
 	}
 
-	public int getY () {
+	public double getY () {
 		return y;
 	}
 
-	public void setY (int y) {
+	public void setY (double y) {
 		this.y = y;
+	}
+
+	public double getWidth () {
+		return width;
+	}
+
+	public void setWidth (double width) {
+		this.width = width;
+	}
+
+	public double getHeight () {
+		return height;
+	}
+
+	public void setHeight (double height) {
+		this.height = height;
 	}
 }
