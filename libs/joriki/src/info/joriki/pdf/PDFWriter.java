@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,8 +38,12 @@ public class PDFWriter extends PDFObjectWriter implements PDFPermissions {
     }
   };
 
+  public PDFWriter (OutputStream out) {
+	  super (new BufferedOutputStream (out));
+  }
+
   public PDFWriter (File file) throws FileNotFoundException {
-    super (new BufferedOutputStream (new FileOutputStream (file)));
+    this (new FileOutputStream (file));
   }
   
   public PDFWriter (String filename) throws FileNotFoundException {
