@@ -49,15 +49,15 @@ public class BasicPdfLayoutTest
 		PDFLayoutTextContent title = new PDFLayoutTextContent("District Grade 2 Literacy Progress Report", titleFont);
 		PDFLayoutTextContent subtitle = new PDFLayoutTextContent("District Chipata (Eastern)", subtitleFont); 
 
-		components.add(new PDFLayoutComponent(title, null, PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.TOP));  
-		components.add(new PDFLayoutComponent(subtitle, null, PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BELOW));  
+//		components.add(new PDFLayoutComponent(title, null, PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.TOP));
+//		components.add(new PDFLayoutComponent(subtitle, null, PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BELOW));
 		
 		double textHeight = 50; 
 		
 		// Three by three sizes
 		double gap = 18.0; 
-		double cellWidth = page.width() - outerFrame.getMargins().getLeft() - outerFrame.getMargins().getRight() - gap * 2;  
-		double cellHeight = page.height() - textHeight - outerFrame.getMargins().getTop() - outerFrame.getMargins().getBottom() - gap * 2; 
+		double cellWidth = (page.width() - outerFrame.getMargins().getLeft() - outerFrame.getMargins().getRight() - gap * 2) / 3;
+		double cellHeight = (page.height() - textHeight - outerFrame.getMargins().getTop() - outerFrame.getMargins().getBottom() - gap * 2) / 3;
 
 		// Charts along bottom 
 		components.add(getPositionedPdf("chart_bottom1.pdf", 0, cellHeight * 2 + gap, cellWidth * 2 + gap, cellHeight));
@@ -72,7 +72,7 @@ public class BasicPdfLayoutTest
 		textFrame.setComponents(Collections.singletonList(new PDFLayoutComponent(textContent, null, PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.TOP)));
 		textFrame.setLineWidths(new PDFLayoutSides<Double>(2.0)); 
 		
-		components.add(new PDFLayoutComponent(textFrame, null, 0, 0, cellWidth, cellHeight * 2 + gap));
+//		components.add(new PDFLayoutComponent(textFrame, null, 0, 0, cellWidth, cellHeight * 2 + gap));
 
 		outerFrame.setComponents (components);
 		
@@ -83,9 +83,6 @@ public class BasicPdfLayoutTest
 	
 	private PDFLayoutComponent getPositionedPdf(String filename, double x, double y, double width, double height)
 	{
-		PDFLayoutPDFContent content = new PDFLayoutPDFContent(); 
-		content.setInput(new IOFileInput(new File(testDir, filename)));
-		
-		return new PDFLayoutComponent(content, PDFLayoutObjectFit.CONTAIN, new PDFLayoutCoordinatePlacement(x, y, width, height));
+		return new PDFLayoutPDFContent (new IOFileInput(new File(testDir, filename))).wrap (width,height).position (x,y);
 	}
 }
