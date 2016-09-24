@@ -13,7 +13,6 @@ import info.joriki.pdf.PDFStream;
 import info.joriki.pdf.PDFWriter;
 import info.joriki.pdf.TextState;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -37,27 +36,22 @@ import com.emistoolbox.lib.pdf.specification.PDFLayoutPlacement;
 import com.emistoolbox.lib.pdf.specification.PDFLayoutTextContent;
 import com.emistoolbox.lib.pdf.specification.PDFLayoutVisitor;
 
-import es.jbauer.lib.io.IOInput;
-import es.jbauer.lib.io.impl.IOInputStreamInput;
+import es.jbauer.lib.io.IOOutput;
 
 public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	ResourceRenamer resourceRenamer;
 	PrintStream ps;
 
-	public IOInput render (List<PDFLayout> layouts) throws IOException {
+	public void render (List<PDFLayout> layouts,IOOutput output) throws IOException {
 		ConstructiblePDFDocument document = new ConstructiblePDFDocument ();
 		
 		// TODO: test document with more than one page
 		for (PDFLayout layout : layouts)
 			render (layout,document);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-		PDFWriter writer = new PDFWriter (baos);
+		PDFWriter writer = new PDFWriter (output.getOutputStream ());
 		writer.write (document);
 		writer.close ();
-		baos.close ();
-		
-		return new IOInputStreamInput (new ByteArrayInputStream (baos.toByteArray ()));
 	}
 
 	private void render (PDFLayout layout,ConstructiblePDFDocument document) throws IOException {
