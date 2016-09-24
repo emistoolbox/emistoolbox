@@ -5,3 +5,4 @@ core/emistoolbox.war
 core/build
 core/war/WEB-INF/classes
 core/war/emistoolbox
+libs/pdf/test/content/test.pdf
