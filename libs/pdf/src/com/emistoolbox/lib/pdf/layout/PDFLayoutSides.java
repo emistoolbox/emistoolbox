@@ -1,4 +1,4 @@
-package com.emistoolbox.lib.pdf.specification;
+package com.emistoolbox.lib.pdf.layout;
 
 public class PDFLayoutSides<T> {
 	private T left;

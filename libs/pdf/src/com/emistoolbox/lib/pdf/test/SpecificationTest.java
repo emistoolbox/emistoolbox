@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.emistoolbox.lib.pdf.PDFLayoutRenderer;
-import com.emistoolbox.lib.pdf.specification.PDFLayout;
+import com.emistoolbox.lib.pdf.layout.PDFLayout;
 
 import es.jbauer.lib.io.impl.IOFileOutput;
 

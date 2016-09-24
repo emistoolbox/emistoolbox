@@ -23,18 +23,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.emistoolbox.lib.pdf.specification.PDFLayout;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutAlignmentPlacement;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutComponent;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutContent;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutCoordinatePlacement;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutFont;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutFrame;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutObjectFit;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutPDFContent;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutPlacement;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutTextContent;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutVisitor;
+import com.emistoolbox.lib.pdf.layout.PDFLayout;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutComponent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutCoordinatePlacement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFrame;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutTextContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 
 import es.jbauer.lib.io.IOOutput;
 

@@ -1,4 +1,4 @@
-package com.emistoolbox.lib.pdf.specification;
+package com.emistoolbox.lib.pdf.layout;
 
 import java.io.IOException;
 

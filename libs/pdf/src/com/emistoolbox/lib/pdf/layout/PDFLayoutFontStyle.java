@@ -1,4 +1,4 @@
-package com.emistoolbox.lib.pdf.specification;
+package com.emistoolbox.lib.pdf.layout;
 
 public class PDFLayoutFontStyle {
 	private final static int italicFlag = 1 << 0;
