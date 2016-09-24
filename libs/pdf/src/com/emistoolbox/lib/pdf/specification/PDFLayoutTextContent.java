@@ -1,5 +1,7 @@
 package com.emistoolbox.lib.pdf.specification;
 
+import java.io.IOException;
+
 public class PDFLayoutTextContent extends PDFLayoutContent {
 	private String text;
 	private PDFLayoutFont font;
@@ -27,5 +29,9 @@ public class PDFLayoutTextContent extends PDFLayoutContent {
 
 	public void setFont (PDFLayoutFont font) {
 		this.font = font;
+	}
+
+	public <T> T accept (PDFLayoutVisitor<T> visitor) throws IOException {
+		return visitor.visit (this);
 	}
 }

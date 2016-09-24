@@ -3,6 +3,7 @@ package com.emistoolbox.lib.pdf.specification;
 import info.joriki.graphics.Rectangle;
 
 import java.awt.Color;
+import java.io.IOException;
 import java.util.List;
 
 public class PDFLayoutFrame extends PDFLayoutContent {
@@ -63,5 +64,9 @@ public class PDFLayoutFrame extends PDFLayoutContent {
 
 	public Rectangle getBoundingBox () {
 		return rectangle;
+	}
+
+	public <T> T accept (PDFLayoutVisitor<T> visitor) throws IOException {
+		return visitor.visit (this);
 	}
 }

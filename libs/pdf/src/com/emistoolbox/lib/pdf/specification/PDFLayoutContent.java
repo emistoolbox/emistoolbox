@@ -6,8 +6,6 @@ import java.util.Collections;
 import info.joriki.graphics.Rectangle;
 
 abstract public class PDFLayoutContent {
-	abstract public Rectangle getBoundingBox () throws IOException;
-
 	public PDFLayoutFrame wrap (double width,double height) {
 		PDFLayoutFrame frame = new PDFLayoutFrame ();
 		frame.setRectangle (new Rectangle (0,0,width,height));
@@ -18,4 +16,6 @@ abstract public class PDFLayoutContent {
 	public PDFLayoutComponent position (double x,double y) {
 		return new PDFLayoutComponent (this,PDFLayoutObjectFit.NONE,new PDFLayoutCoordinatePlacement (x,y));
 	}
+
+	abstract public <T> T accept (PDFLayoutVisitor<T> visitor) throws IOException;
 }
