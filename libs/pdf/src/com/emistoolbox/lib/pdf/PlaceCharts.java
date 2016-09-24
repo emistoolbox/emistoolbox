@@ -7,7 +7,6 @@ import java.io.PrintStream;
 import info.joriki.graphics.Point;
 import info.joriki.graphics.Rectangle;
 import info.joriki.graphics.Transformation;
-import info.joriki.io.Util;
 import info.joriki.pdf.ConstructiblePDFDocument;
 import info.joriki.pdf.PDFArray;
 import info.joriki.pdf.PDFDictionary;
