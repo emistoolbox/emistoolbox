@@ -1,6 +1,8 @@
 package com.emistoolbox.server.renderer.pdfreport.impl;
 
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
+import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import java.util.ArrayList;
@@ -8,32 +10,19 @@ import java.util.List;
 
 public class PdfReportImpl implements PdfReport
 {
-    private PdfReportConfig reportConfig;
-    private List<PdfPage> pages = new ArrayList();
+    private EmisPdfReportConfig reportConfig;
+    private List<EmisPdfPage> pages = new ArrayList<EmisPdfPage>();
 
-    public void addPage(PdfPage page)
-    {
-        this.pages.add(page);
-    }
+    public void addPage(EmisPdfPage page)
+    { this.pages.add(page); }
 
-    public List<PdfPage> getPages()
-    {
-        return this.pages;
-    }
+    public List<EmisPdfPage> getPages()
+    { return this.pages; }
 
-    public PdfReportConfig getReportConfig()
-    {
-        return this.reportConfig;
-    }
+    public EmisPdfReportConfig getReportConfig()
+    { return this.reportConfig; }
 
-    public void setReportConfig(PdfReportConfig reportConfig)
-    {
-        this.reportConfig = reportConfig;
-    }
+    public void setReportConfig(EmisPdfReportConfig reportConfig)
+    { this.reportConfig = reportConfig; }
+
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.server.renderer.pdfreport.impl.PdfReportImpl
- * JD-Core Version: 0.6.0
- */

@@ -56,6 +56,13 @@
     </jar>
   </target>
 
+  <target name="test" depends="clean,jar">
+    <java fork="yes" classname="com.emistoolbox.lib.pdf.test.SpecificationTest">
+      <classpath>
+        <path refid="path.test"/>
+      </classpath>
+	</java>
+  </target>
   <target name="all" depends="clean,jar">
   </target>
 </project>

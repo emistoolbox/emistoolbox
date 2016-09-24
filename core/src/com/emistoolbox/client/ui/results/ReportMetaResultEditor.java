@@ -15,6 +15,7 @@ import com.emistoolbox.common.model.analysis.EmisReportConfig;
 import com.emistoolbox.common.model.meta.EmisMeta;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.renderer.ChartConfig;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfMetaResultContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
@@ -31,7 +32,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 
 public class ReportMetaResultEditor extends MetaResultEditor<ReportMetaResult>
 {
-    private PdfReportConfig currentReport;
+    private EmisPdfReportConfig currentReport;
     private ListBoxWithUserObjects<ChartColor[]> uiColourScheme = new ListBoxWithUserObjects<ChartColor[]>(); 
 
     public ReportMetaResultEditor(EmisToolbox toolbox, EmisMeta emisMeta, EmisReportConfig reportConfig, List<EmisEntity> rootEntities)
@@ -163,14 +164,12 @@ public class ReportMetaResultEditor extends MetaResultEditor<ReportMetaResult>
 
     private void editReport(int row)
     {
-        final ListBoxWithUserObjects<PdfReportConfig> uiReports = new ListBoxWithUserObjects<PdfReportConfig>();
+        final ListBoxWithUserObjects<EmisPdfReportConfig> uiReports = new ListBoxWithUserObjects<EmisPdfReportConfig>();
         uiReports.add("", null);
-        for (PdfReportConfig reportConfig : getReportConfig().getReports())
+        for (EmisPdfReportConfig reportConfig : getReportConfig().getPdfReports())
         {
             if (reportConfig.getEntityType() != null)
-            {
                 uiReports.add(reportConfig.getName() + " (" + reportConfig.getEntityType().getName() + ")", reportConfig);
-            }
         }
         uiReports.addChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent event)

@@ -1,7 +1,7 @@
 package com.emistoolbox.client.admin.ui;
 
 import com.emistoolbox.client.Message;
-import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig.PageOrientation;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedIndexList;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -100,10 +100,9 @@ public class EmisUtils
         if (key.equals(PageOrientation.LANDSCAPE.toString()))
             return Message.messageAdmin().orientationLandscape();
         if (key.equals(PageOrientation.PORTRAIT.toString()))
-        {
             return Message.messageAdmin().orientationPortrait();
-        }
-        return null;
+        else
+        	return null;
     }
 
     public static void editText(String prompt, String defaultValue, ValueChangeHandler<String> handler)

@@ -7,7 +7,9 @@ import com.emistoolbox.client.admin.ReportModule;
 import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.client.admin.ui.ListBoxWithUserObjects;
 import com.emistoolbox.common.model.meta.EmisMeta;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfReportConfigImpl;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedUtil;
@@ -25,9 +27,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<List<PdfReportConfig>>
+public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<List<EmisPdfReportConfig>>
 {
-    private ListBoxWithUserObjects<PdfReportConfig> uiReports = new ListBoxWithUserObjects<PdfReportConfig>();
+    private ListBoxWithUserObjects<EmisPdfReportConfig> uiReports = new ListBoxWithUserObjects<EmisPdfReportConfig>();
     private PdfReportEditor uiEditor;
     private PushButton uiAddReportButton = new PushButton(Message.messageAdmin().prcleAdd());
     private PushButton uiDelReportButton = new PushButton(Message.messageAdmin().prcleDel());
@@ -131,17 +133,15 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
             show((PdfReportConfig) this.uiReports.getUserObject(index));
     }
 
-    public void set(List<PdfReportConfig> configs)
+    public void set(List<EmisPdfReportConfig> configs)
     {
         this.uiReports.clear();
         if (configs == null)
-        {
             return;
-        }
-        for (PdfReportConfig config : configs)
-        {
-            this.uiReports.addItem(config.getTitle(), config);
-        }
+
+        for (EmisPdfReportConfig config : configs)
+            this.uiReports.addItem(config.getText(PdfText.TEXT_TITLE), config);
+
         if (configs.size() > 0)
             selectReport(0, true);
     }
@@ -151,14 +151,13 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
         this.uiEditor.commit();
     }
 
-    public List<PdfReportConfig> get()
+    public List<EmisPdfReportConfig> get()
     {
         commit();
-        List<PdfReportConfig> result = new ArrayList<PdfReportConfig>();
+        List<EmisPdfReportConfig> result = new ArrayList<EmisPdfReportConfig>();
         for (int i = 0; i < this.uiReports.getItemCount(); i++)
-        {
             result.add(this.uiReports.getUserObject(i));
-        }
+
         return result;
     }
 

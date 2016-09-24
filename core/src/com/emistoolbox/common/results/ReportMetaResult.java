@@ -2,13 +2,14 @@ package com.emistoolbox.common.results;
 
 import com.emistoolbox.common.ChartColor;
 import com.emistoolbox.common.ChartStroke;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 
 public abstract interface ReportMetaResult extends MetaResult
 {
-    public abstract PdfReportConfig getReportConfig();
+    public abstract EmisPdfReportConfig getReportConfig();
 
-    public abstract void setReportConfig(PdfReportConfig paramPdfReportConfig);
+    public abstract void setReportConfig(EmisPdfReportConfig paramPdfReportConfig);
 
     public abstract void setEntityPath(int[] paramArrayOfInt, String[] paramArrayOfString);
 

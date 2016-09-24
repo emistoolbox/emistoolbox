@@ -12,8 +12,8 @@ public class ChartFont implements Serializable
     private int size;
     private int style;
 
-    public ChartFont() {
-    }
+    public ChartFont() 
+    {}
 
     public ChartFont(String name, int style, int size) {
         this.name = name;

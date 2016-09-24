@@ -1,5 +1,6 @@
 package com.emistoolbox.server;
 
+import com.emistoolbox.common.ChartColor;
 import com.emistoolbox.common.excelMerge.ExcelReportConfig;
 import com.emistoolbox.common.model.EmisEntity;
 import com.emistoolbox.common.model.EmisEnumSet;
@@ -64,13 +65,19 @@ import com.emistoolbox.common.model.validation.impl.ValidationMinMaxRuleImpl;
 import com.emistoolbox.common.model.validation.impl.ValidationNotExceedingRule;
 import com.emistoolbox.common.model.validation.impl.ValidationRatioRuleImpl;
 import com.emistoolbox.common.model.validation.impl.ValidationTimeRatioRuleImpl;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutBorderConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.common.results.GisMetaResult;
 import com.emistoolbox.common.results.MetaResult;
 import com.emistoolbox.common.results.MetaResultDimension;
@@ -84,6 +91,7 @@ import com.emistoolbox.common.results.impl.MetaResultDimensionEntityFilter;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityGrandChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEnum;
 import com.emistoolbox.common.user.EmisUser;
+import com.emistoolbox.common.util.LayoutSides;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.server.excelMerge.ExcelReportConfigSerializer;
@@ -721,40 +729,114 @@ public class XmlWriter
     	
         for (EmisIndicator indicator : reportConfig.getIndicators())
             addXml(parent, indicator);
-        
-        for (PdfReportConfig report : reportConfig.getReports())
-            addXml(parent, report);
-                
+
+        for (EmisPdfReportConfig pdfReport : reportConfig.getPdfReports())
+        {
+        	if (pdfReport instanceof LayoutPdfReportConfig)
+        		addXml(parent, (LayoutPdfReportConfig) pdfReport); 
+        	else if (pdfReport instanceof PdfReportConfig)
+        		addXml(parent, (PdfReportConfig) pdfReport); 
+        }
+                        
         for (ExcelReportConfig excelReport : reportConfig.getExcelReports())
             ExcelReportConfigSerializer.addXml(parent, excelReport); 
     }
 
-    private void addXml(Element parent, PdfReportConfig reportConfig)
+    private Element getEmisPdfReportConfig(Element parent, EmisPdfReportConfig config, String version)
     {
-        if (reportConfig == null)
+        Element tag = createElementAndAdd("pdfReport", parent);
+        setAttr(tag, "name", config.getName());
+        setAttr(tag, "entityType", config.getEntityType());
+        setAttr(tag, "pageSize", "" + config.getPageSize());
+        setAttr(tag, "pageOrientation", "" + config.getOrientation());
+
+        addXml(tag, (TextSet) config); 
+        if (config.hasShortTitles())
+        	setAttr(tag, "shortTitles", "true"); 
+    	
+        return tag; 
+    }
+    
+    private void addXml(Element parent, TextSet texts)
+    {
+    	for (String key : texts.getTextKeys())
+    	{
+    		String value = texts.getText(key);
+    		if (StringUtils.isEmpty(value))
+    			continue; 
+    		
+    		createElementAndAdd(key, parent).setTextContent(value); 
+    	}
+    }
+    
+    private void addXml(Element parent, LayoutPdfReportConfig config)
+    {
+    	if (config == null)
+    		return; 
+    	
+    	Element tag = getEmisPdfReportConfig(parent, config, LayoutPdfReportConfig.PDF_REPORT_VERSION);
+    	for (LayoutPageConfig page : config.getPages())
+    	{
+    		Element pageTag = createElementAndAdd("page", tag);
+    		for (LayoutFrameConfig frame : page.getFrames())
+    			addXml(pageTag, frame); 
+    		
+    		addXml(pageTag, (TextSet) page); 
+    	}
+    }
+    
+    private void addXml(Element parent, LayoutFrameConfig frame)
+    {
+    	Element tag = createElementAndAdd("frame", parent);
+
+    	if (frame.getPosition() != null)
+    		setIds(tag, "position", frame.getPosition().toDoubleArray());
+
+    	Element borderTag = createElementAndAdd("borders", tag); 
+    	
+    	LayoutSides<LayoutBorderConfig> borders = frame.getBorders(); 
+    	if (borders != null)
+    	{
+    		addXml(borderTag, borders.getLeft(), "left");
+    		addXml(borderTag, borders.getTop(), "top");
+    		addXml(borderTag, borders.getRight(), "right");
+    		addXml(borderTag, borders.getBottom(), "bottom");
+    	}
+    	
+    	setAttr(borderTag, "borderRadius", frame.getBorderRadius());
+
+    	Element backgroundTag = createElementAndAdd("background", tag);
+    	setAttr(backgroundTag, "image", frame.getBackgroundImagePath()); 
+    	setAttr(backgroundTag, "colour", frame.getBackgroundColour()); 
+    	setAttr(backgroundTag, "transparency", frame.getBackgroundTransparency());  
+    	frame.getBackgroundImagePath(); 
+    	frame.getBackgroundTransparency(); 
+    	
+    	addXml(tag, frame.getContentConfig());
+    }
+    
+    private void addXml(Element parent, LayoutBorderConfig border, String side)
+    {
+    	if (border == null)
+    		return; 
+    	
+    	Element tag = createElementAndAdd("border", parent); 
+    	setAttr(tag, "side", side); 
+    	setAttr(tag, "colour", border.getColour()); 
+    	setAttr(tag, "width", border.getWidth()); 
+    }
+    
+    private void addXml(Element parent, PdfReportConfig config)
+    {
+        if (config == null)
             return;
 
-        Element tag = createElementAndAdd("pdfReport", parent);
-        setAttr(tag, "name", reportConfig.getName());
-        setAttr(tag, "entityType", reportConfig.getEntityType());
-        setAttr(tag, "pageSize", "" + reportConfig.getPageSize());
-        setAttr(tag, "pageOrientation", "" + reportConfig.getOrientation());
-        setAttr(tag, "rows", Integer.valueOf(reportConfig.getRows()));
-        setAttr(tag, "cols", Integer.valueOf(reportConfig.getColumns()));
+        Element tag = getEmisPdfReportConfig(parent, config, null); 
         
-        if (reportConfig.hasShortTitles())
-        	setAttr(tag, "shortTitles", "true"); 
-
-        Element tmp = createElementAndAdd("title", tag);
-        tmp.setTextContent(reportConfig.getTitle());
-
-        tmp = createElementAndAdd("subtitle", tag);
-        tmp.setTextContent(reportConfig.getSubtitle());
-
-        tmp = createElementAndAdd("footer", tag);
-        tmp.setTextContent(reportConfig.getFooter());
-
-        for (PdfContentConfig contentConfig : reportConfig.getContentConfigs())
+        setAttr(tag, "rows", Integer.valueOf(config.getRows()));
+        setAttr(tag, "cols", Integer.valueOf(config.getColumns()));
+        
+        for (PdfContentConfig contentConfig : config.getContentConfigs())
             addXml(tag, contentConfig);
     }
 
@@ -1104,6 +1186,14 @@ public class XmlWriter
             tag.setAttribute(attr, obj.toString());
     }
 
+    private void setAttr(Element tag, String attr, ChartColor color)
+    {
+    	if (color == null)
+    		return;
+    	
+    	setAttr(tag, attr, String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue())); 
+    }
+    
     private void setAttr(Element tag, String attr, Named named)
     {
         if (named != null)
@@ -1113,9 +1203,8 @@ public class XmlWriter
     private void setIds(Element tag, String attr, EmisMetaEnumTuple tuple)
     {
         if (tuple == null)
-        {
             return;
-        }
+
         setIds(tag, attr, NamedUtil.getNames(tuple.getEnums()));
     }
 

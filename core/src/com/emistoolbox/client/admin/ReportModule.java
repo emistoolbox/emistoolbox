@@ -631,7 +631,7 @@ public class ReportModule
 
         PdfReportConfigListEditor editor = new PdfReportConfigListEditor(this.config.getModel(), this);
         this.toolbox.setWidget(Message.messageReport().btnReports(), editor);
-        editor.set(this.config.getReportConfig().getReports());
+        editor.set(this.config.getReportConfig().getPdfReports());
         if (report != null)
             editor.selectReport(report);
     }
@@ -695,7 +695,7 @@ public class ReportModule
         if (w instanceof IndicatorConfigurationEditor)
             config.getReportConfig().setIndicators(((IndicatorConfigurationEditor) toolbox.getWidget()).get());
         else if (w instanceof PdfReportConfigListEditor)
-            config.getReportConfig().setReports(((PdfReportConfigListEditor) toolbox.getWidget()).get());
+            config.getReportConfig().setPdfReports(((PdfReportConfigListEditor) toolbox.getWidget()).get());
         else if (w instanceof ExcelReportListEditor)
             config.getReportConfig().setExcelReports(((ExcelReportListEditor) toolbox.getWidget()).get()); 
         

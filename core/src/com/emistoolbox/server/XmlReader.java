@@ -1,5 +1,6 @@
 package com.emistoolbox.server;
 
+import com.emistoolbox.common.ChartColor;
 import com.emistoolbox.common.excelMerge.ExcelReportConfig;
 import com.emistoolbox.common.model.EmisEntity;
 import com.emistoolbox.common.model.EmisEnumSet;
@@ -33,7 +34,6 @@ import com.emistoolbox.common.model.impl.MetaEnum;
 import com.emistoolbox.common.model.impl.MetaEnumTuple;
 import com.emistoolbox.common.model.impl.MetaGroupEnum;
 import com.emistoolbox.common.model.impl.MetaHierarchy;
-import com.emistoolbox.common.model.mapping.DataSourceReplace;
 import com.emistoolbox.common.model.mapping.DataSourceReplaceSet;
 import com.emistoolbox.common.model.mapping.DbContext;
 import com.emistoolbox.common.model.mapping.DbDataFileSource;
@@ -59,7 +59,6 @@ import com.emistoolbox.common.model.mapping.EmisHierarchyDbMap;
 import com.emistoolbox.common.model.mapping.EmisHierarchyDbMapEntry;
 import com.emistoolbox.common.model.mapping.EntityBaseDbMap;
 import com.emistoolbox.common.model.mapping.GisEntityDbMap;
-import com.emistoolbox.common.model.mapping.impl.DataSourceReplaceImpl;
 import com.emistoolbox.common.model.mapping.impl.DataSourceReplaceSetImpl;
 import com.emistoolbox.common.model.mapping.impl.DbContextImpl;
 import com.emistoolbox.common.model.mapping.impl.DbDataSourceConfigJdbc;
@@ -94,7 +93,6 @@ import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.model.meta.GisContext;
 import com.emistoolbox.common.model.meta.GisLayer;
 import com.emistoolbox.common.model.validation.EmisValidationFilter;
-import com.emistoolbox.common.model.validation.EmisValidationRatioRule;
 import com.emistoolbox.common.model.validation.EmisValidation;
 import com.emistoolbox.common.model.validation.EmisValidationRule;
 import com.emistoolbox.common.model.validation.EmisValidationTimeRatioRule;
@@ -103,16 +101,24 @@ import com.emistoolbox.common.model.validation.impl.ValidationImpl;
 import com.emistoolbox.common.model.validation.impl.ValidationMinMaxRuleImpl;
 import com.emistoolbox.common.model.validation.impl.ValidationNotExceedingRule;
 import com.emistoolbox.common.model.validation.impl.ValidationRatioRuleImpl;
-import com.emistoolbox.common.model.validation.impl.ValidationRuleImpl;
 import com.emistoolbox.common.model.validation.impl.ValidationTimeRatioRuleImpl;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfReportConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutBorderConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutFrameConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutPageConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutPdfReportConfigImpl;
 import com.emistoolbox.common.results.GisMetaResult;
 import com.emistoolbox.common.results.MetaResult;
 import com.emistoolbox.common.results.MetaResultDimension;
@@ -129,9 +135,11 @@ import com.emistoolbox.common.results.impl.MetaResultDimensionEnum;
 import com.emistoolbox.common.results.impl.MetaResultValueImpl;
 import com.emistoolbox.common.results.impl.TableMetaResultImpl;
 import com.emistoolbox.common.user.EmisUser;
+import com.emistoolbox.common.util.LayoutSides;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedIndexList;
 import com.emistoolbox.common.util.NamedUtil;
+import com.emistoolbox.common.util.Rectangle;
 import com.emistoolbox.server.excelMerge.ExcelReportConfigSerializer;
 
 import java.io.IOException;
@@ -435,7 +443,7 @@ public class XmlReader
 
 		DataSourceReplaceSet result = new DataSourceReplaceSetImpl();
 		for (Element child : getElements(tag, null, "entry"))
-			result.addReplace(getAttr(tag, "col"), getAttr(tag, "key"), getAttr(tag, "value"));
+			result.addReplace(getAttr(child, "col"), getAttr(child, "key"), getAttr(child, "value"));
 
 		return result;
 	}
@@ -846,8 +854,8 @@ public class XmlReader
 		throw new IllegalArgumentException("Unknow type for <access> tag: '" + type + "'");
 	}
 
-	private EmisHierarchyDbMap getEmisHierarchyDbMap(Element tag,
-			List<DbDataSourceConfig> dbconfigs) {
+	private EmisHierarchyDbMap getEmisHierarchyDbMap(Element tag, List<DbDataSourceConfig> dbconfigs) 
+	{
 		verifyTagName(tag, "hierarchyMap");
 
 		EmisHierarchyDbMap result = new EmisHierarchyDbMapImpl();
@@ -861,8 +869,8 @@ public class XmlReader
 		return result;
 	}
 
-	private EmisHierarchyDbMapEntry getEmisHierarchyDbMapEntry(Element tag,
-			List<DbDataSourceConfig> dbconfigs) {
+	private EmisHierarchyDbMapEntry getEmisHierarchyDbMapEntry(Element tag, List<DbDataSourceConfig> dbconfigs) 
+	{
 		verifyTagName(tag, "hierarchyEntry");
 		EmisHierarchyDbMapEntry result = new EmisHierarchyDbMapEntryImpl();
 		result.setDbContext(getDbContext(getElement(tag, "dbContext"),
@@ -903,10 +911,10 @@ public class XmlReader
 			add(indicators, getEmisIndicator(indicatorTag));
 		result.setIndicators(indicators);
 
-		List<PdfReportConfig> reports = new ArrayList<PdfReportConfig>();
+		List<EmisPdfReportConfig> pdfReports = new ArrayList<EmisPdfReportConfig>();
 		for (Element reportTag : getElements(tag, null, "pdfReport"))
-			add(reports, getPdfReportConfig(reportTag, indicators));
-		result.setReports(reports);
+			add(pdfReports, getPdfReportConfig(reportTag, indicators));
+		result.setPdfReports(pdfReports);
 
 		List<ExcelReportConfig> excelReports = new ArrayList<ExcelReportConfig>();
 		for (Element reportTag : getElements(tag, null,
@@ -919,13 +927,28 @@ public class XmlReader
 		return result;
 	}
 
-	private PdfReportConfig getPdfReportConfig(Element tag, List<EmisIndicator> indicators) 
+	private EmisPdfReportConfig getPdfReportConfig(Element tag, List<EmisIndicator> indicators) 
 	{
 		verifyTagName(tag, "pdfReport");
 
-		PdfReportConfig result = new PdfReportConfigImpl();
-		result.setEntityType((EmisMetaEntity) find(tag, "entityType", this.meta.getEntities()));
-		result.setLayout(getAttrAsInt(tag, "rows").intValue(), getAttrAsInt(tag, "cols").intValue());
+		EmisPdfReportConfig result = null; 
+		
+		// Load correct implementation depending on version
+		String version = tag.getAttribute("version");
+		if (StringUtils.isEmpty(version))
+			result = getLegacyPdfReport(tag, indicators);
+		else if (version.equals(LayoutPdfReportConfig.PDF_REPORT_VERSION))
+			result = getLayoutPdfReport(tag, indicators); 
+		else 
+			throw new IllegalArgumentException("Unexpected PDF report version."); 
+		
+		return result; 
+	}
+	
+	private void readEmisPdfReportConfig(Element tag, EmisPdfReportConfig config)
+	{
+		config.setName(getAttr(tag, "name"));
+		config.setEntityType((EmisMetaEntity) find(tag, "entityType", this.meta.getEntities()));
 
 		PdfReportConfig.PageOrientation orientation = PdfReportConfig.PageOrientation.PORTRAIT;
 		PdfReportConfig.PageSize size = PdfReportConfig.PageSize.A4;
@@ -933,22 +956,106 @@ public class XmlReader
 			size = PdfReportConfig.PageSize.valueOf(tag.getAttribute("pageSize"));
 		if (tag.getAttributeNode("pageOrientation") != null)
 			orientation = PdfReportConfig.PageOrientation.valueOf(tag.getAttribute("pageOrientation"));
-		result.setPage(size, orientation);
+		config.setPage(size, orientation);
 
-		result.setFooter(getElementText(tag, "footer"));
-		result.setTitle(getElementText(tag, "title"), getElementText(tag, "subtitle"));
-		result.setShortTitles(getAttrAsBoolean(tag, "shortTitles"));
+		readTexts(tag, (TextSet) config);
+		config.setShortTitles(getAttrAsBoolean(tag, "shortTitles"));
+	}
+	
+	private void readTexts(Element parent, TextSet texts)
+	{
+		for (String key : texts.getTextKeys())
+			texts.putText(key, getElementText(parent, key)); 
+	}
+	
+	
+	private EmisPdfReportConfig getLayoutPdfReport(Element tag, List<EmisIndicator> indicators)
+	{
+		LayoutPdfReportConfig config = new LayoutPdfReportConfigImpl(); 
+		readEmisPdfReportConfig(tag, config); 
+		
+		for (Element pageTag : getElements(tag, null, "page"))
+		{
+			LayoutPageConfig page = new LayoutPageConfigImpl(); 
+			for (Element frameTag : getElements(pageTag, null, "frame"))
+				page.addFrame(getLayoutFrame(frameTag, indicators));
+			
+			readTexts(pageTag, page); 
+			
+			config.addPage(page);
+		}
+		
+		return config; 
+	}
+
+	private LayoutFrameConfig getLayoutFrame(Element tag, List<EmisIndicator> indicators)
+	{
+		LayoutFrameConfig frame = new LayoutFrameConfigImpl(); 
+		
+		frame.setPosition(new Rectangle(getIdsAsDoubleArray(tag, "position"))); 
+		
+		// borders
+		// borderRadius
+		Element borderTag = getElement(tag, "borders"); 
+		if (borderTag != null)
+		{
+			frame.setBorderRadius(getAttrAsInt(borderTag, "radius", 0)); 
+			LayoutSides<LayoutBorderConfig> borders = new LayoutSides<LayoutBorderConfig>(); 
+			borders.setLeft(getBorderConfig(tag, "left"));   
+			borders.setTop(getBorderConfig(tag, "top"));  
+			borders.setRight(getBorderConfig(tag, "right"));  
+			borders.setBottom(getBorderConfig(tag, "bottom"));  
+
+			frame.setBorders(borders);
+		}
+		
+		Element backgroundTag = getElement(tag, "background");
+		if (backgroundTag != null)
+		{
+			frame.setBackgroundImagePath(getAttr(backgroundTag, "image"));
+			frame.setBackgroundColour(getAttrAsColour(backgroundTag, "colour"));
+			frame.setBackgroundTransparency(getAttrAsInt(backgroundTag, "transparency", 0));
+		}
+
+		frame.setContentConfig(getPdfContentConfig(getElement(tag, "pdfContent"), indicators));
+
+		return frame;
+	}
+	
+	private LayoutBorderConfig getBorderConfig(Element tag, String side)
+	{
+		Element borderTag = getElement(tag, "border", "side", side);
+		if (borderTag == null)
+			return null; 
+		
+		LayoutBorderConfig result = new LayoutBorderConfig();
+		result.setColor(getAttrAsColour(borderTag, "colour")); 
+		result.setWidth(getAttrAsInt(borderTag, "width", 1));
+		
+		return result; 
+	}
+	
+	
+	private EmisPdfReportConfig getLegacyPdfReport(Element tag, List<EmisIndicator> indicators)
+	{
+		PdfReportConfig config = new PdfReportConfigImpl();
+		readEmisPdfReportConfig(tag, config);
+		
+		config.setLayout(getAttrAsInt(tag, "rows").intValue(), getAttrAsInt(tag, "cols").intValue());
 
 		List<PdfContentConfig> contents = new ArrayList<PdfContentConfig>();
 		for (Element contentTag : getElements(tag, null, "pdfContent"))
 			contents.add(getPdfContentConfig(contentTag, indicators));
 
-		result.setContentConfigs(contents);
-		return result;
+		config.setContentConfigs(contents);
+		return config;
 	}
 
-	private PdfContentConfig getPdfContentConfig(Element tag,
-			List<EmisIndicator> indicators) {
+	private PdfContentConfig getPdfContentConfig(Element tag, List<EmisIndicator> indicators) 
+	{
+		if (tag == null)
+			return null; 
+		
 		PdfContentConfig result = null;
 		String type = getAttr(tag, "type");
 		if (type.equals("chart")) {
@@ -1519,6 +1626,24 @@ public class XmlReader
 		return tag.getAttribute(attr);
 	}
 
+	private ChartColor getAttrAsColour(Element tag, String attr)
+	{
+		String value = tag.getAttribute(attr); 
+		if (value == null)
+			return null; 
+		
+		if (value.startsWith("#"))
+			value = value.substring(1); 
+		
+		int len = value.length() == 3 ? 1 : 2; 
+		
+		int r = Integer.parseInt(value.substring(0, len), 16); 
+		int g = Integer.parseInt(value.substring(len, 2 * len), 16); 
+		int b = Integer.parseInt(value.substring(2 * len, 3 * len), 16); 
+		
+		return new ChartColor(r, g, b);  
+	}
+	
 	private Integer getAttrAsInt(Element tag, String attr) {
 		String value = tag.getAttribute(attr);
 		if (value == null)
@@ -1528,6 +1653,12 @@ public class XmlReader
 		} catch (Throwable err) {
 		}
 		return null;
+	}
+
+	private Integer getAttrAsInt(Element tag, String attr, int defaultValue) 
+	{ 
+		Integer value = getAttrAsInt(tag, attr); 
+		return value == null ? defaultValue : value; 
 	}
 
 	private Boolean getAttrAsBoolean(Element tag, String attr) {

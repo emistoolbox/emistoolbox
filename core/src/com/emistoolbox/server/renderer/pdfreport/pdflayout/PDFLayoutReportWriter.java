@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
-import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig.PageOrientation;
-import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig.PageSize;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportWriterException;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.lib.pdf.specification.PDFLayout;
 import com.emistoolbox.lib.pdf.specification.PDFLayoutAlignmentPlacement;
@@ -20,10 +21,11 @@ import com.emistoolbox.lib.pdf.specification.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.specification.PDFLayoutTextContent;
 import com.emistoolbox.lib.pdf.specification.PDFLayoutVerticalAlignment;
 import com.emistoolbox.server.renderer.charts.ChartRenderer;
-import com.emistoolbox.server.renderer.pdfreport.PdfContent;
-import com.emistoolbox.server.renderer.pdfreport.PdfPage;
+import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportWriter;
+import com.emistoolbox.server.renderer.pdfreport.layout.LayoutFrame;
+import com.emistoolbox.server.renderer.pdfreport.layout.LayoutPage;
 
 import info.joriki.graphics.Point;
 import info.joriki.graphics.Rectangle;
@@ -39,24 +41,28 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 	public void writeReport(PdfReport report, File out) 
 		throws IOException, PdfReportWriterException 
 	{
-		PdfReportConfig config = report.getReportConfig(); 
+		if (!(report.getReportConfig() instanceof LayoutPdfReportConfig))
+			throw new IllegalArgumentException("Can only write LayoutPdfReportConfig reports."); 
+
+		LayoutPdfReportConfig config = (LayoutPdfReportConfig) report.getReportConfig(); 
 		
 		Point pageSize = getPageSize(config);
 		Rectangle margins = getMargins(config); 
-		Point marginCells = getCellMargins(config); 
 
 		List<PDFLayout> pages = new ArrayList<PDFLayout>(); 
-		for (PdfPage page : report.getPages())
+		for (EmisPdfPage page : report.getPages())
 		{
-			page.layout(pageSize, margins, marginCells);
-			pages.add(getPage(page, pageSize, margins)); 
+			if (page instanceof LayoutPage)
+				pages.add(renderPage((LayoutPage) page, pageSize, margins)); 
 		}
 		
 		render(out, pages); 
 	}
 
 	private void render(File out, List<PDFLayout> pages)
-	{}
+	{
+		
+	}
 	
 	private PDFLayoutSides<Double> getSides(Rectangle values)
 	{
@@ -69,7 +75,7 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		return result; 
 	}
 	
-	private PDFLayout getPage(PdfPage page, Point size, Rectangle margins)
+	private PDFLayout renderPage(LayoutPage page, Point size, Rectangle margins)
 	{
 		PDFLayout layout = new PDFLayout();  
 		PDFLayoutFrame frame = new PDFLayoutFrame(); 
@@ -77,15 +83,15 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		frame.setMargins(getSides(margins)); 
 
 		List<PDFLayoutComponent> components = new ArrayList<PDFLayoutComponent>();
-		PDFLayoutComponent component = createTitles(frame, page.getTitle(), page.getSubtitle()); 
+		PDFLayoutComponent component = createTitles(frame, page.getText(PdfText.TEXT_TITLE), page.getText(PdfText.TEXT_SUBTITLE)); 
 		if (component != null)
 			components.add(component); 
 		
-		component = createFooter(frame, page.getFooter());
+		component = createFooter(frame, page.getText(PdfText.TEXT_FOOTER));
 		if (component != null)
 			components.add(component); 
 		
-		for (PdfContent content : page.getContents())
+		for (LayoutFrame frames : page.getFrames())
 		{
 		}
 		
@@ -119,7 +125,7 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		return result; 
 	}
 	
-	private Point getPageSize(PdfReportConfig config)
+	private Point getPageSize(LayoutPdfReportConfig config)
 	{
 		Point result = new Point(); 
 		switch (config.getPageSize())
@@ -144,13 +150,13 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		return result; 
 	}
 	
-	private Rectangle getMargins(PdfReportConfig config)
+	private Rectangle getMargins(LayoutPdfReportConfig config)
 	{
 		int margin = config.getPageSize() == PageSize.A5 ? 24 : 36; 
 		return new Rectangle(margin, margin, margin, margin); 
 	}
 	
-	private Point getCellMargins(PdfReportConfig config)
+	private Point getCellMargins(LayoutPdfReportConfig config)
 	{ return new Point(10, 10); }
 	
 	@Override

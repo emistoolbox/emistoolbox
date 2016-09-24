@@ -22,8 +22,10 @@ import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEnumTuple;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfReportConfigImpl;
 import com.emistoolbox.common.results.ListEntityMetaResult;
 import com.emistoolbox.common.results.MetaResult;
@@ -32,6 +34,7 @@ import com.emistoolbox.common.results.impl.MetaResultUtil;
 import com.emistoolbox.common.user.EmisUser.AccessLevel;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedUtil;
+import com.emistoolbox.server.renderer.pdfreport.impl.PdfUtil;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -534,16 +537,16 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
 
         root.add(new Label("Please select the report you want to add to:"));
 
-        List<PdfReportConfig> reports = getReportConfig().getReports();
+        List<EmisPdfReportConfig> reports = getReportConfig().getPdfReports();
 
-        final ListBoxWithUserObjects<PdfReportConfig> uiReports = new ListBoxWithUserObjects<PdfReportConfig>();
+        final ListBoxWithUserObjects<EmisPdfReportConfig> uiReports = new ListBoxWithUserObjects<EmisPdfReportConfig>();
         uiReports.add(Message.messageAdmin().mreHtmlCreateNewReport(), null);
 
         PdfContentConfig contentConfig = getContentConfig(0);
-        for (PdfReportConfig report : reports)
+        for (EmisPdfReportConfig report : reports)
         {
             if (report.allowContentConfig(contentConfig))
-                uiReports.add(report.getTitle() + (report.getEntityType() != null ? "(" + report.getEntityType().getName() + ")" : ""), report);
+                uiReports.add(report.getText(PdfText.TEXT_TITLE) + (report.getEntityType() != null ? "(" + report.getEntityType().getName() + ")" : ""), report);
         }
         HorizontalPanel hp = new HorizontalPanel();
         if (addButtons.length == 1)
@@ -559,14 +562,14 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
                     PdfReportConfig report = (PdfReportConfig) uiReports.getValue();
                     if (report == null)
                     {
-                        String newId = EmisUtils.getUniqueId(NamedUtil.getNames(MetaResultEditor.this.getReportConfig().getReports()), Message.messageAdmin().prcleNewReportId());
+                        String newId = EmisUtils.getUniqueId(NamedUtil.getNames(MetaResultEditor.this.getReportConfig().getPdfReports()), Message.messageAdmin().prcleNewReportId());
                         if (newId == null)
                             return;
                         report = new PdfReportConfigImpl();
                         report.setName(newId);
-                        MetaResultEditor.this.getReportConfig().getReports().add(report);
+                        MetaResultEditor.this.getReportConfig().getPdfReports().add(report);
 
-                        uiReports.add(report.getTitle(), report);
+                        uiReports.add(report.getText(PdfText.TEXT_TITLE), report);
                     }
 
                     popup.hide();

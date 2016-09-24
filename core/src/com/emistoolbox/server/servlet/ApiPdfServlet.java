@@ -64,7 +64,7 @@ public class ApiPdfServlet extends ApiBaseServlet
     {
         // Verify report ID is correct. 
         EmisReportConfig reportConfig = EmisToolboxIO.loadReportXml(emis.getMetaDataSet().getDatasetName(), emis.getMetaDataSet()); 
-        if (!hasParameter(req, resp, QS_REPORT, NamedUtil.getNames(reportConfig.getReports())))
+        if (!hasParameter(req, resp, QS_REPORT, NamedUtil.getNames(reportConfig.getPdfReports())))
             return null;
         
         ReportMetaResultImpl result = new ReportMetaResultImpl();
@@ -74,7 +74,7 @@ public class ApiPdfServlet extends ApiBaseServlet
         EmisMetaHierarchy metaHierarchy = result.getHierarchy();
         int[] entityIds = getEntityPathIds(emis, metaHierarchy, req.getParameter(QS_LOCATION), 0); 
         result.setEntityPath(entityIds, getEntityPathNames(emis, entityIds, metaHierarchy.getEntityOrder(), getDateIndex(result.getContext())));
-        result.setReportConfig(NamedUtil.find(req.getParameter(QS_REPORT), reportConfig.getReports())); 
+        result.setReportConfig(NamedUtil.find(req.getParameter(QS_REPORT), reportConfig.getPdfReports())); 
         result.setColourScheme(getColourScheme(req.getParameter(QS_REPORT_COLOURS))); 
         
         return result; 

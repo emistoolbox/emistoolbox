@@ -8,7 +8,8 @@ import java.io.IOException;
 
 public abstract interface PdfReportWriter
 {
-    public abstract void writeReport(PdfReport paramPdfReport, File paramFile) throws IOException, PdfReportWriterException;
+    public abstract void writeReport(PdfReport pdfReport, File out) 
+    	throws IOException, PdfReportWriterException;
     
     public abstract void setDateInfo(ReportMetaResult metaInfo); 
 }
