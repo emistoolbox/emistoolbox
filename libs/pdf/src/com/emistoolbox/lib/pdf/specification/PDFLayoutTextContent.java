@@ -33,7 +33,6 @@ public class PDFLayoutTextContent extends PDFLayoutContent
 		this.font = font;
 	}
 
-	@Override
 	public Rectangle getBoundingBox() throws IOException {
 		return null;
 	}

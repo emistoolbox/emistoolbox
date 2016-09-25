@@ -8,7 +8,7 @@ import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 /** Frame base layout configuration. */ 
 public interface LayoutPdfReportConfig extends EmisPdfReportConfig
 {
-	public static final String PDF_REPORT_VERSION = "layout-1";
+	public static final String PDF_REPORT_VERSION = "layout";
 	
 	public List<LayoutPageConfig> getPages();
 	public void setPages(List<LayoutPageConfig> pages);

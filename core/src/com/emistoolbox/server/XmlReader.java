@@ -992,7 +992,7 @@ public class XmlReader
 	{
 		LayoutFrameConfig frame = new LayoutFrameConfigImpl(); 
 		
-		frame.setPosition(new Rectangle(getIdsAsDoubleArray(tag, "position"))); 
+		frame.setPosition(new Rectangle(getIdsAsDoubleArray(tag, "position")));
 		
 		// borders
 		// borderRadius
@@ -1001,10 +1001,10 @@ public class XmlReader
 		{
 			frame.setBorderRadius(getAttrAsInt(borderTag, "radius", 0)); 
 			LayoutSides<LayoutBorderConfig> borders = new LayoutSides<LayoutBorderConfig>(); 
-			borders.setLeft(getBorderConfig(tag, "left"));   
-			borders.setTop(getBorderConfig(tag, "top"));  
-			borders.setRight(getBorderConfig(tag, "right"));  
-			borders.setBottom(getBorderConfig(tag, "bottom"));  
+			borders.setLeft(getBorderConfig(borderTag, "left"));   
+			borders.setTop(getBorderConfig(borderTag, "top"));  
+			borders.setRight(getBorderConfig(borderTag, "right"));  
+			borders.setBottom(getBorderConfig(borderTag, "bottom"));  
 
 			frame.setBorders(borders);
 		}
