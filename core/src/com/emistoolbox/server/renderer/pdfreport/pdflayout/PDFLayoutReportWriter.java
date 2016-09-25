@@ -1,6 +1,7 @@
 package com.emistoolbox.server.renderer.pdfreport.pdflayout;
 
 import java.awt.Color;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.util.IOUtils;
 
 import com.emistoolbox.common.ChartColor;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
@@ -21,22 +23,25 @@ import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.lib.pdf.PDFLayoutRenderer;
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutBorderStyle;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutComponent;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutContent;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutFrame;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutLineStyle;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutTextContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
 import com.emistoolbox.lib.pdf.util.PDFLayoutLogVisitor;
 import com.emistoolbox.server.renderer.charts.ChartRenderer;
 import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
+import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
+import com.emistoolbox.server.renderer.pdfreport.PdfContent;
+import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportWriter;
+import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
+import com.emistoolbox.server.renderer.pdfreport.impl.PdfTextContent;
+import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContent;
 import com.emistoolbox.server.renderer.pdfreport.layout.LayoutFrame;
 import com.emistoolbox.server.renderer.pdfreport.layout.LayoutPage;
 
@@ -100,12 +105,16 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		File objFile = new File(out.getParentFile(), name + ".layout"); 
 		
 		IOOutput ioo = new IOFileOutput(objFile); 
-		try (OutputStream os = ioo.getOutputStream())
+		OutputStream os = null; 
+		try 
 		{
+			os = ioo.getOutputStream(); 
 			ObjectOutputStream oos = new ObjectOutputStream(os); 
 			oos.writeObject(pages);
 			oos.flush(); 
 		}
+		finally 
+		{ IOUtils.closeQuietly(os); }
 	}
 	
 	private void render(File out, List<PDFLayout> pages)
@@ -126,50 +135,62 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 	private PDFLayout renderPage(LayoutPage page, Point size, Rectangle margins)
 	{
 		PDFLayout layout = new PDFLayout();  
-		PDFLayoutFrame pageFrame = new PDFLayoutFrame(); 
-		pageFrame.setRectangle(new Rectangle(margins.xmin, margins.ymin, size.x - margins.xmin - margins.xmax, size.y - margins.ymin - margins.ymax));
-
-		List<PDFLayoutComponent> components = new ArrayList<PDFLayoutComponent>();
-		components.addAll(createAlignedText(page.getText(PdfText.TEXT_TITLE), PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.TOP)); 
-		components.addAll(createAlignedText(page.getText(PdfText.TEXT_SUBTITLE), PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.TOP)); 
-
+		
+		PDFLayoutFrameElement outerFrame = new PDFLayoutFrameElement(size.x - margins.xmin - margins.xmax, size.y - margins.ymin - margins.ymax);
 		for (LayoutFrame frame : page.getFrames())
-		{
-			PDFLayoutComponent component = createFrame(frame);
-			if (component != null)
-				components.add(component); 
-		}
+			outerFrame.addElement(createFrame(frame)); 
 		
-		components.addAll(createAlignedText(page.getText(PdfText.TEXT_FOOTER), PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BOTTOM));
-
-		pageFrame.setComponents(components);
-		layout.setOuterFrame(pageFrame);
+		outerFrame.addElement(createAlignedText(page.getText(PdfText.TEXT_FOOTER), PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BOTTOM));
 		
+		layout.setOuterFrame(outerFrame); 
 		return layout; 
 	}
-	
-	private PDFLayoutComponent createFrame(LayoutFrame frame)
-	{
-		PDFLayoutComponent component = new PDFLayoutComponent(); 
-		setPlacement(component, frame.getFrameConfig().getPosition());
 
-		PDFLayoutFrame pdfFrame = createFrame(frame.getFrameConfig()); 
-		component.setContent(pdfFrame);
+	private PDFLayoutElement createAlignedText(String title, PDFLayoutHorizontalAlignment horizontal, PDFLayoutVerticalAlignment vertical)
+	{
+		if (StringUtils.isEmpty(title))
+			return null; 
+		return new PDFLayoutTextElement(title, null).align(horizontal, vertical); 
+	}
 		
-		return component; 
+	private PDFLayoutElement createFrame(LayoutFrame frame)
+	{
+		PDFLayoutFrameElement result = new PDFLayoutFrameElement(); 
+		LayoutFrameConfig config = frame.getFrameConfig(); 
+
+		setFramePlacement(result, config); 
+		setFrameBorder(result, config); 
+		setFramePadding(result, config); 
+		setFrameBackground(result, config);
+		
+		
+		PDFLayoutElement contentElement = null; 
+		PdfContent content = frame.getContent();
+		if (content instanceof PdfImageContent)
+			contentElement = new PDFLayoutTextElement("IMAGE - to be implemented", null);  
+		else if (content instanceof PdfChartContent)
+			contentElement = new PDFLayoutTextElement("CHART - to be implemented", null);  
+		else if (content instanceof PdfTextContent)
+			contentElement = new PDFLayoutTextElement(((PdfTextContent) content).getText(), null); 
+		else if (content instanceof PdfVariableContent)
+			contentElement = new PDFLayoutTextElement("VARIABLES - to be implemented", null);  
+		else if (content instanceof PdfTableContent)
+			contentElement = new PDFLayoutTextElement("TABLE - to be implemented", null);  
+		
+		return result; 
 	}
 	
-	private void setPlacement(PDFLayoutComponent component, com.emistoolbox.common.util.Rectangle rect)
+	private void setFramePlacement(PDFLayoutFrameElement el, LayoutFrameConfig config)
 	{
-		// TODO
+		el.position(config.getPosition().getLeft(), config.getPosition().getRight()); 
+		el.setWidth(config.getPosition().getWidth() - config.getPadding().getLeft() - config.getPadding().getRight());
+		el.setHeight(config.getPosition().getHeight() - config.getPadding().getTop() - config.getPadding().getBottom());
 	}
-	
-	private PDFLayoutFrame createFrame(LayoutFrameConfig config)
+
+	private void setFrameBorder(PDFLayoutElement el, LayoutFrameConfig config)
 	{
-		PDFLayoutFrame result = new PDFLayoutFrame(); 
 		PDFLayoutBorderStyle  border = new PDFLayoutBorderStyle();
 		border.setBorderRadius((double) config.getBorderRadius());
-		
 		PDFLayoutLineStyle[] lineStyles = new PDFLayoutLineStyle[4]; 
 		int i = 0; 
 		
@@ -180,42 +201,19 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		}
 
 		border.setLineStyles(new PDFLayoutSides<PDFLayoutLineStyle>(lineStyles));
-
-// TODO		result.setRectangle();
-		
-		return null; 
 	}
+	
+	private void setFrameBackground(PDFLayoutElement el, LayoutFrameConfig config)
+	{}
+	
+	private void setFrameObjectFit(PDFLayoutElement el, LayoutFrameConfig config)
+	{}
+
+	private void setFramePadding(PDFLayoutElement el, LayoutFrameConfig config)
+	{ el.setPadding(new PDFLayoutSides<Double>(config.getPadding().getValues(new Double[4]))); }
 	
 	private Color getColor(ChartColor color)
 	{ return new Color(color.getRed(), color.getGreen(), color.getBlue()); }
-	
-	private List<PDFLayoutComponent> createAlignedText(String title, PDFLayoutHorizontalAlignment horizontal, PDFLayoutVerticalAlignment vertical)
-	{
-		List<PDFLayoutComponent> result = new ArrayList<PDFLayoutComponent>(); 
-		if (!StringUtils.isEmpty(title))
-			result.add(new PDFLayoutComponent(new PDFLayoutTextContent(title, null), null, horizontal, vertical)); 
-		
-		return result; 
-	}
-		
-	private PDFLayoutComponent createFooter(PDFLayoutFrame frame, String footer)
-	{ return getText(footer, null, PDFLayoutObjectFit.NONE, PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BOTTOM); }
-	
-	private PDFLayoutComponent getText(String text, String font, PDFLayoutObjectFit fit, PDFLayoutHorizontalAlignment horizontal, PDFLayoutVerticalAlignment vertical)
-	{
-		PDFLayoutTextContent content = new PDFLayoutTextContent(); 
-		content.setText(text);
-		
-		PDFLayoutComponent result = new PDFLayoutComponent(); 
-		result.setContent(content);
-		result.setObjectFit(fit);
-		PDFLayoutAlignmentPlacement placement = new PDFLayoutAlignmentPlacement(); 
-		placement.setHorizontalAlignment(horizontal);
-		placement.setVerticalAlignment(vertical);
-		result.setPlacement(placement);
-		
-		return result; 
-	}
 	
 	private Point getPageSize(LayoutPdfReportConfig config)
 	{

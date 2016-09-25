@@ -3,15 +3,15 @@ package com.emistoolbox.lib.pdf.layout;
 import java.io.IOException;
 import info.joriki.graphics.Rectangle;
 
-public class PDFLayoutTextContent extends PDFLayoutContent 
+public class PDFLayoutTextElement extends PDFLayoutElement 
 {
 	private String text;
 	private PDFLayoutFont font;
 
-	public PDFLayoutTextContent()
+	public PDFLayoutTextElement()
 	{}
 	
-	public PDFLayoutTextContent(String text, PDFLayoutFont font)
+	public PDFLayoutTextElement(String text, PDFLayoutFont font)
 	{
 		this.text = text; 
 		this.font = font; 

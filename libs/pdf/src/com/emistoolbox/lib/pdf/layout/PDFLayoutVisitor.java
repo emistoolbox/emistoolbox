@@ -4,8 +4,7 @@ import java.io.IOException;
 
 public interface PDFLayoutVisitor<T> {
 	T visit (PDFLayout page) throws IOException; 
-	T visit (PDFLayoutComponent component) throws IOException;
-	T visit (PDFLayoutFrame frame) throws IOException;
-	T visit (PDFLayoutPDFContent pdfContent) throws IOException;
-	T visit (PDFLayoutTextContent textContent);
+	T visit (PDFLayoutFrameElement frameElement) throws IOException;
+	T visit (PDFLayoutPDFElement pdfElement) throws IOException;
+	T visit (PDFLayoutTextElement textElement);
 }

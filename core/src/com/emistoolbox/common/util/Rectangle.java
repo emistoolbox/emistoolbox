@@ -54,4 +54,10 @@ public class Rectangle implements Serializable
 
 	public void setBottom(double bottom) 
 	{ this.bottom = bottom; }
+	
+	public double getWidth()
+	{ return right - left; } 
+	
+	public double getHeight()
+	{ return bottom - top; } 
 }

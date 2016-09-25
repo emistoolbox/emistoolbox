@@ -3,7 +3,7 @@ package com.emistoolbox.lib.pdf.layout;
 import info.joriki.graphics.Rectangle;
 
 public interface PDFLayoutBoundingBoxVisitor {
-	Rectangle visit (PDFLayoutFrame frame);
-	Rectangle visit (PDFLayoutPDFContent pdfContent);
-	Rectangle visit (PDFLayoutTextContent textContent);
+	Rectangle visit (PDFLayoutFrameElement frameElement);
+	Rectangle visit (PDFLayoutPDFElement pdfElement);
+	Rectangle visit (PDFLayoutTextElement textElement);
 }

@@ -25,15 +25,14 @@ import java.util.Set;
 
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutComponent;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutCoordinatePlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutFrame;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutTextContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 
 import es.jbauer.lib.io.IOOutput;
@@ -58,12 +57,12 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream ();
 		ps = new PrintStream (baos);
 		resourceRenamer = new ResourceRenamer ("R");
-		PDFLayoutFrame outerFrame = layout.getOuterFrame ();
-		flip (outerFrame.getRectangle ());
+		PDFLayoutFrameElement outerFrame = layout.getOuterFrame ();
+		flip (getBoundingBox (outerFrame));
 		outerFrame.accept (this);
 		ps.close ();
 		PDFDictionary page = new PDFDictionary ("Page");
-		page.put ("MediaBox",new PDFArray (outerFrame.getRectangle ()));
+		page.put ("MediaBox",new PDFArray (getBoundingBox (outerFrame)));
 		page.putIndirect ("Contents",new PDFStream (baos.toByteArray ()));
 		PDFDictionary resources = resourceRenamer.getResources ();
 		PDFDictionary fonts = resources.getOrCreateDictionary ("Font");
@@ -161,32 +160,27 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return null;
 	}
 
-	public Void visit(PDFLayoutComponent component) throws IOException {
-		return null;
-	}
-
-	public Void visit (PDFLayoutFrame frame) throws IOException {
-		Rectangle frameBox = frame.getRectangle ();
-		Rectangle previousComponentBox = null;
-		for (PDFLayoutComponent component : frame.getComponents ()) {
-			PDFLayoutContent componentContent = component.getContent ();
-			PDFLayoutPlacement placement = component.getPlacement ();
-			PDFLayoutObjectFit objectFit = component.getObjectFit ();
-			Rectangle componentBox = getBoundingBox (componentContent);
+	public Void visit (PDFLayoutFrameElement frame) throws IOException {
+		Rectangle frameBox = getBoundingBox (frame);
+		Rectangle previousElementBox = null;
+		for (PDFLayoutElement element : frame.getElements ()) {
+			PDFLayoutPlacement placement = element.getPlacement ();
+			PDFLayoutObjectFit objectFit = element.getObjectFit ();
+			Rectangle elementBox = getBoundingBox (element);
 			double width = 0;
 			double height = 0;
 			switch (objectFit) {
 			case CONTAIN:
-				double scale = Math.min (frameBox.width () / componentBox.width (),frameBox.height () / componentBox.height ()); 
-				width = scale * componentBox.width ();
-				height = scale * componentBox.height ();
+				double scale = Math.min (frameBox.width () / elementBox.width (),frameBox.height () / elementBox.height ()); 
+				width = scale * elementBox.width ();
+				height = scale * elementBox.height ();
 				break;
 			case NONE:
 				break;
 				default:
 					throw new Error ("object fit " + objectFit + " not implemented");
 			}
-			Rectangle newComponentBox = objectFit == PDFLayoutObjectFit.NONE ? new Rectangle (componentBox) : new Rectangle (0,0,width,height);
+			Rectangle newElementBox = objectFit == PDFLayoutObjectFit.NONE ? new Rectangle (elementBox) : new Rectangle (0,0,width,height);
 			double x;
 			double y;
 			if (placement instanceof PDFLayoutCoordinatePlacement) {
@@ -198,32 +192,32 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				PDFLayoutAlignmentPlacement alignmentPlacement = (PDFLayoutAlignmentPlacement) placement;
 				switch (alignmentPlacement.getHorizontalAlignment ()) {
 				case BEFORE:
-					x = previousComponentBox.xmin - newComponentBox.width ();
+					x = previousElementBox.xmin - newElementBox.width ();
 					break;
 				case AFTER:
-					x = previousComponentBox.xmax;
+					x = previousElementBox.xmax;
 					break;
 				case LEFT:
 					x = frameBox.xmin;
 					break;
 				case CENTER:
-					x = frameBox.xmin + (frameBox.width () - newComponentBox.width ()) / 2;
+					x = frameBox.xmin + (frameBox.width () - newElementBox.width ()) / 2;
 					break;
 				default:
 					throw new Error ("horizontal placement " + alignmentPlacement.getHorizontalAlignment () + " not implemented");
 				}
 				switch (alignmentPlacement.getVerticalAlignment ()) {
 				case ABOVE:
-					y = previousComponentBox.ymin - newComponentBox.height ();
+					y = previousElementBox.ymin - newElementBox.height ();
 					break;
 				case BELOW:
-					y = previousComponentBox.ymax;
+					y = previousElementBox.ymax;
 					break;
 				case TOP:
 					y = frameBox.ymin;
 					break;
 				case CENTER:
-					y = frameBox.ymin + (frameBox.height () - newComponentBox.height ()) / 2;
+					y = frameBox.ymin + (frameBox.height () - newElementBox.height ()) / 2;
 					break;
 				default:
 					throw new Error ("vertical placement " + alignmentPlacement.getVerticalAlignment () + " not implemented");
@@ -231,34 +225,34 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			}
 			else
 				throw new Error ("placement " + placement.getClass () + " not implemented");
-			newComponentBox.shiftBy (newComponentBox.xmin - x,newComponentBox.ymin - y);
+			newElementBox.shiftBy (newElementBox.xmin - x,newElementBox.ymin - y);
 
 			pushGraphicsState ();
-//			drawRectangle (newComponentBox);
-			if (!newComponentBox.equals (componentBox))
-				transform (componentBox,newComponentBox);
-			drawRectangle (componentBox);
+//			drawRectangle (newElementBox);
+			if (!newElementBox.equals (elementBox))
+				transform (elementBox,newElementBox);
+			drawRectangle (elementBox);
 			// This could be done more elegantly by always flipping here and always flipping frames instead of just the outer one.
 			// All frame flips except the outer one would cancel, but we'd have a lot of unnecessary cancelling transformations
 			// in the output (unless we cancel them explicitly, which would defeat the purpose of elegance)
-			if (!(componentContent instanceof PDFLayoutFrame))
-				flip (componentBox);
-			componentContent.accept (this);
+			if (!(element instanceof PDFLayoutFrameElement))
+				flip (elementBox);
+			element.accept (this);
 			popGraphicsState ();
-			previousComponentBox = newComponentBox;
+			previousElementBox = newElementBox;
 		}
 		return null;
 	}
 
-	public Void visit (PDFLayoutPDFContent pdfContent) throws IOException {
-		ps.write (resourceRenamer.rename (getPage (pdfContent)));
+	public Void visit (PDFLayoutPDFElement pdfElement) throws IOException {
+		ps.write (resourceRenamer.rename (getPage (pdfElement)));
 		return null;
 	}
 
-	public Void visit (PDFLayoutTextContent textContent) {
-		PDFLayoutFont layoutFont = textContent.getFont ();
+	public Void visit (PDFLayoutTextElement textElement) {
+		PDFLayoutFont layoutFont = textElement.getFont ();
 		double fontSize = layoutFont.getFontSize ();
-		ps.print ("BT /" + getFontLabel (layoutFont) + " " + fontSize + " Tf (" + textContent.getText () + ") Tj ET\n");
+		ps.print ("BT /" + getFontLabel (layoutFont) + " " + fontSize + " Tf (" + textElement.getText () + ") Tj ET\n");
 		return null;
 	}
 
@@ -274,31 +268,26 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return fontLabel;
 	}
 
-	private Rectangle getBoundingBox (PDFLayoutContent content) throws IOException {
-		return content.accept (new PDFLayoutVisitor<Rectangle> () {
+	private Rectangle getBoundingBox (PDFLayoutElement element) throws IOException {
+		return element.accept (new PDFLayoutVisitor<Rectangle> () {
 			public Rectangle visit(PDFLayout page) throws IOException {
 				return null;
 			}
-
-			public Rectangle visit(PDFLayoutComponent component) throws IOException {
-				return null;
+			public Rectangle visit (PDFLayoutFrameElement frame) throws IOException {
+				return new Rectangle (0,0,frame.getWidth (),frame.getHeight ());
 			}
 
-			public Rectangle visit (PDFLayoutFrame frame) throws IOException {
-				return frame.getRectangle ();
+			public Rectangle visit (PDFLayoutPDFElement pdfElement) throws IOException {
+				return getPage (pdfElement).getMediaBox ().toRectangle ();
 			}
 
-			public Rectangle visit (PDFLayoutPDFContent pdfContent) throws IOException {
-				return getPage (pdfContent).getMediaBox ().toRectangle ();
-			}
-
-			public Rectangle visit (PDFLayoutTextContent textContent) {
-				PDFLayoutFont layoutFont = textContent.getFont ();
+			public Rectangle visit (PDFLayoutTextElement textElement) {
+				PDFLayoutFont layoutFont = textElement.getFont ();
 				PDFFont pdfFont = getPDFFont (layoutFont);
 				TextState textState = new TextState ();
 				double fontSize = layoutFont.getFontSize ();
 				textState.setTextFont (pdfFont,fontSize);
-				double advance = textState.getAdvance (textContent.getText ().getBytes ()); // TODO: proper encoding
+				double advance = textState.getAdvance (textElement.getText ().getBytes ()); // TODO: proper encoding
 				double descent = fontSize * pdfFont.getDescent ();
 				double ascent = fontSize * pdfFont.getAscent ();
 				return new Rectangle (0,descent,advance,ascent);
@@ -306,13 +295,13 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		});
 	}
 
-	private Map<PDFLayoutPDFContent,PDFDictionary> pageMap = new HashMap<PDFLayoutPDFContent,PDFDictionary> ();
+	private Map<PDFLayoutPDFElement,PDFDictionary> pageMap = new HashMap<PDFLayoutPDFElement,PDFDictionary> ();
 
-	private PDFDictionary getPage (PDFLayoutPDFContent content) throws IOException {
-		PDFDictionary page = pageMap.get (content);
+	private PDFDictionary getPage (PDFLayoutPDFElement pdfElement) throws IOException {
+		PDFDictionary page = pageMap.get (pdfElement);
 		if (page== null) {
-			page = new PDFFile (new SeekableByteArray (Util.toByteArray (content.getInput ().getInputStream ()))).getDocument ().getPage (1);
-			pageMap.put (content,page);
+			page = new PDFFile (new SeekableByteArray (Util.toByteArray (pdfElement.getInput ().getInputStream ()))).getDocument ().getPage (1);
+			pageMap.put (pdfElement,page);
 		}
 		return page;
 	}

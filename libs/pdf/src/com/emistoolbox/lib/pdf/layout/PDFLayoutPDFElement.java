@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import es.jbauer.lib.io.IOInput;
 
-public class PDFLayoutPDFContent extends PDFLayoutContent {
+public class PDFLayoutPDFElement extends PDFLayoutElement {
 	private IOInput input;
 
-	public PDFLayoutPDFContent (IOInput input) {
+	public PDFLayoutPDFElement (IOInput input) {
 		this.input = input;
 	}
 

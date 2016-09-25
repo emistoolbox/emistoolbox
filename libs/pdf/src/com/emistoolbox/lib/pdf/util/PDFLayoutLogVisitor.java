@@ -5,11 +5,11 @@ import java.io.PrintStream;
 
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutBorderStyle;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutComponent;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutFrame;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutLineStyle;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFContent;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutTextContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 
 import es.jbauer.lib.io.IOOutput;
@@ -53,46 +53,48 @@ public class PDFLayoutLogVisitor implements PDFLayoutVisitor<Void>
 	}
 
 	@Override
-	public Void visit(PDFLayoutComponent component) throws IOException 
+	public Void visit(PDFLayoutFrameElement frame) throws IOException 
 	{
-		PDFLayoutBorderStyle border = component.getBorderStyle(); 
+		os.println(indent + "Element - Frame: " + frame.getWidth() + " x " + frame.getHeight()); 
+		output(frame);
+		for (PDFLayoutElement e : frame.getElements())
+			e.accept(this); 
+		
+		return null;
+	}
+	
+	@Override
+	public Void visit(PDFLayoutPDFElement pdfContent) throws IOException {
+		os.println(indent + "Element - PDF"); 
+		output(pdfContent); 
+		return null; 
+	}
+
+	@Override
+	public Void visit(PDFLayoutTextElement textContent) {
+		os.println(indent + "Element - Text: " + textContent.getText());
+		output(textContent); 
+		return null; 
+	}
+	
+	private void output(PDFLayoutElement item)
+	{
+		PDFLayoutBorderStyle border = item.getBorderStyle(); 
 		os.println(indent + "Border Style"); 
+
 		indent(); 
 		try { 
 			os.println(indent + "radius=" + border.getBorderRadius()); 
 			for (PDFLayoutLineStyle line : border.getLineStyles().getValues(new PDFLayoutLineStyle[0])) 
 				os.println(indent + "Line: color=" + line.getColor() + ", width=" + line.getWidth()); 
 		}
-		finally { unindent(); } 
+		finally { unindent(); }
 		
-		return null;
+		os.println(indent + "fit = " + item.getObjectFit());
+		os.println(indent + "padding = " + item.getPadding().getValues(new Double[0]));  
+		os.println(indent + "placement = " + item.getPlacement()); 
 	}
 	
-	@Override
-	public Void visit(PDFLayoutFrame frame) throws IOException 
-	{
-		os.println(indent + "Frame: " + frame.getRectangle().toString()); 
-		indent();  
-		try { 
-			for (PDFLayoutComponent component : frame.getComponents())
-				component.accept(this); 
-		}
-		finally { unindent(); } 
-		
-		return null; 
-	}
-
-	@Override
-	public Void visit(PDFLayoutPDFContent pdfContent) throws IOException {
-		os.println(indent + "Content - PDF"); 
-		return null; 
-	}
-
-	@Override
-	public Void visit(PDFLayoutTextContent textContent) {
-		os.println(indent + "Content - Text: " + textContent.getText());
-		return null; 
-	}
 
 	public void close()
 	{ 

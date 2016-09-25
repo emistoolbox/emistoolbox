@@ -32,10 +32,13 @@ public class ObjectStreamTest
 	private static List<PDFLayout> readLayout(IOInput in)
 		throws IOException, ClassNotFoundException
 	{
-		try (InputStream is = in.getInputStream())
-		{
+		InputStream is = null; 
+		try {
+			is = in.getInputStream(); 
 			ObjectInputStream ois = new ObjectInputStream(is); 
 			return (List<PDFLayout>) ois.readObject(); 
 		}
+		finally 
+		{ if (is != null) is.close(); }  
 	}
 }
