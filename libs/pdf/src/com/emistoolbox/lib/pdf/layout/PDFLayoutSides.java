@@ -30,6 +30,15 @@ public class PDFLayoutSides<T> {
 		right = values[2]; 
 		bottom = values[3]; 
 	}
+	
+	public void getValues(T[] values)
+	{
+		values[0] = left; 
+		values[1] = top; 
+		values[2] = right;  
+		values[3] = bottom; 
+	}
+	
 	public T getLeft () {
 		return left;
 	}

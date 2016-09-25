@@ -1,15 +1,22 @@
 package com.emistoolbox.server.renderer.pdfreport.pdflayout;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
-import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig.PageOrientation;
-import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig.PageSize;
+import com.emistoolbox.common.ChartColor;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportWriterException;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutBorderConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.common.results.ReportMetaResult;
+import com.emistoolbox.common.util.LayoutSides;
+import com.emistoolbox.lib.pdf.PDFLayoutRenderer;
 import com.emistoolbox.lib.pdf.specification.PDFLayout;
 import com.emistoolbox.lib.pdf.specification.PDFLayoutAlignmentPlacement;
 import com.emistoolbox.lib.pdf.specification.PDFLayoutComponent;
@@ -20,13 +27,16 @@ import com.emistoolbox.lib.pdf.specification.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.specification.PDFLayoutTextContent;
 import com.emistoolbox.lib.pdf.specification.PDFLayoutVerticalAlignment;
 import com.emistoolbox.server.renderer.charts.ChartRenderer;
-import com.emistoolbox.server.renderer.pdfreport.PdfContent;
-import com.emistoolbox.server.renderer.pdfreport.PdfPage;
+import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportWriter;
+import com.emistoolbox.server.renderer.pdfreport.layout.LayoutFrame;
+import com.emistoolbox.server.renderer.pdfreport.layout.LayoutPage;
 
+import es.jbauer.lib.io.IOInput;
 import info.joriki.graphics.Point;
 import info.joriki.graphics.Rectangle;
+import info.joriki.io.Util;
 
 public class PDFLayoutReportWriter implements PdfReportWriter 
 {
@@ -39,24 +49,30 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 	public void writeReport(PdfReport report, File out) 
 		throws IOException, PdfReportWriterException 
 	{
-		PdfReportConfig config = report.getReportConfig(); 
+		if (!(report.getReportConfig() instanceof LayoutPdfReportConfig))
+			throw new IllegalArgumentException("Can only write LayoutPdfReportConfig reports."); 
+
+		LayoutPdfReportConfig config = (LayoutPdfReportConfig) report.getReportConfig(); 
 		
 		Point pageSize = getPageSize(config);
 		Rectangle margins = getMargins(config); 
-		Point marginCells = getCellMargins(config); 
 
 		List<PDFLayout> pages = new ArrayList<PDFLayout>(); 
-		for (PdfPage page : report.getPages())
+		for (EmisPdfPage page : report.getPages())
 		{
-			page.layout(pageSize, margins, marginCells);
-			pages.add(getPage(page, pageSize, margins)); 
+			if (page instanceof LayoutPage)
+				pages.add(renderPage((LayoutPage) page, pageSize, margins)); 
 		}
 		
 		render(out, pages); 
 	}
 
 	private void render(File out, List<PDFLayout> pages)
-	{}
+		throws IOException
+	{
+		IOInput input = new PDFLayoutRenderer().render(pages);
+		Util.copy(input.getInputStream (), out);
+	}
 	
 	private PDFLayoutSides<Double> getSides(Rectangle values)
 	{
@@ -69,31 +85,83 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		return result; 
 	}
 	
-	private PDFLayout getPage(PdfPage page, Point size, Rectangle margins)
+	private PDFLayout renderPage(LayoutPage page, Point size, Rectangle margins)
 	{
 		PDFLayout layout = new PDFLayout();  
-		PDFLayoutFrame frame = new PDFLayoutFrame(); 
-		frame.setRectangle(new Rectangle(0, 0, size.x, size.y));
-		frame.setMargins(getSides(margins)); 
+		PDFLayoutFrame pageFrame = new PDFLayoutFrame(); 
+		pageFrame.setRectangle(new Rectangle(0, 0, size.x, size.y));
+		pageFrame.setMargins(getSides(margins)); 
 
 		List<PDFLayoutComponent> components = new ArrayList<PDFLayoutComponent>();
-		PDFLayoutComponent component = createTitles(frame, page.getTitle(), page.getSubtitle()); 
+		PDFLayoutComponent component = createTitles(pageFrame, page.getText(PdfText.TEXT_TITLE), page.getText(PdfText.TEXT_SUBTITLE)); 
 		if (component != null)
 			components.add(component); 
 		
-		component = createFooter(frame, page.getFooter());
+		component = createFooter(pageFrame, page.getText(PdfText.TEXT_FOOTER));
 		if (component != null)
 			components.add(component); 
 		
-		for (PdfContent content : page.getContents())
+		for (LayoutFrame frame : page.getFrames())
 		{
+			component = createFrame(frame);
+			if (component != null)
+				components.add(component); 
 		}
 		
-		frame.setComponents(components);
-		layout.setOuterFrame(frame);
+		pageFrame.setComponents(components);
+		layout.setOuterFrame(pageFrame);
 		
 		return layout; 
 	}
+	
+	private PDFLayoutComponent createFrame(LayoutFrame frame)
+	{
+		PDFLayoutComponent component = new PDFLayoutComponent(); 
+		setPlacement(component, frame.getFrameConfig().getPosition());
+
+		PDFLayoutFrame pdfFrame = createFrame(frame.getFrameConfig()); 
+		component.setContent(pdfFrame);
+		
+		return component; 
+	}
+	
+	private void setPlacement(PDFLayoutComponent component, com.emistoolbox.common.util.Rectangle rect)
+	{
+		// TODO
+	}
+	
+	private PDFLayoutFrame createFrame(LayoutFrameConfig config)
+	{
+		PDFLayoutFrame result = new PDFLayoutFrame(); 
+		result.setBorderRadius((double) config.getBorderRadius());
+		result.setColors(getColors(config.getBorders())); 
+//		result.setLineWidths(lineWidths);
+//		result.setMargins();
+//		result.setRectangle();
+	}
+	
+	private PDFLayoutSides<Color> getColors(LayoutSides<LayoutBorderConfig> borderSides)
+	{
+		if (borderSides == null)
+			return null; 
+		
+		PDFLayoutSides<Color> result = new PDFLayoutSides<Color>(); 
+
+		LayoutBorderConfig[] borders = borderSides.getValues(new LayoutBorderConfig[4]); 
+		Color[] colors = new Color[4]; 
+		
+		for (int i = 0; i < 4; i++)
+		{
+			if (borders[i] != null)
+				colors[i] = getColor(borders[i].getColour()); 
+		}
+		
+		result.set(colors); 
+		return result; 
+	}
+	
+	private Color getColor(ChartColor color)
+	{ return new Color(color.getRed(), color.getGreen(), color.getBlue()); }
 	
 	private PDFLayoutComponent createTitles(PDFLayoutFrame frame, String title, String subtitle)
 	{
@@ -119,7 +187,7 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		return result; 
 	}
 	
-	private Point getPageSize(PdfReportConfig config)
+	private Point getPageSize(LayoutPdfReportConfig config)
 	{
 		Point result = new Point(); 
 		switch (config.getPageSize())
@@ -144,13 +212,13 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		return result; 
 	}
 	
-	private Rectangle getMargins(PdfReportConfig config)
+	private Rectangle getMargins(LayoutPdfReportConfig config)
 	{
 		int margin = config.getPageSize() == PageSize.A5 ? 24 : 36; 
 		return new Rectangle(margin, margin, margin, margin); 
 	}
 	
-	private Point getCellMargins(PdfReportConfig config)
+	private Point getCellMargins(LayoutPdfReportConfig config)
 	{ return new Point(10, 10); }
 	
 	@Override

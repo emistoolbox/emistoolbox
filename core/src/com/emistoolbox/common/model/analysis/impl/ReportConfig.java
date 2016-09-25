@@ -5,6 +5,7 @@ import com.emistoolbox.common.model.analysis.EmisIndicator;
 import com.emistoolbox.common.model.analysis.EmisReportConfig;
 import com.emistoolbox.common.model.meta.EmisMetaEnum;
 import com.emistoolbox.common.model.meta.EmisMetaGroupEnum;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.util.NamedUtil;
 
@@ -18,6 +19,7 @@ public class ReportConfig implements EmisReportConfig, Serializable
     private List<EmisMetaGroupEnum> groupEnums = new ArrayList<EmisMetaGroupEnum>(); 
     private List<EmisIndicator> indicators = new ArrayList<EmisIndicator>();
     private List<PdfReportConfig> reports = new ArrayList<PdfReportConfig>();
+    private List<EmisPdfReportConfig> pdfReports = new ArrayList<EmisPdfReportConfig>();
     private List<ExcelReportConfig> excelReports = new ArrayList<ExcelReportConfig>(); 
     private int defaultDateIndex = 0;
 
@@ -33,7 +35,14 @@ public class ReportConfig implements EmisReportConfig, Serializable
     public void setIndicators(List<EmisIndicator> indicator)
     { this.indicators = indicator; }
 
-    public List<PdfReportConfig> getReports()
+	public List<EmisPdfReportConfig> getPdfReports() 
+	{ return pdfReports; }
+
+	@Override
+	public void setPdfReports(List<EmisPdfReportConfig> reports) 
+	{ this.pdfReports = reports; } 
+
+	public List<PdfReportConfig> getReports()
     { return this.reports; }
 
     public void setReports(List<PdfReportConfig> reports)

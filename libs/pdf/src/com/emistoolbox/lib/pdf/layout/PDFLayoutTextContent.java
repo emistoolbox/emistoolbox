@@ -1,8 +1,10 @@
 package com.emistoolbox.lib.pdf.layout;
 
 import java.io.IOException;
+import info.joriki.graphics.Rectangle;
 
-public class PDFLayoutTextContent extends PDFLayoutContent {
+public class PDFLayoutTextContent extends PDFLayoutContent 
+{
 	private String text;
 	private PDFLayoutFont font;
 
@@ -31,6 +33,10 @@ public class PDFLayoutTextContent extends PDFLayoutContent {
 		this.font = font;
 	}
 
+	public Rectangle getBoundingBox() throws IOException {
+		return null;
+	}
+	
 	public <T> T accept (PDFLayoutVisitor<T> visitor) throws IOException {
 		return visitor.visit (this);
 	}

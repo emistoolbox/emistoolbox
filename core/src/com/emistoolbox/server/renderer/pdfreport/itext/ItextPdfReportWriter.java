@@ -3,8 +3,12 @@ package com.emistoolbox.server.renderer.pdfreport.itext;
 import com.emistoolbox.common.model.EmisEnumTupleValue;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportWriterException;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
+import com.emistoolbox.common.renderer.pdfreport.TextSet;
+import com.emistoolbox.common.renderer.pdfreport.TextSetImpl;
 import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.server.ServerUtil;
+import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPage;
@@ -100,6 +104,9 @@ public class ItextPdfReportWriter implements PdfReportWriter
     {
         if (report == null)
             throw new PdfReportWriterException("Report cannot be null");
+        
+        if (!(report.getReportConfig() instanceof PdfReportConfig))
+        	throw new PdfReportWriterException("Cannot only write PdfReportConfig reports."); 
 
         Document document = new Document(getItextPageSize(report));
         try
@@ -111,8 +118,12 @@ public class ItextPdfReportWriter implements PdfReportWriter
 
             String currentPageTitle = null;
 
-            for (PdfPage page : report.getPages())
+            for (EmisPdfPage emisPage : report.getPages())
             {
+            	if (!(emisPage instanceof PdfPage))
+            		continue; 
+            	
+            	PdfPage page = (PdfPage) emisPage; 
                 document.newPage();
 
                 int maxCellWidth = (int) (document.getPageSize().getWidth() - 20.0F) / page.getColumns();
@@ -220,7 +231,8 @@ public class ItextPdfReportWriter implements PdfReportWriter
 
     private String getCurrentFooter(PdfPage page, PdfReport report)
     {
-        return isNullOrEmpty(page.getFooter()) ? report.getReportConfig().getFooter() : page.getFooter();
+    	String pageFooter = page.getText(PdfText.TEXT_FOOTER); 
+        return isNullOrEmpty(pageFooter) ? report.getReportConfig().getText(PdfText.TEXT_FOOTER) : pageFooter;
     }
 
     private static boolean isNullOrEmpty(String check)
@@ -230,18 +242,19 @@ public class ItextPdfReportWriter implements PdfReportWriter
 
     private String setTitleRow(PdfPTable table, PdfPage page, PdfReport report, String previousPageTitle)
     {
-        String title = report.getReportConfig().getTitle();
-        String subtitle = report.getReportConfig().getSubtitle();
+    	TextSet txt = report.getReportConfig(); 
+        String title = txt.getText(PdfText.TEXT_TITLE);
+        String subtitle = txt.getText(PdfText.TEXT_SUBTITLE);
 
-        if (isNullOrEmpty(page.getTitle()))
+        if (isNullOrEmpty(page.getText(PdfText.TEXT_TITLE)))
         {
-            if (isNullOrEmpty(report.getReportConfig().getTitle()))
+            if (isNullOrEmpty(txt.getText(PdfText.TEXT_TITLE)))
                 return previousPageTitle;
         }
         else
         {
-            title = replaceDate(page.getTitle());
-            subtitle = replaceDate(page.getSubtitle());
+            title = replaceDate(page.getText(PdfText.TEXT_TITLE));
+            subtitle = replaceDate(page.getText(PdfText.TEXT_SUBTITLE));
         }
 
         StringBuilder builder = new StringBuilder();

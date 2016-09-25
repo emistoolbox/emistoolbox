@@ -11,6 +11,7 @@ import com.emistoolbox.common.model.analysis.EmisAggregatorDef;
 import com.emistoolbox.common.model.analysis.EmisIndicator;
 import com.emistoolbox.common.model.analysis.EmisReportConfig;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfMetaResultContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
@@ -69,7 +70,7 @@ public class MetaResultUtil
 		
 	}
 	
-	public static Set<EmisMetaDateEnum> getUsedDateTypes(PdfReportConfig reportConfig)
+	public static Set<EmisMetaDateEnum> getUsedDateTypes(EmisPdfReportConfig reportConfig)
 	{
 		Set<EmisMetaDateEnum> result = new HashSet<EmisMetaDateEnum>();
 		if (reportConfig == null)

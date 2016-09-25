@@ -5,24 +5,17 @@ import java.util.List;
 
 import org.apache.commons.lang3.Range;
 
-import com.emistoolbox.common.ChartFont;
-import com.emistoolbox.server.renderer.pdfreport.FontIdentifier;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
-import com.emistoolbox.server.renderer.pdfreport.PdfContentFontMap;
 import com.emistoolbox.server.renderer.pdfreport.PdfPage;
 
 import info.joriki.graphics.Point;
 import info.joriki.graphics.Rectangle;
 
-public class PdfPageImpl implements PdfPage
+public class PdfPageImpl extends EmisPdfPageImpl implements PdfPage
 {
     private PdfContent[][] content;
-    private String title;
-    private String subtitle;
-    private String footer;
     private int rows = 0;
     private int cols = 0;
-    private PdfContentFontMap fontMap = new PdfContentFontMap();
 
     public void addContent(int row, int col, PdfContent content)
     {
@@ -119,22 +112,11 @@ public class PdfPageImpl implements PdfPage
             addContent(row, col + i, content, clearing);
     }
 
-    public void setFooter(String footer)
-    {
-        this.footer = footer;
-    }
-
     public void setLayout(int rows, int cols)
     {
         this.content = new PdfContent[rows][cols];
         this.rows = rows;
         this.cols = cols;
-    }
-
-    public void setTitle(String title, String subtitle)
-    {
-        this.title = title;
-        this.subtitle = subtitle;
     }
 
     public int getColumns()
@@ -145,18 +127,6 @@ public class PdfPageImpl implements PdfPage
 
     public int getRows()
     { return this.rows; }
-
-    public String getSubtitle()
-    { return this.subtitle; }
-
-    public String getTitle()
-    { return this.title; }
-
-    public String getFooter()
-    { return this.footer; }
-
-    public void setFont(FontIdentifier identifier, ChartFont font)
-    { this.fontMap.setFont(identifier, font); }
 
     public String contentToString()
     {
@@ -173,11 +143,6 @@ public class PdfPageImpl implements PdfPage
         return builder.toString();
     }
 
-    public String toString()
-    {
-        return String.format("%s - %s : rows:%d  cols:%d", new Object[] { this.title, this.subtitle, Integer.valueOf(this.rows), Integer.valueOf(this.cols) });
-    }
-    
     public void layout(Point pageSize, Rectangle margins, Point cellMargin)
     {
     	for (int col = 0; col < cols; col++)
@@ -229,6 +194,4 @@ public class PdfPageImpl implements PdfPage
 		
 		return result;
 	}
-	
-	
 }

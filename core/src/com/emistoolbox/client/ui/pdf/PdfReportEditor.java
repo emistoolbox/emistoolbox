@@ -12,6 +12,7 @@ import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
@@ -278,8 +279,9 @@ public class PdfReportEditor extends FlexTable implements EmisEditor<PdfReportCo
             return;
         }
         this.reportConfig.setEntityType((EmisMetaEntity) this.uiEntity.getUserObject());
-        this.reportConfig.setTitle(this.uiTitle.getText(), null);
-        this.reportConfig.setFooter(this.uiFooter.getText());
+        this.reportConfig.putText(PdfText.TEXT_TITLE, this.uiTitle.getText()); 
+        this.reportConfig.putText(PdfText.TEXT_FOOTER, uiFooter.getText());
+        
         this.reportConfig.setPage(PdfReportConfig.PageSize.values()[this.uiSize.getSelectedIndex()], PdfReportConfig.PageOrientation.values()[this.uiOrientation.getSelectedIndex()]);
 
         int[] layout = (int[]) this.uiLayout.getUserObject();
@@ -317,8 +319,8 @@ public class PdfReportEditor extends FlexTable implements EmisEditor<PdfReportCo
             }
         }
         this.uiEntity.setValue(config.getEntityType());
-        this.uiTitle.setText(config.getTitle());
-        this.uiFooter.setText(config.getFooter());
+        this.uiTitle.setText(config.getText(PdfText.TEXT_TITLE));
+        this.uiFooter.setText(config.getText(PdfText.TEXT_FOOTER));
         this.uiOrientation.setSelectedIndex(config.getOrientation().ordinal());
         this.uiSize.setSelectedIndex(config.getPageSize().ordinal());
 

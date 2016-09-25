@@ -3,7 +3,8 @@ package com.emistoolbox.common.results.impl;
 import com.emistoolbox.common.ChartColor;
 import com.emistoolbox.common.ChartStroke;
 import com.emistoolbox.common.renderer.ChartConfig;
-import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
+
 import com.emistoolbox.common.results.ReportMetaResult;
 
 import java.io.Serializable;
@@ -11,16 +12,16 @@ import java.io.Serializable;
 public class ReportMetaResultImpl extends MetaResultImpl implements ReportMetaResult, Serializable
 {
     private static final long serialVersionUID = 1L;
-    private PdfReportConfig reportConfig;
+    private EmisPdfReportConfig reportConfig;
     private int[] entityIds;
     private String[] entityNames;
     private ChartColor[] colourScheme = ChartConfig.PALLET_VARIED; 
     private ChartStroke[] colourStrokes = null; 
 
-    public PdfReportConfig getReportConfig()
+    public EmisPdfReportConfig getReportConfig()
     { return this.reportConfig; }
 
-    public void setReportConfig(PdfReportConfig reportConfig)
+    public void setReportConfig(EmisPdfReportConfig reportConfig)
     { this.reportConfig = reportConfig; }
 
     public int[] getEntityPathIds()
