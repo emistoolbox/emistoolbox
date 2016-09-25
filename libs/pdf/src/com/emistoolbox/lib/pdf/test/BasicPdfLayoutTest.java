@@ -5,20 +5,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.emistoolbox.lib.pdf.specification.PDFLayout;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutAlignmentPlacement;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutComponent;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutContent;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutCoordinatePlacement;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutFont;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutFontStyle;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutFrame;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutHorizontalAlignment;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutObjectFit;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutPDFContent;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutSides;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutTextContent;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutVerticalAlignment;
+import com.emistoolbox.lib.pdf.layout.PDFLayout;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutComponent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutCoordinatePlacement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFontStyle;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFrame;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutTextContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
 
 import es.jbauer.lib.io.impl.IOFileInput;
 import info.joriki.graphics.Rectangle;
@@ -43,7 +43,8 @@ public class BasicPdfLayoutTest
 		
 		PDFLayoutFont titleFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 24, PDFLayoutFontStyle.BOLD); 
 		PDFLayoutFont subtitleFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 20, PDFLayoutFontStyle.BOLD);
-		PDFLayoutFont textFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 16, PDFLayoutFontStyle.BOLD);
+//		PDFLayoutFont textFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 16, PDFLayoutFontStyle.BOLD);
+		PDFLayoutFont textFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 16, PDFLayoutFontStyle.PLAIN);
 
 		// Title
 		PDFLayoutTextContent title = new PDFLayoutTextContent("District Grade 2 Literacy Progress Report", titleFont);
@@ -60,8 +61,8 @@ public class BasicPdfLayoutTest
 		double cellHeight = (page.height() - textHeight - outerFrame.getMargins().getTop() - outerFrame.getMargins().getBottom() - gap * 2) / 3;
 
 		// Charts along bottom 
-		components.add(getPositionedPdf("chart_bottom1.pdf", 0, cellHeight * 2 + gap, cellWidth * 2 + gap, cellHeight));
-		components.add(getPositionedPdf("chart_bottom2.pdf", 2 * (cellWidth + gap), cellHeight * 2 + gap, cellWidth, cellHeight));
+		components.add(getPositionedPdf("chart_bottom1.pdf", 0, 2 * (cellHeight + gap), cellWidth * 2 + gap, cellHeight));
+		components.add(getPositionedPdf("chart_bottom2.pdf", 2 * (cellWidth + gap), 2 * (cellHeight + gap), cellWidth, cellHeight));
 		
 		// Big 2x2 chart
 		components.add(getPositionedPdf("chart_main.pdf", cellWidth + gap, 0, cellWidth * 2 + gap, cellHeight * 2 + gap)); 
@@ -70,8 +71,8 @@ public class BasicPdfLayoutTest
 		PDFLayoutFrame textFrame = new PDFLayoutFrame(); 
 //		PDFLayoutContent textContent = new PDFLayoutTextContent("This is some bigger text that will explain the charts. The chart layout is based on 4 charts - one featured chart and then three smaller charts. \n\nThis layout illustrates how we can arbitrarily place content on the page to create more interesting report pages. \n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", textFont); 
 		// some smaller text for a first test
-		PDFLayoutContent textContent = new PDFLayoutTextContent("small is beautiful", textFont); 
-		textFrame.setComponents(Collections.singletonList(new PDFLayoutComponent(textContent,null,0,0)));
+		PDFLayoutContent textContent = new PDFLayoutTextContent("The quick brown fox jumps over the lazy dog.", textFont);
+		textFrame.setComponents(Collections.singletonList(new PDFLayoutComponent(textContent,null,10,10)));
 		textFrame.setLineWidths(new PDFLayoutSides<Double>(2.0));
 		textFrame.setRectangle (new Rectangle (0, 0, cellWidth, cellHeight * 2 + gap));
 		components.add(new PDFLayoutComponent(textFrame,null,PDFLayoutHorizontalAlignment.LEFT,PDFLayoutVerticalAlignment.TOP));

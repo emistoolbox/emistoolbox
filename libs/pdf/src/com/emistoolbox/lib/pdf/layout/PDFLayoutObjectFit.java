@@ -1,4 +1,4 @@
-package com.emistoolbox.lib.pdf.specification;
+package com.emistoolbox.lib.pdf.layout;
 
 public enum PDFLayoutObjectFit {
 	// same values and meaning as for CSS property object-fit

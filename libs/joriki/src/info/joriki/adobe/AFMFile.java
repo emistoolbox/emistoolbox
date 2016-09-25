@@ -243,14 +243,24 @@ public class AFMFile implements FontMetrics
 
   public int getAscender ()
   {
-    String ascender = (String) dictionary.get ("Ascender");
-    if (ascender == null)
+	  return getScender ("A",4);
+  }
+
+  public int getDescender ()
+  {
+	  return getScender ("De",2);
+  }
+
+  private int getScender (String prefix,int index)
+  {
+    String scender = (String) dictionary.get (prefix + "scender");
+    if (scender == null)
       {
         String fontBBox = (String) dictionary.get ("FontBBox");
         StringTokenizer tok = new StringTokenizer (fontBBox," ");
-        for (int i = 0;i < 4;i++)
-          ascender = tok.nextToken ();
+        for (int i = 0;i < index;i++)
+          scender = tok.nextToken ();
       }
-    return Integer.parseInt (ascender);
+    return Integer.parseInt (scender);
   }
 }
