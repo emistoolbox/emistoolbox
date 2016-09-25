@@ -117,7 +117,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private void outputRectangle (Rectangle r) {
-		coordinateCommand ("re",r.toDoubleArray ());
+		coordinateCommand ("re",r.xmin,r.ymin,r.width (),r.height ());
 	}
 
 	private void flip (Rectangle r) {
@@ -159,8 +159,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 
 	public Void visit (PDFLayoutFrame frame) throws IOException {
 		Rectangle frameBox = frame.getRectangle ();
+		Rectangle previousComponentBox = null;
 		for (PDFLayoutComponent component : frame.getComponents ()) {
-			pushGraphicsState ();
 			PDFLayoutContent componentContent = component.getContent ();
 			PDFLayoutPlacement placement = component.getPlacement ();
 			PDFLayoutObjectFit objectFit = component.getObjectFit ();
@@ -178,7 +178,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				default:
 					throw new Error ("object fit " + objectFit + " not implemented");
 			}
-			Rectangle newComponentBox = objectFit == PDFLayoutObjectFit.NONE ? componentBox : new Rectangle (0,0,width,height);
+			Rectangle newComponentBox = objectFit == PDFLayoutObjectFit.NONE ? new Rectangle (componentBox) : new Rectangle (0,0,width,height);
 			double x;
 			double y;
 			if (placement instanceof PDFLayoutCoordinatePlacement) {
@@ -189,6 +189,12 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			else if (placement instanceof PDFLayoutAlignmentPlacement) {
 				PDFLayoutAlignmentPlacement alignmentPlacement = (PDFLayoutAlignmentPlacement) placement;
 				switch (alignmentPlacement.getHorizontalAlignment ()) {
+				case BEFORE:
+					x = previousComponentBox.xmin - newComponentBox.width ();
+					break;
+				case AFTER:
+					x = previousComponentBox.xmax;
+					break;
 				case LEFT:
 					x = frameBox.xmin;
 					break;
@@ -199,6 +205,12 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					throw new Error ("horizontal placement " + alignmentPlacement.getHorizontalAlignment () + " not implemented");
 				}
 				switch (alignmentPlacement.getVerticalAlignment ()) {
+				case ABOVE:
+					y = previousComponentBox.ymin - newComponentBox.height ();
+					break;
+				case BELOW:
+					y = previousComponentBox.ymax;
+					break;
 				case TOP:
 					y = frameBox.ymin;
 					break;
@@ -211,7 +223,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			}
 			else
 				throw new Error ("placement " + placement.getClass () + " not implemented");
-			translate (x - newComponentBox.xmin,y - newComponentBox.ymin);
+			newComponentBox.shiftBy (newComponentBox.xmin - x,newComponentBox.ymin - y);
+
+			pushGraphicsState ();
+//			drawRectangle (newComponentBox);
 			if (!newComponentBox.equals (componentBox))
 				transform (componentBox,newComponentBox);
 			drawRectangle (componentBox);
@@ -222,6 +237,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				flip (componentBox);
 			componentContent.accept (this);
 			popGraphicsState ();
+			previousComponentBox = newComponentBox;
 		}
 		return null;
 	}
@@ -234,7 +250,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	public Void visit (PDFLayoutTextContent textContent) {
 		PDFLayoutFont layoutFont = textContent.getFont ();
 		double fontSize = layoutFont.getFontSize ();
-		ps.print ("BT /" + getFontLabel (layoutFont) + " " + fontSize + " Tf 0 " + -fontSize * getPDFFont (layoutFont).getDescent () + " Td (" + textContent.getText () + ") Tj ET\n");
+		ps.print ("BT /" + getFontLabel (layoutFont) + " " + fontSize + " Tf (" + textContent.getText () + ") Tj ET\n");
 		return null;
 	}
 
@@ -269,7 +285,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				double advance = textState.getAdvance (textContent.getText ().getBytes ()); // TODO: proper encoding
 				double descent = fontSize * pdfFont.getDescent ();
 				double ascent = fontSize * pdfFont.getAscent ();
-				return new Rectangle (0,descent,advance,ascent - descent);
+				return new Rectangle (0,descent,advance,ascent);
 			}
 		});
 	}
