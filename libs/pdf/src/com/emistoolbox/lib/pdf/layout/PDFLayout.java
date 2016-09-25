@@ -1,13 +1,13 @@
 package com.emistoolbox.lib.pdf.layout;
 
 public class PDFLayout {
-	private PDFLayoutFrame outerFrame;
+	private PDFLayoutFrameElement outerFrame;
 
-	public PDFLayoutFrame getOuterFrame () {
+	public PDFLayoutFrameElement getOuterFrame () {
 		return outerFrame;
 	}
 
-	public void setOuterFrame (PDFLayoutFrame outerFrame) {
+	public void setOuterFrame (PDFLayoutFrameElement outerFrame) {
 		this.outerFrame = outerFrame;
 	}
 }
