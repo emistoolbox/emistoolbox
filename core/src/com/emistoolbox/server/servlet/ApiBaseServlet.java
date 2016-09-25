@@ -145,13 +145,13 @@ public abstract class ApiBaseServlet extends HttpServlet
         return true; 
     }
     
-    protected boolean asJson(HttpServletRequest req)
+    protected static boolean asJson(HttpServletRequest req)
     {
         String format = req.getParameter(QS_FORMAT); 
         return !StringUtils.isEmpty(format) && format.equals("json"); 
     }
     
-    protected void error(HttpServletResponse resp, int status, String message, boolean asJson)
+    protected static void error(HttpServletResponse resp, int status, String message, boolean asJson)
         throws IOException
     {
         if (asJson)
@@ -370,7 +370,7 @@ public abstract class ApiBaseServlet extends HttpServlet
         content.append("</data>\n"); 
     }
     
-    private void out(HttpServletResponse resp, int status, String content)
+    private static void out(HttpServletResponse resp, int status, String content)
         throws IOException
     {
         resp.setStatus(status); 
@@ -387,23 +387,22 @@ public abstract class ApiBaseServlet extends HttpServlet
         }
     }
     
-    protected List<EmisIndicator> getIndicators(EmisMeta meta)
+    protected static List<EmisIndicator> getIndicators(EmisMeta meta)
         throws IOException
     {
         EmisReportConfig config = EmisToolboxServiceImpl.getReportConfig(meta.getDatasetName(), meta);    
         return config.getIndicators(); 
     }
 
-    protected EmisMetaHierarchy getHierarchy(HttpServletRequest req, String qs, EmisMeta meta)
+    protected static EmisMetaHierarchy getHierarchy(String name, EmisMeta meta)
     {
-        String value = req.getParameter(qs);
-        if (StringUtils.isEmpty(value))
+        if (StringUtils.isEmpty(name))
             return null; 
         
-        return NamedUtil.find(value,  meta.getHierarchies()); 
+        return NamedUtil.find(name,  meta.getHierarchies()); 
     }
     
-    protected EmisIndicator getIndicator(String value, EmisMeta meta)
+    protected static EmisIndicator getIndicator(String value, EmisMeta meta)
         throws IOException
     {
         if (StringUtils.isEmpty(value))
@@ -427,23 +426,27 @@ public abstract class ApiBaseServlet extends HttpServlet
     }
 
     protected boolean setMetaResult(MetaResult metaResult, HttpServletRequest req, HttpServletResponse resp, EmisDataSet emis)
+            throws IOException
+    { return setMetaResult(metaResult, req.getParameterMap(), emis); }
+    
+    protected static boolean setMetaResult(MetaResult metaResult, Map<String, String> params, EmisDataSet emis)
         throws IOException
     {
         EmisMeta meta = emis.getMetaDataSet(); 
-        EmisMetaHierarchy hierarchy = getHierarchy(req, QS_HIERARCHY, meta);
+        EmisMetaHierarchy hierarchy = getHierarchy(params.get(QS_HIERARCHY), meta);
 
         List<EmisMetaEntity> entityTypes = hierarchy.getEntityOrder(); 
-        int[] pathIds = getEntityPathIds(emis, hierarchy, req.getParameter(QS_LOCATION), 0); 
+        int[] pathIds = getEntityPathIds(emis, hierarchy, params.get(QS_LOCATION), 0); 
 
         int entityIndex = pathIds.length -1; 
-        EmisContext context = getContext(req, resp, pathIds == null || pathIds.length == 0 ? null : new Entity(entityTypes.get(entityIndex), pathIds[entityIndex]), meta); 
+        EmisContext context = getContext(params.get(QS_DATE), pathIds == null || pathIds.length == 0 ? null : new Entity(entityTypes.get(entityIndex), pathIds[entityIndex]), meta); 
         if (context == null)
             return false; 
 
         metaResult.setContext(context); 
         metaResult.setHierarchy(hierarchy); 
-        if (req.getParameter(QS_INDICATOR) != null)
-            metaResult.setIndicator(getIndicator(req.getParameter(QS_INDICATOR), meta)); 
+        if (params.get(QS_INDICATOR) != null)
+            metaResult.setIndicator(getIndicator(params.get(QS_INDICATOR), meta)); 
         
         return true; 
     }
@@ -466,24 +469,62 @@ public abstract class ApiBaseServlet extends HttpServlet
         return NamedUtil.find(value,  dims); 
     }
 
-    protected boolean hasParameters(HttpServletRequest req, HttpServletResponse resp, List<String> hieraries, List<String> indicators, List<String> xaxis, List<String> splitBy) throws IOException
+    protected static boolean hasParameters(HttpServletRequest req, HttpServletResponse resp, List<String> hieraries, List<String> indicators, List<String> xaxis, List<String> splitBy) throws IOException
     {
-        if (hieraries != null && !hasParameter(req, resp, QS_HIERARCHY, hieraries))
-            return false; 
+    	String error = hasParameters((Map<String, String>) req.getParameterMap(), hieraries, indicators, xaxis, splitBy); 
+    	if (error == null)
+    		return true; 
+    	
+        error(resp, 400, error, asJson(req)); 
+    	return false; 
+    }
+    
+    public static String hasParameters(Map<String, String> params, List<String> hieraries, List<String> indicators, List<String> xaxis, List<String> splitBy) throws IOException
+    {
+    	String error = null; 
+        if (hieraries != null)
+        	error = hasParameter(params, QS_HIERARCHY, hieraries); 
         
-        if (indicators != null && !hasParameter(req, resp, QS_INDICATOR, indicators))
-            return false; 
+        if (error == null && indicators != null)
+        	error = hasParameter(params, QS_INDICATOR, indicators); 
+
+        if (error == null && xaxis != null)
+        	error = hasParameter(params, QS_XAXIS, xaxis); 
+
+        if (error == null && splitBy != null && !StringUtils.isEmpty(params.get(QS_SPLITBY)))
+        	error = hasParameter(params, QS_SPLITBY, splitBy); 
         
-        if (xaxis != null && !hasParameter(req, resp, QS_XAXIS, xaxis))
-            return false; 
-        
-        if (splitBy != null && !StringUtils.isEmpty(req.getParameter(QS_SPLITBY)))
+        return error; 
+    }
+
+    protected static String hasParameter(Map<String, String> params, String param, Collection<String> values)
+		throws IOException
+    {
+        String value = params.get(param); 
+        if (StringUtils.isEmpty(value))
+        	return "Missing parameter '" + param + "'";  
+
+        if (values != null)
         {
-            if (!hasParameter(req, resp, QS_SPLITBY, splitBy))
-                return false; 
+        	StringBuffer allValues = new StringBuffer(); 
+        	for (String v : values)
+        	{
+        		if (v.equals(value))
+        			return null; 
+                    
+        		if (allValues.length() > 0)
+        			allValues.append(","); 
+        		allValues.append(v); 
+        	}
+                
+        	String message = "Invalid parameter '" + param + "'"; 
+        	if (values != null)
+        		message += ". Should be one of: " + allValues; 
+                
+        	return message; 
         }
         
-        return true; 
+        return null; 
     }
 
     protected List<MetaResultDimension> getDimensions(HttpServletRequest req, String qsIgnoreDimension, String dataName, EmisDataSet emis) throws IOException
@@ -498,7 +539,7 @@ public abstract class ApiBaseServlet extends HttpServlet
             { result.add(dim); }
         }; 
         
-        EmisMetaHierarchy hierarchy = getHierarchy(req, QS_HIERARCHY, emis.getMetaDataSet()); 
+        EmisMetaHierarchy hierarchy = getHierarchy(req.getParameter(QS_HIERARCHY), emis.getMetaDataSet()); 
         EmisIndicator indicator = getIndicator(req.getParameter(QS_INDICATOR), emis.getMetaDataSet()); 
         MetaResultDimension ignoreDimension = getMetaResultDimension(req, qsIgnoreDimension, hierarchy, indicator, emis.getMetaDataSet()); 
         
@@ -507,7 +548,7 @@ public abstract class ApiBaseServlet extends HttpServlet
         return result; 
     }
 
-    protected int[] getEntityPathIds(EmisDataSet emis, EmisMetaHierarchy metaHierarchy, String path, int dateIndex)
+    protected static int[] getEntityPathIds(EmisDataSet emis, EmisMetaHierarchy metaHierarchy, String path, int dateIndex)
     {
         if (StringUtils.isEmpty(path))
             return null; 
@@ -531,7 +572,7 @@ public abstract class ApiBaseServlet extends HttpServlet
         return result; 
     }
     
-    private int[] findIdsFromEntity(EmisDataSet emis, EmisMetaHierarchy metaHierarchy, String entityTypeName, int entityId, int dateIndex)
+    private static int[] findIdsFromEntity(EmisDataSet emis, EmisMetaHierarchy metaHierarchy, String entityTypeName, int entityId, int dateIndex)
     {
         EmisHierarchy hierarchy = emis.getHierarchy(metaHierarchy.getName());
         NamedIndexList<EmisMetaEntity> entityOrder = metaHierarchy.getEntityOrder();         
@@ -556,7 +597,7 @@ public abstract class ApiBaseServlet extends HttpServlet
         return ids; 
     }
     
-    protected String[] getEntityPathNames(EmisDataSet emis, int[] entityIds, List<EmisMetaEntity> entityOrder, int dateIndex)
+    protected static String[] getEntityPathNames(EmisDataSet emis, int[] entityIds, List<EmisMetaEntity> entityOrder, int dateIndex)
     { 
         String[] entityNames = new String[entityIds.length]; 
         for (int i = 0; i < entityNames.length; i++)
@@ -588,7 +629,7 @@ public abstract class ApiBaseServlet extends HttpServlet
         }
     }
     
-    protected EmisContext getContext(HttpServletRequest req, HttpServletResponse resp, EmisEntity entity, EmisMeta meta)
+    protected static EmisContext getContext(String date, EmisEntity entity, EmisMeta meta)
     {
         Context result = new Context();
 
@@ -601,7 +642,6 @@ public abstract class ApiBaseServlet extends HttpServlet
             result.setHierarchyDateIndex(meta.getDefaultDateTypeIndex());
         }
 
-        String date = req.getParameter(QS_DATE); 
         if (!StringUtils.isEmpty(date))
         {
             List<EmisEnumTupleValue> dates = new ArrayList<EmisEnumTupleValue>();
@@ -613,7 +653,7 @@ public abstract class ApiBaseServlet extends HttpServlet
         return result; 
     }
 
-    protected EmisEnumTupleValue getDateEnumValue(EmisMetaDateEnum dateType, String date)
+    protected static EmisEnumTupleValue getDateEnumValue(EmisMetaDateEnum dateType, String date)
     {
         EnumTupleValueImpl value = new EnumTupleValueImpl(); 
         value.setEnumTuple(dateType); 

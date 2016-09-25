@@ -4,10 +4,6 @@ import com.emistoolbox.common.excelMerge.ExcelReportConfig;
 import com.emistoolbox.common.model.meta.EmisMetaEnum;
 import com.emistoolbox.common.model.meta.EmisMetaGroupEnum;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
-import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
-import com.emistoolbox.common.util.NamedUtil;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public interface EmisReportConfig

@@ -157,6 +157,14 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return String.valueOf (x);
 	}
 
+	public Void visit(PDFLayout page) throws IOException {
+		return null;
+	}
+
+	public Void visit(PDFLayoutComponent component) throws IOException {
+		return null;
+	}
+
 	public Void visit (PDFLayoutFrame frame) throws IOException {
 		Rectangle frameBox = frame.getRectangle ();
 		for (PDFLayoutComponent component : frame.getComponents ()) {
@@ -252,6 +260,14 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 
 	private Rectangle getBoundingBox (PDFLayoutContent content) throws IOException {
 		return content.accept (new PDFLayoutVisitor<Rectangle> () {
+			public Rectangle visit(PDFLayout page) throws IOException {
+				return null;
+			}
+
+			public Rectangle visit(PDFLayoutComponent component) throws IOException {
+				return null;
+			}
+
 			public Rectangle visit (PDFLayoutFrame frame) throws IOException {
 				return frame.getRectangle ();
 			}

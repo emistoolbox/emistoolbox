@@ -1041,7 +1041,7 @@ public class XmlReader
 		PdfReportConfig config = new PdfReportConfigImpl();
 		readEmisPdfReportConfig(tag, config);
 		
-		config.setLayout(getAttrAsInt(tag, "rows").intValue(), getAttrAsInt(tag, "cols").intValue());
+		config.setLayout(getAttrAsInt(tag, "rows", 1), getAttrAsInt(tag, "cols", 1));
 
 		List<PdfContentConfig> contents = new ArrayList<PdfContentConfig>();
 		for (Element contentTag : getElements(tag, null, "pdfContent"))

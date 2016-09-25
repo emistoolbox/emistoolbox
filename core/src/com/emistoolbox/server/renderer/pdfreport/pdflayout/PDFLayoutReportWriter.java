@@ -17,15 +17,16 @@ import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.common.util.LayoutSides;
 import com.emistoolbox.lib.pdf.PDFLayoutRenderer;
-import com.emistoolbox.lib.pdf.specification.PDFLayout;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutAlignmentPlacement;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutComponent;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutFrame;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutHorizontalAlignment;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutObjectFit;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutSides;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutTextContent;
-import com.emistoolbox.lib.pdf.specification.PDFLayoutVerticalAlignment;
+import com.emistoolbox.lib.pdf.layout.PDFLayout;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutComponent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFrame;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutTextContent;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 import com.emistoolbox.server.renderer.charts.ChartRenderer;
 import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
@@ -34,6 +35,7 @@ import com.emistoolbox.server.renderer.pdfreport.layout.LayoutFrame;
 import com.emistoolbox.server.renderer.pdfreport.layout.LayoutPage;
 
 import es.jbauer.lib.io.IOInput;
+import es.jbauer.lib.io.impl.IOFileOutput;
 import info.joriki.graphics.Point;
 import info.joriki.graphics.Rectangle;
 import info.joriki.io.Util;
@@ -41,9 +43,13 @@ import info.joriki.io.Util;
 public class PDFLayoutReportWriter implements PdfReportWriter 
 {
 	private ChartRenderer chartRenderer; 
+	private boolean debug = false; 
 	
 	public PDFLayoutReportWriter(ChartRenderer chartRenderer)
 	{ this.chartRenderer = chartRenderer; }
+	
+	public void setDebug(boolean debug)
+	{ this.debug = debug; }
 	
 	@Override
 	public void writeReport(PdfReport report, File out) 
@@ -63,16 +69,17 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 			if (page instanceof LayoutPage)
 				pages.add(renderPage((LayoutPage) page, pageSize, margins)); 
 		}
+
+		PDFLayoutVisitor visitor = new PDFLayoutLogVisitor(); 
+		for (PDFLayout page : pages)
+			visitor.visit(page); 
 		
 		render(out, pages); 
 	}
 
 	private void render(File out, List<PDFLayout> pages)
 		throws IOException
-	{
-		IOInput input = new PDFLayoutRenderer().render(pages);
-		Util.copy(input.getInputStream (), out);
-	}
+	{ new PDFLayoutRenderer().render(pages, new IOFileOutput(out, "application/pdf", null)); }
 	
 	private PDFLayoutSides<Double> getSides(Rectangle values)
 	{
@@ -138,6 +145,8 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 //		result.setLineWidths(lineWidths);
 //		result.setMargins();
 //		result.setRectangle();
+		
+		return null; 
 	}
 	
 	private PDFLayoutSides<Color> getColors(LayoutSides<LayoutBorderConfig> borderSides)

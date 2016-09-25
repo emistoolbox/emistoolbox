@@ -75,7 +75,7 @@ public class ApiInfoServlet extends ApiBaseServlet
             if (!hasParameters(req, resp, hierarchyList, indicatorList, xaxises, splitBys))
                 return; 
 
-            EmisMetaHierarchy hierarchy = getHierarchy(req, QS_HIERARCHY, emis.getMetaDataSet()); 
+            EmisMetaHierarchy hierarchy = getHierarchy(req.getParameter(QS_HIERARCHY), emis.getMetaDataSet()); 
             EmisIndicator indicator = getIndicator(req.getParameter(QS_INDICATOR), emis.getMetaDataSet()); 
             MetaResultDimension dim = getMetaResultDimension(req, QS_XAXIS, hierarchy, indicator, emis.getMetaDataSet()); 
             MetaResultDimension dim2 = getMetaResultDimension(req, QS_SPLITBY, hierarchy, indicator, emis.getMetaDataSet()); 
@@ -120,7 +120,7 @@ public class ApiInfoServlet extends ApiBaseServlet
             if (!hasParameters(req, resp, hierarchyList, indicatorList, xaxises, splitBys))
                 return; 
 
-            EmisMetaHierarchy hierarchy = getHierarchy(req, QS_HIERARCHY, emis.getMetaDataSet()); 
+            EmisMetaHierarchy hierarchy = getHierarchy(req.getParameter(QS_HIERARCHY), emis.getMetaDataSet()); 
             EmisIndicator indicator = getIndicator(req.getParameter(QS_INDICATOR), emis.getMetaDataSet()); 
             MetaResultDimension dim = getMetaResultDimension(req, QS_XAXIS, hierarchy, indicator, emis.getMetaDataSet()); 
             MetaResultDimension dim2 = getMetaResultDimension(req, QS_SPLITBY, hierarchy, indicator, emis.getMetaDataSet()); 

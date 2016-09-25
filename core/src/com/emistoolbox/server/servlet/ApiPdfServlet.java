@@ -2,6 +2,7 @@ package com.emistoolbox.server.servlet;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -51,36 +52,53 @@ public class ApiPdfServlet extends ApiBaseServlet
         if (!hasParameters(req, resp, hierarchyList, null, null, null))
             return; 
 
-        ReportMetaResult metaResult = getReportMetaResult(req, resp, emis); 
-        if (metaResult == null)
-            return; 
+        
+        ObjectRef<String> outError = new ObjectRef<String>(); 
+        ReportMetaResult metaResult = getReportMetaResult((Map<String, String>) req.getParameterMap(), outError, emis); 
+        if (outError.get() != null)
+        {
+        	error(resp, 400, outError.get(), asJson(req)); 
+        	return; 
+        }
         
         String filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(dataset, metaResult); 
         success(req, resp, new String[] { "/emistoolbox/content?report=" + filename, MetaResultDimensionUtil.getTitle(metaResult) });  
     }
     
-    private ReportMetaResult getReportMetaResult(HttpServletRequest req, HttpServletResponse resp, EmisDataSet emis)
+    protected boolean hasParameter(Map<String, String> params, HttpServletRequest req, HttpServletResponse resp, String param)
+        throws IOException
+    {
+    	String result = hasParameter(params, param, null); 
+    	if (result == null)
+    		return true; 
+    	
+    	error(resp, 400, result, asJson(req)); 
+    	return false; 
+    }
+    
+    public static ReportMetaResult getReportMetaResult(Map<String, String> params, ObjectRef<String> outError, EmisDataSet emis)
         throws IOException
     {
         // Verify report ID is correct. 
         EmisReportConfig reportConfig = EmisToolboxIO.loadReportXml(emis.getMetaDataSet().getDatasetName(), emis.getMetaDataSet()); 
-        if (!hasParameter(req, resp, QS_REPORT, NamedUtil.getNames(reportConfig.getPdfReports())))
+        outError.set(hasParameter(params, QS_REPORT, NamedUtil.getNames(reportConfig.getPdfReports()))); 
+        if (outError.get() != null)
             return null;
         
         ReportMetaResultImpl result = new ReportMetaResultImpl();
-        if (!setMetaResult(result, req, resp, emis))
+        if (!setMetaResult(result, params, emis))
             return null; 
 
         EmisMetaHierarchy metaHierarchy = result.getHierarchy();
-        int[] entityIds = getEntityPathIds(emis, metaHierarchy, req.getParameter(QS_LOCATION), 0); 
+        int[] entityIds = getEntityPathIds(emis, metaHierarchy, params.get(QS_LOCATION), 0); 
         result.setEntityPath(entityIds, getEntityPathNames(emis, entityIds, metaHierarchy.getEntityOrder(), getDateIndex(result.getContext())));
-        result.setReportConfig(NamedUtil.find(req.getParameter(QS_REPORT), reportConfig.getPdfReports())); 
-        result.setColourScheme(getColourScheme(req.getParameter(QS_REPORT_COLOURS))); 
+        result.setReportConfig(NamedUtil.find(params.get(QS_REPORT), reportConfig.getPdfReports())); 
+        result.setColourScheme(getColourScheme(params.get(QS_REPORT_COLOURS))); 
         
         return result; 
     }
     
-    private ChartColor[] getColourScheme(String scheme)
+    private static ChartColor[] getColourScheme(String scheme)
     {
         if ("colors".equals(scheme))
             return ChartConfig.PALLET_VARIED; 
@@ -92,12 +110,23 @@ public class ApiPdfServlet extends ApiBaseServlet
             return ChartConfig.PALLET_GRAYS;
     }
     
-    private int getDateIndex(EmisContext context)
+    private static int getDateIndex(EmisContext context)
     {
         List<EmisEnumTupleValue> dates = context.getDates();
         if (dates == null || dates.size() == 0)
             return 0; 
         
         return dates.get(0).getIndex()[0]; 
+    }
+    
+    public static class ObjectRef<T>
+    {
+    	private T value = null; 
+    	
+    	public T get()
+    	{ return value; } 
+    	
+    	public void set(T value)
+    	{ this.value = value; } 
     }
 }

@@ -16,6 +16,12 @@
     <fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
   </path>
 
+  <path id="testPath">
+    <fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
+	<pathelement location="build/emistoolbox.jar"/>
+	<pathelement location="lib/servlet.jar"/>
+  </path>
+	
   <target name="libs" description="Copy libs to WEB-INF/lib">
     <mkdir dir="war/WEB-INF/lib" />
     <copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
@@ -101,7 +107,7 @@
   </target>
 
   <target name="jar">
-    <zip destfile="emistoolbox.jar" >
+    <zip destfile="build/emistoolbox.jar" >
         <fileset dir="war/WEB-INF/classes"/>
         <fileset dir="jarFiles"/>
     </zip>
@@ -128,5 +134,18 @@
        <fileset dir="standard-style"/>
      </copy>
   </target>
-    
+
+  <target name="test" depends="javac,jar">
+    <java fork="yes" classname="com.emistoolbox.server.cli.PdfReportRenderer">
+      <arg value="default"/>
+      <arg value="report=Layout Test 1"/>
+      <arg value="hierarchy=default"/>
+	  <arg value="location=School:1856"/>
+      <arg value="date=latest"/>
+      <classpath>
+        <path refid="testPath"/>
+      </classpath>
+      <jvmarg line="-Demistoolbox.renderer.chart=highcharts" />
+    </java>
+  </target>  
 </project>
