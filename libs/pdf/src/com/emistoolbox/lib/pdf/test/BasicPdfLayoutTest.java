@@ -61,8 +61,8 @@ public class BasicPdfLayoutTest
 		double cellHeight = (page.height() - textHeight - outerFrame.getMargins().getTop() - outerFrame.getMargins().getBottom() - gap * 2) / 3;
 
 		// Charts along bottom 
-		components.add(getPositionedPdf("chart_bottom1.pdf", 0, cellHeight * 2 + gap, cellWidth * 2 + gap, cellHeight));
-		components.add(getPositionedPdf("chart_bottom2.pdf", 2 * (cellWidth + gap), cellHeight * 2 + gap, cellWidth, cellHeight));
+		components.add(getPositionedPdf("chart_bottom1.pdf", 0, 2 * (cellHeight + gap), cellWidth * 2 + gap, cellHeight));
+		components.add(getPositionedPdf("chart_bottom2.pdf", 2 * (cellWidth + gap), 2 * (cellHeight + gap), cellWidth, cellHeight));
 		
 		// Big 2x2 chart
 		components.add(getPositionedPdf("chart_main.pdf", cellWidth + gap, 0, cellWidth * 2 + gap, cellHeight * 2 + gap)); 
