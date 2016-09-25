@@ -4,6 +4,8 @@ public class PDFLayoutComponent {
 	private PDFLayoutContent content;
 	private PDFLayoutObjectFit objectFit = PDFLayoutObjectFit.NONE;
 	private PDFLayoutPlacement placement;
+	private PDFLayoutSides<Double> padding;
+	PDFLayoutBorderStyle borderStyle;
 
 	public PDFLayoutComponent()
 	{}
@@ -45,5 +47,21 @@ public class PDFLayoutComponent {
 
 	public void setPlacement (PDFLayoutPlacement placement) {
 		this.placement = placement;
+	}
+
+	public PDFLayoutBorderStyle getBorderStyle () {
+		return borderStyle;
+	}
+
+	public void setBorderStyle (PDFLayoutBorderStyle borderStyle) {
+		this.borderStyle = borderStyle;
+	}
+
+	public PDFLayoutSides<Double> getPadding () {
+		return padding;
+	}
+
+	public void setPadding (PDFLayoutSides<Double> padding) {
+		this.padding = padding;
 	}
 }
