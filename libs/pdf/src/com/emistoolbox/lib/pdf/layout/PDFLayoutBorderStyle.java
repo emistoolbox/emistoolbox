@@ -10,7 +10,7 @@ public class PDFLayoutBorderStyle {
 		this.lineStyles = lineStyles;
 		this.borderRadius = borderRadius;
 	}
-	
+
 	public PDFLayoutBorderStyle (Double width) {
 		this (new PDFLayoutSides<PDFLayoutLineStyle> (new PDFLayoutLineStyle (2.,Color.BLACK)),null);
 	}
