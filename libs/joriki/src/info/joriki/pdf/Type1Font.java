@@ -160,6 +160,14 @@ public class Type1Font extends NativeSimpleFont implements CFFFontContainer, PDF
     throw new Error ("missing font descriptor for non-standard font");
   }
 
+  public double getAscent () {
+	  return AFMfile != null ? AFMfile.getAscender () / 1000. : super.getAscent ();
+  }
+
+  public double getDescent () {
+	  return AFMfile != null ? AFMfile.getDescender () / 1000. : super.getDescent ();
+  }
+
   public boolean containsCFF ()
   {
     return stream != null;

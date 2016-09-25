@@ -43,7 +43,8 @@ public class BasicPdfLayoutTest
 		
 		PDFLayoutFont titleFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 24, PDFLayoutFontStyle.BOLD); 
 		PDFLayoutFont subtitleFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 20, PDFLayoutFontStyle.BOLD);
-		PDFLayoutFont textFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 16, PDFLayoutFontStyle.BOLD);
+//		PDFLayoutFont textFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 16, PDFLayoutFontStyle.BOLD);
+		PDFLayoutFont textFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 16, PDFLayoutFontStyle.PLAIN);
 
 		// Title
 		PDFLayoutTextContent title = new PDFLayoutTextContent("District Grade 2 Literacy Progress Report", titleFont);
@@ -70,8 +71,8 @@ public class BasicPdfLayoutTest
 		PDFLayoutFrame textFrame = new PDFLayoutFrame(); 
 //		PDFLayoutContent textContent = new PDFLayoutTextContent("This is some bigger text that will explain the charts. The chart layout is based on 4 charts - one featured chart and then three smaller charts. \n\nThis layout illustrates how we can arbitrarily place content on the page to create more interesting report pages. \n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", textFont); 
 		// some smaller text for a first test
-		PDFLayoutContent textContent = new PDFLayoutTextContent("small is beautiful", textFont); 
-		textFrame.setComponents(Collections.singletonList(new PDFLayoutComponent(textContent,null,0,0)));
+		PDFLayoutContent textContent = new PDFLayoutTextContent("The quick brown fox jumps over the lazy dog.", textFont);
+		textFrame.setComponents(Collections.singletonList(new PDFLayoutComponent(textContent,null,10,10)));
 		textFrame.setLineWidths(new PDFLayoutSides<Double>(2.0));
 		textFrame.setRectangle (new Rectangle (0, 0, cellWidth, cellHeight * 2 + gap));
 		components.add(new PDFLayoutComponent(textFrame,null,PDFLayoutHorizontalAlignment.LEFT,PDFLayoutVerticalAlignment.TOP));

@@ -111,28 +111,36 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return PDFFont.getInstance (getFontDictionary (layoutFont),null);
 	}
 
-	private double getWidth (String text,PDFLayoutFont layoutFont) {
-		TextState textState = new TextState ();
-		textState.setTextFont (getPDFFont (layoutFont),layoutFont.getFontSize ());
-		return textState.getAdvance (text.getBytes ()); // TODO: proper encoding
+	private void drawRectangle (Rectangle r) {
+		outputRectangle (r);
+		ps.print ("s\n");
+	}
+
+	private void outputRectangle (Rectangle r) {
+		coordinateCommand ("re",r.toDoubleArray ());
+	}
+
+	private void flip (Rectangle r) {
+		transform (1,0,0,-1,0,r.ymin + r.ymax);
 	}
 
 	private void transform (Rectangle from,Rectangle to) {
 		transform (Transformation.matchBoxes (from,to).matrix);
 	}
 
-	private void flip (Rectangle r) {
-		transform (1,0,0,-1,0,r.ymin + r.ymax);
-	}
-	
 	private void transform (double ... m) {
+		coordinateCommand ("cm",m);
+	}
+
+	private void coordinateCommand (String command,double ... m) {
 		for (double v : m) {
 			ps.print (toString (v));
 			ps.print (' ');
 		}
-		ps.print ("cm\n");
+		ps.print (command);
+		ps.print ('\n');
 	}
-	
+
 	private void translate (double dx,double dy) {
 		transform (1,0,0,1,dx,dy);
 	}
@@ -170,11 +178,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				default:
 					throw new Error ("object fit " + objectFit + " not implemented");
 			}
-			if (objectFit != PDFLayoutObjectFit.NONE) {
-				Rectangle newComponentBox = new Rectangle (0,0,width,height);
-				transform (componentBox,newComponentBox);
-				componentBox = newComponentBox;
-			}
+			Rectangle newComponentBox = objectFit == PDFLayoutObjectFit.NONE ? componentBox : new Rectangle (0,0,width,height);
 			double x;
 			double y;
 			if (placement instanceof PDFLayoutCoordinatePlacement) {
@@ -189,7 +193,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					x = frameBox.xmin;
 					break;
 				case CENTER:
-					x = frameBox.xmin + (frameBox.width () - componentBox.width ()) / 2;
+					x = frameBox.xmin + (frameBox.width () - newComponentBox.width ()) / 2;
 					break;
 				default:
 					throw new Error ("horizontal placement " + alignmentPlacement.getHorizontalAlignment () + " not implemented");
@@ -199,7 +203,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					y = frameBox.ymin;
 					break;
 				case CENTER:
-					y = frameBox.ymin + (frameBox.height () - componentBox.height ()) / 2;
+					y = frameBox.ymin + (frameBox.height () - newComponentBox.height ()) / 2;
 					break;
 				default:
 					throw new Error ("vertical placement " + alignmentPlacement.getVerticalAlignment () + " not implemented");
@@ -207,9 +211,15 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			}
 			else
 				throw new Error ("placement " + placement.getClass () + " not implemented");
-			translate (x - componentBox.xmin,y - componentBox.ymin);
+			translate (x - newComponentBox.xmin,y - newComponentBox.ymin);
+			if (!newComponentBox.equals (componentBox))
+				transform (componentBox,newComponentBox);
+			drawRectangle (componentBox);
+			// This could be done more elegantly by always flipping here and always flipping frames instead of just the outer one.
+			// All frame flips except the outer one would cancel, but we'd have a lot of unnecessary cancelling transformations
+			// in the output (unless we cancel them explicitly, which would defeat the purpose of elegance)
 			if (!(componentContent instanceof PDFLayoutFrame))
-				flip (getBoundingBox (componentContent));
+				flip (componentBox);
 			componentContent.accept (this);
 			popGraphicsState ();
 		}
@@ -222,7 +232,9 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	public Void visit (PDFLayoutTextContent textContent) {
-		ps.print ("BT /" + getFontLabel (textContent.getFont ()) + " " + textContent.getFont ().getFontSize () + " Tf (" + textContent.getText () + ") Tj ET\n");
+		PDFLayoutFont layoutFont = textContent.getFont ();
+		double fontSize = layoutFont.getFontSize ();
+		ps.print ("BT /" + getFontLabel (layoutFont) + " " + fontSize + " Tf 0 " + -fontSize * getPDFFont (layoutFont).getDescent () + " Td (" + textContent.getText () + ") Tj ET\n");
 		return null;
 	}
 
@@ -249,7 +261,15 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			}
 
 			public Rectangle visit (PDFLayoutTextContent textContent) {
-				return new Rectangle (0,0,getWidth (textContent.getText (),textContent.getFont ()),30);
+				PDFLayoutFont layoutFont = textContent.getFont ();
+				PDFFont pdfFont = getPDFFont (layoutFont);
+				TextState textState = new TextState ();
+				double fontSize = layoutFont.getFontSize ();
+				textState.setTextFont (pdfFont,fontSize);
+				double advance = textState.getAdvance (textContent.getText ().getBytes ()); // TODO: proper encoding
+				double descent = fontSize * pdfFont.getDescent ();
+				double ascent = fontSize * pdfFont.getAscent ();
+				return new Rectangle (0,descent,advance,ascent - descent);
 			}
 		});
 	}

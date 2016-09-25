@@ -575,6 +575,14 @@ abstract public class PDFFont implements Font, PDFOptions
     return height / 1000;
   }
 
+  public double getAscent () {
+	  return fontDescriptor.getDouble ("Ascent") / 1000;
+  }
+
+  public double getDescent () {
+	  return fontDescriptor.getDouble ("Descent") / 1000;
+  }
+
   protected DescribedFont readCFFFile () throws IOException
   {
     return new CFFFontSet (getStreamData ()).getOnlyFont ();
