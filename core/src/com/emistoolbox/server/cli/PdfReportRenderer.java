@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.emistoolbox.common.model.analysis.EmisReportConfig;
-import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.server.EmisToolboxIO;

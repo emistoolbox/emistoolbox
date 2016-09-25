@@ -20,6 +20,8 @@ public class LayoutFrameConfigImpl extends TextSetImpl implements LayoutFrameCon
 	private ChartColor backgroundColour; 
 	private int backgroundTransparency = 0;
 
+	private LayoutSides<Double> padding = new LayoutSides<Double>(); 
+	
 	private PdfContentConfig content; 
 	
 	public LayoutFrameConfigImpl()
@@ -80,4 +82,10 @@ public class LayoutFrameConfigImpl extends TextSetImpl implements LayoutFrameCon
 	@Override
 	public void setContentConfig(PdfContentConfig content) 
 	{ this.content = content; }
+
+	public LayoutSides<Double> getPadding() 
+	{ return padding; }
+
+	public void setPadding(LayoutSides<Double> padding) 
+	{ this.padding = padding; }
 }

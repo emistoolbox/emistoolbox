@@ -31,4 +31,7 @@ public interface LayoutFrameConfig extends TextSet
 	
 	public PdfContentConfig getContentConfig(); 
 	public void setContentConfig(PdfContentConfig content); 
+	
+	public LayoutSides<Double> getPadding(); 
+	public void setPadding(LayoutSides<Double> padding); 
 }

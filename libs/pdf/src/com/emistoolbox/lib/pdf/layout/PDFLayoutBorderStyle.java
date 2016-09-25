@@ -6,6 +6,9 @@ public class PDFLayoutBorderStyle {
 	PDFLayoutSides<PDFLayoutLineStyle> lineStyles;
 	Double borderRadius;
 
+	public PDFLayoutBorderStyle()
+	{}
+	
 	public PDFLayoutBorderStyle (PDFLayoutSides<PDFLayoutLineStyle> lineStyles,Double borderRadius) {
 		this.lineStyles = lineStyles;
 		this.borderRadius = borderRadius;

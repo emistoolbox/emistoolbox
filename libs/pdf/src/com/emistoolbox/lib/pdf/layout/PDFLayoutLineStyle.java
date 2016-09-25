@@ -6,7 +6,10 @@ public class PDFLayoutLineStyle {
 	Double width;
 	Color color;
 
-	public PDFLayoutLineStyle (Double width,Color color) {
+	public PDFLayoutLineStyle()
+	{}
+	
+	public PDFLayoutLineStyle (Double width, Color color) {
 		this.width = width;
 		this.color = color;
 	}

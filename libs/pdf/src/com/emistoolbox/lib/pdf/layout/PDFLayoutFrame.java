@@ -26,6 +26,6 @@ public class PDFLayoutFrame extends PDFLayoutContent {
 	}
 
 	public <T> T accept (PDFLayoutVisitor<T> visitor) throws IOException {
-		return visitor.visit (this);
+		return visitor.visit(this);
 	}
 }

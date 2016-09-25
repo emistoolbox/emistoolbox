@@ -148,7 +148,10 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
     	if (EmisConfig.RENDERER_PDF_ITEXT.equals(pdfRenderer))
         	cachedPdfRenderer = new ItextPdfReportWriter();    	
     	else if (EmisConfig.RENDERER_PDF_JORIKI.equals(pdfRenderer))
-    		cachedPdfRenderer = new PDFLayoutReportWriter(null);  
+    	{
+    		cachedPdfRenderer = new PDFLayoutReportWriter(null);
+    		((PDFLayoutReportWriter) cachedPdfRenderer).setDebug(true); 
+    	}
     	else
     		throw new IllegalArgumentException("Invalid pdf renderer configuration."); 
 

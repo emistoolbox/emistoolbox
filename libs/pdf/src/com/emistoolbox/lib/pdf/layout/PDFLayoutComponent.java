@@ -1,5 +1,7 @@
 package com.emistoolbox.lib.pdf.layout;
 
+import java.io.IOException;
+
 public class PDFLayoutComponent {
 	private PDFLayoutContent content;
 	private PDFLayoutObjectFit objectFit = PDFLayoutObjectFit.NONE;
@@ -63,5 +65,9 @@ public class PDFLayoutComponent {
 
 	public void setPadding (PDFLayoutSides<Double> padding) {
 		this.padding = padding;
+	}
+
+	public <T> T accept (PDFLayoutVisitor<T> visitor) throws IOException {
+		return visitor.visit(this);
 	}
 }
