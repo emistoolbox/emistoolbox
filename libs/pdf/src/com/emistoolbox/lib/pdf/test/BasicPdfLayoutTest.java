@@ -12,6 +12,7 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFontStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
@@ -68,6 +69,14 @@ public class BasicPdfLayoutTest
 		textContent.setBorderStyle (new PDFLayoutBorderStyle (2.));
 		textFrame.setElements(Collections.singletonList(textContent));
 		components.add(textFrame.align (PDFLayoutHorizontalAlignment.LEFT,PDFLayoutVerticalAlignment.TOP));
+
+		PDFLayoutFrameElement displacementTestFrame = new PDFLayoutFrameElement (200,200);
+		displacementTestFrame.addElement (new PDFLayoutTextElement ("title",titleFont).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.BELOW).displace (false,true));
+		displacementTestFrame.addElement (new PDFLayoutTextElement ("subtitle",subtitleFont).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.BELOW).displace (false,true));
+		displacementTestFrame.addElement (new PDFLayoutTextElement ("huge",textFont).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.CENTER).fit (PDFLayoutObjectFit.CONTAIN));
+		displacementTestFrame.addElement (new PDFLayoutTextElement ("?",textFont).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.CENTER).fit (PDFLayoutObjectFit.CONTAIN));
+		displacementTestFrame.position (10,100);
+		components.add (displacementTestFrame);
 
 		outerFrame.setElements (components);
 		

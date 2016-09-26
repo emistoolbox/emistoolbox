@@ -38,7 +38,6 @@ public class Rectangle implements Shape
     this.ymin = ymin;
     this.xmax = xmax;
     this.ymax = ymax;
-    check ();
   }
 
   public Rectangle (double [] bbox)

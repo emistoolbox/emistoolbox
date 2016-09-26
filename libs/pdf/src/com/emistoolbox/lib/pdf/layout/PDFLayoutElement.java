@@ -7,7 +7,8 @@ abstract public class PDFLayoutElement {
 	private PDFLayoutObjectFit objectFit = PDFLayoutObjectFit.NONE;
 	private PDFLayoutPlacement placement;
 	private PDFLayoutSides<Double> padding;
-	PDFLayoutBorderStyle borderStyle;
+	private PDFLayoutBorderStyle borderStyle;
+	private PDFLayoutAxes<Boolean> displacement = new PDFLayoutAxes<Boolean> (false,false);
 
 	public PDFLayoutObjectFit getObjectFit () {
 		return objectFit;
@@ -41,6 +42,14 @@ abstract public class PDFLayoutElement {
 		this.borderStyle = borderStyle;
 	}
 
+	public PDFLayoutAxes<Boolean> getDisplacement () {
+		return displacement;
+	}
+
+	public void setDisplacement (PDFLayoutAxes<Boolean> displacement) {
+		this.displacement = displacement;
+	}
+
 	public PDFLayoutFrameElement wrap (double width,double height) {
 		align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.CENTER);
 		setObjectFit (PDFLayoutObjectFit.CONTAIN);
@@ -54,6 +63,16 @@ abstract public class PDFLayoutElement {
 
 	public PDFLayoutElement align (PDFLayoutHorizontalAlignment horizontalAlignment,PDFLayoutVerticalAlignment verticalAlignment) {
 		setPlacement (new PDFLayoutAlignmentPlacement (horizontalAlignment,verticalAlignment));
+		return this;
+	}
+
+	public PDFLayoutElement displace (boolean horizontally,boolean vertically) {
+		setDisplacement (new PDFLayoutAxes<Boolean> (horizontally,vertically));
+		return this;
+	}
+
+	public PDFLayoutElement fit (PDFLayoutObjectFit objectFit) {
+		setObjectFit (objectFit);
 		return this;
 	}
 

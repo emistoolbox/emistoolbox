@@ -35,6 +35,7 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFileElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 
@@ -164,8 +165,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	public Void visit (PDFLayoutFrameElement frame) throws IOException {
+		PDFLayoutSides<Boolean> alignedWithEdge = new PDFLayoutSides<Boolean> (true);
 		Rectangle frameBox = getBoundingBox (frame);
-		Rectangle previousElementBox = null;
+		Rectangle objectFitBox = new Rectangle (frameBox);
+		Rectangle previousElementBox = new Rectangle (frameBox.xmax,frameBox.ymax,frameBox.xmin,frameBox.ymin);
 		for (PDFLayoutElement element : frame.getElements ()) {
 			PDFLayoutPlacement placement = element.getPlacement ();
 			PDFLayoutObjectFit objectFit = element.getObjectFit ();
@@ -174,7 +177,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			double height = 0;
 			switch (objectFit) {
 			case CONTAIN:
-				double scale = Math.min (frameBox.width () / elementBox.width (),frameBox.height () / elementBox.height ()); 
+				double scale = Math.min (objectFitBox.width () / elementBox.width (),objectFitBox.height () / elementBox.height ());
 				width = scale * elementBox.width ();
 				height = scale * elementBox.height ();
 				break;
@@ -190,45 +193,83 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				PDFLayoutCoordinatePlacement coordinatePlacement = (PDFLayoutCoordinatePlacement) placement;
 				x = coordinatePlacement.getX ();
 				y = coordinatePlacement.getY ();
+				alignedWithEdge = new PDFLayoutSides<Boolean> (false);
 			}
 			else if (placement instanceof PDFLayoutAlignmentPlacement) {
 				PDFLayoutAlignmentPlacement alignmentPlacement = (PDFLayoutAlignmentPlacement) placement;
 				switch (alignmentPlacement.getHorizontalAlignment ()) {
 				case BEFORE:
 					x = previousElementBox.xmin - newElementBox.width ();
+					alignedWithEdge.setLeft (false);
 					break;
 				case AFTER:
 					x = previousElementBox.xmax;
+					alignedWithEdge.setRight (false);
 					break;
 				case LEFT:
 					x = frameBox.xmin;
+					alignedWithEdge.setLeft (true);
+					alignedWithEdge.setRight (false);
 					break;
 				case CENTER:
-					x = frameBox.xmin + (frameBox.width () - newElementBox.width ()) / 2;
+					x = objectFitBox.xmin + (objectFitBox.width () - newElementBox.width ()) / 2;
+					alignedWithEdge.setLeft (false);
+					alignedWithEdge.setRight (false);
+					break;
+				case RIGHT:
+					x = frameBox.xmax - newElementBox.width ();
+					alignedWithEdge.setLeft (false);
+					alignedWithEdge.setRight (true);
 					break;
 				default:
 					throw new Error ("horizontal placement " + alignmentPlacement.getHorizontalAlignment () + " not implemented");
 				}
+
 				switch (alignmentPlacement.getVerticalAlignment ()) {
 				case ABOVE:
 					y = previousElementBox.ymin - newElementBox.height ();
+					alignedWithEdge.setTop (false);
 					break;
 				case BELOW:
 					y = previousElementBox.ymax;
+					alignedWithEdge.setBottom (false);
 					break;
 				case TOP:
 					y = frameBox.ymin;
+					alignedWithEdge.setTop (true);
+					alignedWithEdge.setBottom (false);
 					break;
 				case CENTER:
-					y = frameBox.ymin + (frameBox.height () - newElementBox.height ()) / 2;
+					y = objectFitBox.ymin + (objectFitBox.height () - newElementBox.height ()) / 2;
+					alignedWithEdge.setTop (false);
+					alignedWithEdge.setBottom (false);
 					break;
+				case BOTTOM:
+					y = frameBox.ymax - newElementBox.height ();
+					alignedWithEdge.setTop (false);
+					alignedWithEdge.setBottom (true);
 				default:
 					throw new Error ("vertical placement " + alignmentPlacement.getVerticalAlignment () + " not implemented");
 				}
 			}
 			else
 				throw new Error ("placement " + placement.getClass () + " not implemented");
+
 			newElementBox.shiftBy (newElementBox.xmin - x,newElementBox.ymin - y);
+
+			if (element.getDisplacement ().getVertical ()) {
+				if (alignedWithEdge.getTop ())
+					objectFitBox.ymin = newElementBox.ymax;
+				if (alignedWithEdge.getBottom ())
+					objectFitBox.ymax = newElementBox.ymin;
+			}
+
+			if (element.getDisplacement ().getHorizontal ()) {
+				if (alignedWithEdge.getLeft ())
+					objectFitBox.xmin = newElementBox.xmax;
+				if (alignedWithEdge.getRight ())
+					objectFitBox.xmax = newElementBox.xmin;
+			}
 
 			pushGraphicsState ();
 //			drawRectangle (newElementBox);
