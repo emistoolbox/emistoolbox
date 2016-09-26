@@ -7,8 +7,11 @@ import com.emistoolbox.lib.pdf.layout.PDFLayout;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutBorderStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutHighchartElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutImageElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutLineStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFileElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 
@@ -64,8 +67,22 @@ public class PDFLayoutLogVisitor implements PDFLayoutVisitor<Void>
 	}
 	
 	@Override
+	public Void visit(PDFLayoutHighchartElement highchartContent) throws IOException {
+		os.println(indent + "Element - Highchart: " + highchartContent.getInput().getName()); 
+		output(highchartContent); 
+		return null; 
+	}
+
+	@Override
+	public Void visit(PDFLayoutImageElement imageContent) throws IOException {
+		os.println(indent + "Element - Image: " + imageContent.getInput().getName()); 
+		output(imageContent); 
+		return null; 
+	}
+
+	@Override
 	public Void visit(PDFLayoutPDFElement pdfContent) throws IOException {
-		os.println(indent + "Element - PDF"); 
+		os.println(indent + "Element - PDF: " + pdfContent.getInput().getName()); 
 		output(pdfContent); 
 		return null; 
 	}
@@ -80,19 +97,25 @@ public class PDFLayoutLogVisitor implements PDFLayoutVisitor<Void>
 	private void output(PDFLayoutElement item)
 	{
 		PDFLayoutBorderStyle border = item.getBorderStyle(); 
-		os.println(indent + "Border Style"); 
-
-		indent(); 
-		try { 
-			os.println(indent + "radius=" + border.getBorderRadius()); 
-			for (PDFLayoutLineStyle line : border.getLineStyles().getValues(new PDFLayoutLineStyle[0])) 
-				os.println(indent + "Line: color=" + line.getColor() + ", width=" + line.getWidth()); 
+		if (border != null)
+		{
+			os.println(indent + "Border Style"); 
+	
+			indent(); 
+			try { 
+				os.println(indent + "radius=" + border.getBorderRadius()); 
+				os.println(indent + "borders: " + border.getLineStyles()); 
+			}
+			finally { unindent(); }
 		}
-		finally { unindent(); }
 		
 		os.println(indent + "fit = " + item.getObjectFit());
-		os.println(indent + "padding = " + item.getPadding().getValues(new Double[0]));  
-		os.println(indent + "placement = " + item.getPlacement()); 
+		
+		if (item.getPadding() != null)
+			os.println(indent + "padding = " + item.getPadding());  
+		
+		if (item.getPlacement() != null)
+			os.println(indent + "placement = " + item.getPlacement()); 
 	}
 	
 

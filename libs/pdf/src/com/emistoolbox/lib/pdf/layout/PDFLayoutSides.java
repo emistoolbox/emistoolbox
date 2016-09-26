@@ -72,4 +72,7 @@ public class PDFLayoutSides<T> {
 	public void setBottom (T bottom) {
 		this.bottom = bottom;
 	}
+	
+	public String toString()
+	{ return left + ", " + top + ", " + right + ", " + bottom; }
 }

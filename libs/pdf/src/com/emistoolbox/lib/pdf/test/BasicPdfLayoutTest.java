@@ -78,6 +78,6 @@ public class BasicPdfLayoutTest
 	
 	private PDFLayoutElement getPositionedPdf(String filename, double x, double y, double width, double height)
 	{
-		return new PDFLayoutPDFElement (new IOFileInput(new File(testDir, filename))).wrap (width,height).position (x,y);
+		return new PDFLayoutPDFElement(new IOFileInput(new File(testDir, filename))).wrap (width,height).position (x,y);
 	}
 }

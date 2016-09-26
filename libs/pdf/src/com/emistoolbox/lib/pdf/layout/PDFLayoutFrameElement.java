@@ -7,7 +7,7 @@ import java.util.List;
 public class PDFLayoutFrameElement extends PDFLayoutElement {
 	private double width;
 	private double height;
-	private List<PDFLayoutElement> elements;
+	private List<PDFLayoutElement> elements = new ArrayList<PDFLayoutElement>();
 
 	public PDFLayoutFrameElement () {
 	}

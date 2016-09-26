@@ -28,4 +28,7 @@ public class PDFLayoutAlignmentPlacement extends PDFLayoutPlacement {
 	public void setVerticalAlignment (PDFLayoutVerticalAlignment verticalAlignment) {
 		this.verticalAlignment = verticalAlignment;
 	}
+	
+	public String toString()
+	{ return horizontalAlignment + ", " + verticalAlignment; }
 }

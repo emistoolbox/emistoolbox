@@ -23,4 +23,7 @@ public class PDFLayoutCoordinatePlacement extends PDFLayoutPlacement {
 	public void setY (double y) {
 		this.y = y;
 	}
+	
+	public String toString()
+	{ return "(" + x + ", " + y + ")"; }
 }

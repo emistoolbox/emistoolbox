@@ -65,4 +65,10 @@
   </target>
   <target name="all" depends="clean,jar">
   </target>
+
+  <target name="getlibs">
+	<ant antfile="../joriki/build.xml" target="clean" dir="../joriki" inheritAll="false"/>
+	<ant antfile="../joriki/build.xml" target="jar" dir="../joriki" inheritAll="false"/>
+    <copy file="../joriki/build/joriki.jar" todir="${lib}" overwrite="true"/>
+  </target>
 </project>

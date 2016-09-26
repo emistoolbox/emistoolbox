@@ -4,13 +4,14 @@ import java.io.IOException;
 
 import es.jbauer.lib.io.IOInput;
 
-public class PDFLayoutPDFElement extends PDFLayoutFileElement {
+public class PDFLayoutHighchartElement extends PDFLayoutFileElement {
 
-	public PDFLayoutPDFElement(IOInput file)
+	public PDFLayoutHighchartElement (IOInput file)
 	{ super(file); } 
 	
 	@Override
 	public <T> T accept(PDFLayoutVisitor<T> visitor) throws IOException {
-		return visitor.visit(this); 
+		return visitor.visit(this);
 	}
+
 }

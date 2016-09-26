@@ -29,8 +29,11 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutCoordinatePlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutHighchartElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutImageElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFileElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
@@ -244,6 +247,16 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return null;
 	}
 
+	public Void visit (PDFLayoutHighchartElement element) throws IOException {
+		// TODO
+		return null;
+	}
+
+	public Void visit (PDFLayoutImageElement element) throws IOException {
+		// TODO 
+		return null;
+	}
+
 	public Void visit (PDFLayoutPDFElement pdfElement) throws IOException {
 		ps.write (resourceRenamer.rename (getPage (pdfElement)));
 		return null;
@@ -277,8 +290,14 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				return new Rectangle (0,0,frame.getWidth (),frame.getHeight ());
 			}
 
-			public Rectangle visit (PDFLayoutPDFElement pdfElement) throws IOException {
-				return getPage (pdfElement).getMediaBox ().toRectangle ();
+			public Rectangle visit (PDFLayoutHighchartElement element) throws IOException {
+				return getPage (element).getMediaBox ().toRectangle ();
+			}
+			public Rectangle visit (PDFLayoutImageElement element) throws IOException {
+				return getPage (element).getMediaBox ().toRectangle ();
+			}
+			public Rectangle visit (PDFLayoutPDFElement element) throws IOException {
+				return getPage (element).getMediaBox ().toRectangle ();
 			}
 
 			public Rectangle visit (PDFLayoutTextElement textElement) {
@@ -295,9 +314,9 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		});
 	}
 
-	private Map<PDFLayoutPDFElement,PDFDictionary> pageMap = new HashMap<PDFLayoutPDFElement,PDFDictionary> ();
+	private Map<PDFLayoutFileElement,PDFDictionary> pageMap = new HashMap<PDFLayoutFileElement,PDFDictionary> ();
 
-	private PDFDictionary getPage (PDFLayoutPDFElement pdfElement) throws IOException {
+	private PDFDictionary getPage (PDFLayoutFileElement pdfElement) throws IOException {
 		PDFDictionary page = pageMap.get (pdfElement);
 		if (page== null) {
 			page = new PDFFile (new SeekableByteArray (Util.toByteArray (pdfElement.getInput ().getInputStream ()))).getDocument ().getPage (1);
