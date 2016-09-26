@@ -209,7 +209,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					alignedWithEdge.setRight (false);
 					break;
 				case CENTER:
-					x = frameBox.xmin + (frameBox.width () - newElementBox.width ()) / 2;
+					x = objectFitBox.xmin + (objectFitBox.width () - newElementBox.width ()) / 2;
 					alignedWithEdge.setLeft (false);
 					alignedWithEdge.setRight (false);
 					break;
@@ -220,13 +220,6 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					break;
 				default:
 					throw new Error ("horizontal placement " + alignmentPlacement.getHorizontalAlignment () + " not implemented");
-				}
-
-				if (element.getDisplacement ().getHorizontal ()) {
-					if (alignedWithEdge.getLeft ())
-						objectFitBox.xmin = newElementBox.xmax;
-					if (alignedWithEdge.getRight ())
-						objectFitBox.xmax = newElementBox.xmin;
 				}
 
 				switch (alignmentPlacement.getVerticalAlignment ()) {
@@ -244,7 +237,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					alignedWithEdge.setBottom (false);
 					break;
 				case CENTER:
-					y = frameBox.ymin + (frameBox.height () - newElementBox.height ()) / 2;
+					y = objectFitBox.ymin + (objectFitBox.height () - newElementBox.height ()) / 2;
 					alignedWithEdge.setTop (false);
 					alignedWithEdge.setBottom (false);
 					break;
@@ -259,6 +252,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			else
 				throw new Error ("placement " + placement.getClass () + " not implemented");
 
+			newElementBox.shiftBy (newElementBox.xmin - x,newElementBox.ymin - y);
+
 			if (element.getDisplacement ().getVertical ()) {
 				if (alignedWithEdge.getTop ())
 					objectFitBox.ymin = newElementBox.ymax;
@@ -266,7 +261,12 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					objectFitBox.ymax = newElementBox.ymin;
 			}
 
-			newElementBox.shiftBy (newElementBox.xmin - x,newElementBox.ymin - y);
+			if (element.getDisplacement ().getHorizontal ()) {
+				if (alignedWithEdge.getLeft ())
+					objectFitBox.xmin = newElementBox.xmax;
+				if (alignedWithEdge.getRight ())
+					objectFitBox.xmax = newElementBox.xmin;
+			}
 
 			pushGraphicsState ();
 //			drawRectangle (newElementBox);

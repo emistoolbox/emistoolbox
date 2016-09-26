@@ -73,7 +73,8 @@ public class BasicPdfLayoutTest
 		PDFLayoutFrameElement displacementTestFrame = new PDFLayoutFrameElement (200,200);
 		displacementTestFrame.addElement (new PDFLayoutTextElement ("title",titleFont).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.BELOW).displace (false,true));
 		displacementTestFrame.addElement (new PDFLayoutTextElement ("subtitle",subtitleFont).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.BELOW).displace (false,true));
-		displacementTestFrame.addElement (new PDFLayoutTextElement ("huge",subtitleFont).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.CENTER).fit (PDFLayoutObjectFit.CONTAIN));
+		displacementTestFrame.addElement (new PDFLayoutTextElement ("huge",textFont).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.CENTER).fit (PDFLayoutObjectFit.CONTAIN));
+		displacementTestFrame.addElement (new PDFLayoutTextElement ("?",textFont).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.CENTER).fit (PDFLayoutObjectFit.CONTAIN));
 		displacementTestFrame.position (10,100);
 		components.add (displacementTestFrame);
 
