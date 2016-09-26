@@ -12,15 +12,15 @@ import com.emistoolbox.common.util.Rectangle;
 
 public class LayoutFrameConfigImpl extends TextSetImpl implements LayoutFrameConfig, Serializable
 {
-	private Rectangle position; 
-	private LayoutSides<LayoutBorderConfig> borders = new LayoutSides<LayoutBorderConfig>(); 
+	private Rectangle position = new Rectangle(); 
+	private LayoutSides<LayoutBorderConfig> borders = new LayoutSides<LayoutBorderConfig>(new LayoutBorderConfig(0, null)); 
 	private int borderRadius = 0; 
 	
 	private String backgroundImage; 
 	private ChartColor backgroundColour; 
 	private int backgroundTransparency = 0;
 
-	private LayoutSides<Double> padding = new LayoutSides<Double>(); 
+	private LayoutSides<Double> padding = new LayoutSides<Double>(0.0); 
 	
 	private PdfContentConfig content; 
 	

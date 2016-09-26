@@ -1,5 +1,6 @@
 package com.emistoolbox.server.renderer.pdfreport.layout;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -11,7 +12,7 @@ import com.emistoolbox.server.renderer.pdfreport.FontIdentifier;
 public class LayoutPageImpl extends TextSetImpl implements LayoutPage 
 {
 	private LayoutPageConfig config; 
-	private List<LayoutFrame> frames; 
+	private List<LayoutFrame> frames = new ArrayList<LayoutFrame>(); 
 	
 	public LayoutPageImpl()
 	{ super(TEXT_KEYS); } 

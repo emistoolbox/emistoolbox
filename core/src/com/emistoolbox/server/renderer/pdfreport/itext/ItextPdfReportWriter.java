@@ -1,13 +1,20 @@
 package com.emistoolbox.server.renderer.pdfreport.itext;
 
 import com.emistoolbox.common.model.EmisEnumTupleValue;
+import com.emistoolbox.common.renderer.ChartConfig;
+import com.emistoolbox.common.renderer.ChartConfig.ChartType;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportWriterException;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.renderer.pdfreport.TextSetImpl;
 import com.emistoolbox.common.results.ReportMetaResult;
+import com.emistoolbox.common.results.Result;
 import com.emistoolbox.server.ServerUtil;
+import com.emistoolbox.server.renderer.charts.impl.BarChartRenderer;
+import com.emistoolbox.server.renderer.charts.impl.LineChartRenderer;
+import com.emistoolbox.server.renderer.charts.impl.PieChartRenderer;
+import com.emistoolbox.server.renderer.charts.impl.StackedBarChartRenderer;
 import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
@@ -25,19 +32,27 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Font.FontFamily;
 import com.itextpdf.text.Image;
+import com.itextpdf.text.ImgTemplate;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.DefaultFontMapper;
+import com.itextpdf.text.pdf.FontMapper;
+import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
+
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jfree.chart.JFreeChart;
 
 public class ItextPdfReportWriter implements PdfReportWriter
 {
@@ -67,7 +82,7 @@ public class ItextPdfReportWriter implements PdfReportWriter
             for (int col = 0; col < page.getColumns(); col++) 
             {
                 PdfContent content = page.getContent(row, col); 
-                if (content instanceof PdfChartContent || content instanceof PdfTableContent || content instanceof ItextPdfImageContent)
+                if (content instanceof PdfChartContent || content instanceof PdfTableContent || content instanceof PdfImageContentImpl)
                     result[row] = 2; 
                 else if (content instanceof PdfVariableContent && ((PdfVariableContent) content).getSize() > 4)
                     result[row] = 2; 
@@ -106,7 +121,7 @@ public class ItextPdfReportWriter implements PdfReportWriter
             throw new PdfReportWriterException("Report cannot be null");
         
         if (!(report.getReportConfig() instanceof PdfReportConfig))
-        	throw new PdfReportWriterException("Cannot only write PdfReportConfig reports."); 
+        	throw new PdfReportWriterException("Can only write PdfReportConfig reports."); 
 
         Document document = new Document(getItextPageSize(report));
         try
@@ -159,8 +174,8 @@ public class ItextPdfReportWriter implements PdfReportWriter
 
                             if ((content instanceof PdfChartContent))
                             {
-                                ItextPdfChartContent chartContent = (ItextPdfChartContent) content;
-                                contentTable.addCell(chartContent.getChart(writer, new DefaultFontMapper(), maxCellWidth * content.getSpanCols(),
+                                PdfChartContent chartContent = (PdfChartContent) content;
+                                contentTable.addCell(getChart(chartContent, writer, new DefaultFontMapper(), maxCellWidth * content.getSpanCols(),
                                         (int) (maxCellHeight[row] - contentTable.getHeaderHeight() - tablePageLayout.getHeaderHeight() - 5.0F) * content.getSpanRows()));
                             }
                             else if ((content instanceof PdfTableContent))
@@ -173,7 +188,7 @@ public class ItextPdfReportWriter implements PdfReportWriter
                             }
                             else if ((content instanceof PdfVariableContent))
                                 contentTable.addCell(((PdfVariableContent) content).getTable()); 
-                            else if ((content instanceof ItextPdfImageContent))
+                            else if ((content instanceof PdfImageContentImpl))
                                 contentTable.addCell(getSizedImage(content, maxCellWidth * content.getSpanCols(), (int) (maxCellHeight[row] - contentTable.getHeaderHeight() - tablePageLayout.getHeaderHeight())));
 
                             cell.addElement(contentTable);
@@ -192,13 +207,60 @@ public class ItextPdfReportWriter implements PdfReportWriter
             throw new PdfReportWriterException(e.getMessage());
         }
     }
+    
+    public Image getChart(PdfChartContent chartContent, PdfWriter writer, FontMapper mapper, int width, int height) throws BadElementException
+    {
+        PdfContentByte cb = writer.getDirectContent();
+        PdfTemplate tp = cb.createTemplate(width, height);
+        Graphics2D g2 = tp.createGraphics(width, height, mapper);
+        Rectangle2D r2D = new Rectangle2D.Double(0.0D, 0.0D, width, height);
+        drawChart(chartContent, g2, r2D);
+        g2.dispose();
+        return new ImgTemplate(tp);
+    }
+
+
+    private void drawChart(PdfChartContent chartContent, Graphics2D g2, Rectangle2D r2d)
+    {
+    	ChartType type = chartContent.getType(); 
+    	Result result = chartContent.getResult(); 
+    	ChartConfig config = chartContent.getChartConfig(); 
+    	
+        JFreeChart chart = null;
+        switch (chartContent.getType()) {
+        case BAR:
+            chart = new BarChartRenderer().render(config, result);
+            break;
+        case PIE:
+            chart = new PieChartRenderer().render(config, result);
+            break;
+        case STACKED:
+            chart = new StackedBarChartRenderer().render(config, result);
+            break;
+        case STACKED_SCALED: 
+        {    
+            if (result.getDimensions() == 1)
+                chart = new BarChartRenderer().render(config, result);
+            else
+                chart = new StackedBarChartRenderer().render(config, result);
+            break; 
+        }
+        case LINE: 
+            chart = new LineChartRenderer().render(config, result); 
+            break; 
+        default:
+            throw new UnsupportedOperationException("Type not supported:" + type);
+        }
+        chart.draw(g2, r2d);
+    }
+
 
     private PdfPCell getSizedImage(PdfContent content, float width, float height) throws BadElementException, MalformedURLException, IOException
     {
         width -= Math.ceil(width * 0.02);
         height -= Math.ceil(height * 0.02);
 
-        Image image = Image.getInstance(ServerUtil.getFile("charts", ((ItextPdfImageContent) content).getImagePath(), true).getAbsolutePath());
+        Image image = Image.getInstance(ServerUtil.getFile("charts", ((PdfImageContentImpl) content).getImagePath(), true).getAbsolutePath());
         image.scaleAbsolute(width, height);
         return new PdfPCell(image, false);
     }

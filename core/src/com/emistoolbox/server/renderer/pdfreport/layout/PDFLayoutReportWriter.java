@@ -1,7 +1,8 @@
-package com.emistoolbox.server.renderer.pdfreport.pdflayout;
+package com.emistoolbox.server.renderer.pdfreport.layout;
 
 import java.awt.Color;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.util.IOUtils;
 
 import com.emistoolbox.common.ChartColor;
+import com.emistoolbox.common.renderer.ChartConfig;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportWriterException;
@@ -26,8 +28,11 @@ import com.emistoolbox.lib.pdf.layout.PDFLayout;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutBorderStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutHighchartElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutImageElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutLineStyle;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
@@ -40,27 +45,20 @@ import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportWriter;
 import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
+import com.emistoolbox.server.renderer.pdfreport.impl.PdfBaseReportWriter;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfTextContent;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContent;
-import com.emistoolbox.server.renderer.pdfreport.layout.LayoutFrame;
-import com.emistoolbox.server.renderer.pdfreport.layout.LayoutPage;
 
+import es.jbauer.lib.io.IOInput;
 import es.jbauer.lib.io.IOOutput;
 import es.jbauer.lib.io.impl.IOFileOutput;
+import es.jbauer.lib.io.impl.IOInputStreamInput;
+import es.jbauer.lib.io.impl.IOOutputStreamOutput;
 import info.joriki.graphics.Point;
 import info.joriki.graphics.Rectangle;
 
-public class PDFLayoutReportWriter implements PdfReportWriter 
+public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfReportWriter 
 {
-	private ChartRenderer chartRenderer; 
-	private boolean debug = false; 
-	
-	public PDFLayoutReportWriter(ChartRenderer chartRenderer)
-	{ this.chartRenderer = chartRenderer; }
-	
-	public void setDebug(boolean debug)
-	{ this.debug = debug; }
-	
 	@Override
 	public void writeReport(PdfReport report, File out) 
 		throws IOException, PdfReportWriterException 
@@ -80,7 +78,7 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 				pages.add(renderPage((LayoutPage) page, pageSize, margins)); 
 		}
 
-		if (debug)
+		if (isDebug())
 		{
 			PDFLayoutLogVisitor visitor = new PDFLayoutLogVisitor(); 
 			for (PDFLayout page : pages)
@@ -133,6 +131,7 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 	}
 	
 	private PDFLayout renderPage(LayoutPage page, Point size, Rectangle margins)
+		throws IOException
 	{
 		PDFLayout layout = new PDFLayout();  
 		
@@ -154,6 +153,7 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 	}
 		
 	private PDFLayoutElement createFrame(LayoutFrame frame)
+		throws IOException
 	{
 		PDFLayoutFrameElement result = new PDFLayoutFrameElement(); 
 		LayoutFrameConfig config = frame.getFrameConfig(); 
@@ -163,25 +163,55 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		setFramePadding(result, config); 
 		setFrameBackground(result, config);
 		
-		
-		PDFLayoutElement contentElement = null; 
+		PDFLayoutElement item = null; 
 		PdfContent content = frame.getContent();
 		if (content instanceof PdfImageContent)
-			contentElement = new PDFLayoutTextElement("IMAGE - to be implemented", null);  
+			item = new PDFLayoutImageElement(((PdfImageContent) content).getFile());  
 		else if (content instanceof PdfChartContent)
-			contentElement = new PDFLayoutTextElement("CHART - to be implemented", null);  
+			item = renderChart((PdfChartContent) content);   
 		else if (content instanceof PdfTextContent)
-			contentElement = new PDFLayoutTextElement(((PdfTextContent) content).getText(), null); 
+			item = new PDFLayoutTextElement(((PdfTextContent) content).getText(), null); 
 		else if (content instanceof PdfVariableContent)
-			contentElement = new PDFLayoutTextElement("VARIABLES - to be implemented", null);  
+			item = new PDFLayoutTextElement("VARIABLES - to be implemented", null);  
 		else if (content instanceof PdfTableContent)
-			contentElement = new PDFLayoutTextElement("TABLE - to be implemented", null);  
-		
+			item = new PDFLayoutTextElement("TABLE - to be implemented", null);  
+
+		if (item != null)
+			result.addElement(item);
+
 		return result; 
+	}
+	
+	private PDFLayoutElement renderChart(PdfChartContent content)
+		throws IOException
+	{
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
+
+		IOOutput out = null; 
+		if (getChartRenderer().canCreateContentType("application/json"))
+			out = new IOOutputStreamOutput(buffer, "chart.json", "application/json", null); 
+		else
+			out = new IOOutputStreamOutput(buffer, "chart.png", "image/png", null); 
+
+		ChartConfig chartConfig = content.getChartConfig();  
+		getChartRenderer().render(content.getType(), content.getResult(), chartConfig, out);
+		
+		IOInput in = new IOInputStreamInput(new ByteArrayInputStream(buffer.toByteArray()), out.getName(), out.getContentType(), null); 
+		if (in.getContentType().equals("application/json"))
+			return new PDFLayoutHighchartElement(in); 
+		else if (in.getContentType().equals("image/png"))
+			return new PDFLayoutImageElement(in);
+		else if (in.getContentType().equals("application/pdf"))
+			return new PDFLayoutPDFElement(in);
+		
+		throw new IllegalArgumentException("Unsupported chart output format"); 
 	}
 	
 	private void setFramePlacement(PDFLayoutFrameElement el, LayoutFrameConfig config)
 	{
+		if (config.getPosition() == null)
+			return; 
+		
 		el.position(config.getPosition().getLeft(), config.getPosition().getRight()); 
 		el.setWidth(config.getPosition().getWidth() - config.getPadding().getLeft() - config.getPadding().getRight());
 		el.setHeight(config.getPosition().getHeight() - config.getPadding().getTop() - config.getPadding().getBottom());
@@ -194,9 +224,10 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 		PDFLayoutLineStyle[] lineStyles = new PDFLayoutLineStyle[4]; 
 		int i = 0; 
 		
-		for (LayoutBorderConfig borderConfig : config.getBorders().getValues(new LayoutBorderConfig[0]))
+		for (LayoutBorderConfig borderConfig : config.getBorders().getValues(new LayoutBorderConfig[4]))
 		{
-			lineStyles[i] = new PDFLayoutLineStyle((double) borderConfig.getWidth(), getColor(borderConfig.getColour())); 
+			if (borderConfig != null)
+				lineStyles[i] = new PDFLayoutLineStyle((double) borderConfig.getWidth(), getColor(borderConfig.getColour())); 
 			i++; 
 		}
 
@@ -213,7 +244,12 @@ public class PDFLayoutReportWriter implements PdfReportWriter
 	{ el.setPadding(new PDFLayoutSides<Double>(config.getPadding().getValues(new Double[4]))); }
 	
 	private Color getColor(ChartColor color)
-	{ return new Color(color.getRed(), color.getGreen(), color.getBlue()); }
+	{
+		if (color == null)
+			return null; 
+		
+		return new Color(color.getRed(), color.getGreen(), color.getBlue()); 
+	}
 	
 	private Point getPageSize(LayoutPdfReportConfig config)
 	{

@@ -9,6 +9,20 @@ public class LayoutSides<T> implements Serializable
 	private T right; 
 	private T bottom;
 	
+	public LayoutSides()
+	{}
+	
+	public LayoutSides(T val)
+	{
+		left = val; 
+		right = val; 
+		top = val; 
+		bottom = val;  
+	}
+	
+	public LayoutSides(T[] values)
+	{ setValues(values); }
+	
 	public T getLeft() 
 	{ return left; }
 

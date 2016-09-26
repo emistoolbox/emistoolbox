@@ -1,5 +1,6 @@
 package com.emistoolbox.server.renderer.pdfreport.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,29 +21,41 @@ import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
+import com.emistoolbox.common.renderer.ChartConfig;
+import com.emistoolbox.common.renderer.ChartConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
 import com.emistoolbox.common.results.GisMetaResult;
 import com.emistoolbox.common.results.MetaResultDimension;
 import com.emistoolbox.common.results.MetaResultDimensionUtil;
 import com.emistoolbox.common.results.ReportMetaResult;
+import com.emistoolbox.common.results.Result;
 import com.emistoolbox.common.results.TableMetaResult;
 import com.emistoolbox.common.results.impl.MetaResultDimensionDate;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntity;
 import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.server.model.EmisDataSet;
 import com.emistoolbox.server.model.EmisEntityDataSet;
+import com.emistoolbox.server.renderer.charts.impl.ChartUtil;
 import com.emistoolbox.server.renderer.gis.GisUtil;
+import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportCreator;
-import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfImageContent;
+import com.emistoolbox.server.renderer.pdfreport.itext.PdfImageContentImpl;
+import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfTableContent;
+import com.emistoolbox.server.renderer.pdfreport.itext.PdfChartContentImpl;
 import com.emistoolbox.server.results.ResultCollector;
+import com.emistoolbox.server.results.TableResultCollector;
+
+import es.jbauer.lib.io.impl.IOFileInput;
 
 public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implements PdfReportCreator<T> 
 {
@@ -174,42 +187,6 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         			result += ints.length; 
         
         return result; 
-    }
-
-    protected PdfContent createContent(PdfContentConfig contentConfig)
-    {
-        PdfContent result = null;
-
-        if ((contentConfig instanceof PdfTextContentConfigImpl))
-            result = new PdfTextContent(contentConfig.getTitle(), ((PdfTextContentConfigImpl) contentConfig).getText());
-        else if ((contentConfig instanceof PdfVariableContentConfigImpl))
-        {
-            PdfVariableContentConfig variableConfig = (PdfVariableContentConfig) contentConfig;  
-            PdfVariableContent tmp = new PdfVariableContent(contentConfig.getTitle(), variableConfig.getSeniorEntity(), variableConfig.getTitles(), variableConfig.getVariables());  
-            if (tmp.setContext(dataSet, metaResult.getContext()))
-                result = tmp; 
-        }
-        else if ((contentConfig instanceof PdfGisContentConfigImpl))
-        {
-            try
-            {
-                PdfGisContentConfigImpl gisContentConfig = (PdfGisContentConfigImpl) contentConfig;
-                String[] results = GisUtil.getGisResult((GisMetaResult) gisContentConfig.getMetaResult(), dataSet, null);
-
-                PdfImageContent gisResult = new ItextPdfImageContent();
-                gisResult.setImagePath(results[0]);
-
-                result = gisResult;
-                if (metaResult.getReportConfig().hasShortTitles())
-                	result.setTitle(MetaResultDimensionUtil.getSimpleTitle(gisContentConfig.getMetaResult(), false, null).toString()); 
-                else
-                	result.setTitle(MetaResultDimensionUtil.getTitle(gisContentConfig.getMetaResult(), MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NONE, false));
-            }
-            catch (IOException ex)
-            { return null; }
-        }
-
-        return result;
     }
 
     protected boolean adapt(TableMetaResult tableMetaResult)
@@ -427,4 +404,67 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 
 	    return totalPages; 
 	}
+	
+    protected PdfContent createContent(PdfContentConfig contentConfig)
+    {
+        PdfContent result = null;
+
+	    if ((contentConfig instanceof PdfChartContentConfigImpl))
+	    {
+	        PdfChartContentConfigImpl chartContentConfig = (PdfChartContentConfigImpl) contentConfig;
+	        PdfChartContent chartResult = new PdfChartContentImpl(chartContentConfig.getChartType());
+	        
+	        ChartConfig chartConfig = new ChartConfigImpl();
+	
+	        chartConfig.setSeriesColours(metaResult.getColourScheme());
+	        chartConfig.setSeriesStrokes(metaResult.getStrokes());
+	        
+	        chartConfig.setLabelFont(LABEL_FONT); 
+	        ChartUtil.setMetaResultValueConfiguration(((TableMetaResult) chartContentConfig.getMetaResult()).getMetaResultValue(0), chartConfig);
+	        chartResult.setChartConfig(chartConfig);
+	
+	        TableMetaResult tableMetaResult = (TableMetaResult) chartContentConfig.getMetaResult();
+	        adapt(tableMetaResult);
+	        
+	        EmisContext oldGlobalFilter = tableMetaResult.getGlobalFilter(); 
+	        tableMetaResult.setGlobalFilter(mergeFilters(oldGlobalFilter, metaResult.getGlobalFilter(), metaResult.getHierarchy())); 
+	        try {
+	            Result[] results = TableResultCollector.getMultiResult(dataSet, tableMetaResult);
+	            chartResult.setResult(results[0]);
+	            result = chartResult;
+	            if (metaResult.getReportConfig().hasShortTitles())
+	            	result.setTitle(MetaResultDimensionUtil.getSimpleTitle(tableMetaResult, false, null).toString()); 
+	            else
+	            	result.setTitle(MetaResultDimensionUtil.getTitle(tableMetaResult, MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NAMES, false));
+	        }
+	        finally 
+	        { tableMetaResult.setGlobalFilter(oldGlobalFilter); }
+	    }
+	    else if ((contentConfig instanceof PdfTextContentConfigImpl))
+            result = new PdfTextContent(contentConfig.getTitle(), ((PdfTextContentConfigImpl) contentConfig).getText());
+        else if ((contentConfig instanceof PdfVariableContentConfigImpl))
+        {
+            PdfVariableContentConfig variableConfig = (PdfVariableContentConfig) contentConfig;  
+            PdfVariableContent tmp = new PdfVariableContent(contentConfig.getTitle(), variableConfig.getSeniorEntity(), variableConfig.getTitles(), variableConfig.getVariables());  
+            if (tmp.setContext(dataSet, metaResult.getContext()))
+                result = tmp; 
+        }
+        else if ((contentConfig instanceof PdfGisContentConfigImpl))
+        {
+            try
+            {
+                PdfGisContentConfigImpl gisContentConfig = (PdfGisContentConfigImpl) contentConfig;
+                String[] results = GisUtil.getGisResult((GisMetaResult) gisContentConfig.getMetaResult(), dataSet, null);
+                result = new PdfImageContentImpl(new IOFileInput(new File(results[0])));
+                if (metaResult.getReportConfig().hasShortTitles())
+                	result.setTitle(MetaResultDimensionUtil.getSimpleTitle(gisContentConfig.getMetaResult(), false, null).toString()); 
+                else
+                	result.setTitle(MetaResultDimensionUtil.getTitle(gisContentConfig.getMetaResult(), MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NONE, false));
+            }
+            catch (IOException ex)
+            { return null; }
+        }
+
+        return result;
+    }
 }

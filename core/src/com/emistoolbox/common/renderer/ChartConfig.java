@@ -6,6 +6,8 @@ import com.emistoolbox.common.ChartStroke;
 
 public abstract interface ChartConfig
 {
+	public enum ChartType { BAR, STACKED, PIE, LINE, STACKED_SCALED }; 
+
     public static final ChartColor[] PALLET_YELLOW = { new ChartColor(255, 185, 25), new ChartColor(255, 227, 25), new ChartColor(228, 203, 33), new ChartColor(247, 238, 33), new ChartColor(247, 183, 52), new ChartColor(247, 202, 110) };
 
     public static final ChartColor[] PALLET_GRAYS = { new ChartColor(117, 124, 130), new ChartColor(220, 222, 224), new ChartColor(152, 157, 162), new ChartColor(187, 190, 193), new ChartColor(99, 105, 111), new ChartColor(88, 93, 98),

@@ -69,7 +69,7 @@ import com.emistoolbox.server.renderer.pdfreport.html.ResultToTableGenerator;
 import com.emistoolbox.server.renderer.pdfreport.html.ResultToTableGeneratorImpl;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfUtil;
 import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfReportWriter;
-import com.emistoolbox.server.renderer.pdfreport.pdflayout.PDFLayoutReportWriter;
+import com.emistoolbox.server.renderer.pdfreport.layout.PDFLayoutReportWriter;
 import com.emistoolbox.server.results.ExcelResultCollector;
 import com.emistoolbox.server.results.PriorityResultCollector;
 import com.emistoolbox.server.results.TableResultCollector;
@@ -80,6 +80,9 @@ import com.emistoolbox.server.util.TableWriter;
 import com.emistoolbox.server.validation.ValidationTask;
 import com.emistoolbox.server.validation.ValidationTaskList;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+
+import es.jbauer.lib.io.IOOutput;
+import es.jbauer.lib.io.impl.IOFileOutput;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -144,12 +147,12 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
     	if (cachedPdfRenderer != null)
         	return cachedPdfRenderer; 
 
-    	String pdfRenderer = EmisConfig.get(EmisConfig.EMISTOOLBOX_RENDERER_PDF, EmisConfig.RENDERER_PDF_ITEXT);
+    	String pdfRenderer = EmisConfig.get(EmisConfig.EMISTOOLBOX_RENDERER_PDF, EmisConfig.RENDERER_PDF_JORIKI);
     	if (EmisConfig.RENDERER_PDF_ITEXT.equals(pdfRenderer))
         	cachedPdfRenderer = new ItextPdfReportWriter();    	
     	else if (EmisConfig.RENDERER_PDF_JORIKI.equals(pdfRenderer))
     	{
-    		cachedPdfRenderer = new PDFLayoutReportWriter(null);
+    		cachedPdfRenderer = new PDFLayoutReportWriter().setChartRenderer(null);
     		((PDFLayoutReportWriter) cachedPdfRenderer).setDebug(true); 
     	}
     	else
@@ -727,6 +730,7 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
             if (renderer instanceof HighchartChartRenderer)
             	chartOutputFile = ServerUtil.getNewFile("charts", "bar",  ".json"); 
             
+            IOOutput chartOutput = new IOFileOutput(chartOutputFile); 
             String chartResult = chartOutputFile.getName();
             if (((chartType == 1) || (chartType == 3)) && (result[0].getDimensions() == 1))
                 chartType = 0;
@@ -736,18 +740,18 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
             ChartUtil.scaleChartWidth(chartConfig, result[0], chartType == 0 ? 2 : 1);
 
             if (chartType == EmisToolboxService.CHART_BAR)
-                this.renderer.renderBar(result[0], chartConfig, chartOutputFile);
+                this.renderer.renderBar(result[0], chartConfig, chartOutput);
             else if (chartType == EmisToolboxService.CHART_STACKED_BAR)
-                this.renderer.renderStackedBar(result[0], chartConfig, chartOutputFile);
+                this.renderer.renderStackedBar(result[0], chartConfig, chartOutput);
             else if (chartType == EmisToolboxService.CHART_PIE)
-                this.renderer.renderPie(result[0], chartConfig, chartOutputFile);
+                this.renderer.renderPie(result[0], chartConfig, chartOutput);
             else if (chartType == EmisToolboxService.CHART_STACKED_BAR_NORMALIZED)
             {
                 chartConfig.setMaxValue(100.0D);
-                this.renderer.renderNormalizedStackedBar(result[0], chartConfig, chartOutputFile);
+                this.renderer.renderNormalizedStackedBar(result[0], chartConfig, chartOutput);
             }
             else if (chartType == EmisToolboxService.CHART_LINES)
-                renderer.renderLines(result[0], chartConfig, chartOutputFile); 
+                renderer.renderLines(result[0], chartConfig, chartOutput); 
             else
                 chartResult = null;
 

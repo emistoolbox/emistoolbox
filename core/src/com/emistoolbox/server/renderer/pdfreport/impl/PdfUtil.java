@@ -45,8 +45,8 @@ import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportCreator;
-import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfChartContent;
-import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfImageContent;
+import com.emistoolbox.server.renderer.pdfreport.itext.PdfChartContentImpl;
+import com.emistoolbox.server.renderer.pdfreport.itext.PdfImageContentImpl;
 import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfTableContent;
 import com.emistoolbox.server.renderer.pdfreport.layout.LayoutPdfReportCreator;
 import com.emistoolbox.server.results.ResultCollector;
@@ -67,7 +67,10 @@ public class PdfUtil
     public static PdfReport getPdfReport(ReportMetaResult metaResult, EmisDataSet dataSet)
     {
         EmisPdfReportConfig config = metaResult.getReportConfig();
-        return getPdfReportCreator(config).create(metaResult, dataSet); 
+        PdfReport result = getPdfReportCreator(config).create(metaResult, dataSet);
+        result.setReportConfig(config);
+        
+        return result; 
     }
     
     private static PdfReportCreator getPdfReportCreator(EmisPdfReportConfig config)

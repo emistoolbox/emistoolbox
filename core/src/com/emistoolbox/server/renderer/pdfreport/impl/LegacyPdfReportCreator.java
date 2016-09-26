@@ -18,10 +18,11 @@ import com.emistoolbox.common.results.MetaResultDimensionUtil;
 import com.emistoolbox.common.results.Result;
 import com.emistoolbox.common.results.TableMetaResult;
 import com.emistoolbox.server.renderer.charts.impl.ChartUtil;
+import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPage;
-import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfTableContent;
+import com.emistoolbox.server.renderer.pdfreport.itext.PdfChartContentImpl;
 import com.emistoolbox.server.results.TableResultCollector;
 
 public class LegacyPdfReportCreator extends BasePdfReportCreator<PdfReportConfig> 
@@ -83,54 +84,24 @@ public class LegacyPdfReportCreator extends BasePdfReportCreator<PdfReportConfig
         return page;
     }
 
-    protected PdfContent createContent(PdfContentConfig contentConfig)
-    {
-    	PdfContent result = super.createContent(contentConfig); 
-    	if (result != null)
-    		return result; 
-    	
-        if ((contentConfig instanceof PdfChartContentConfigImpl))
-        {
-            PdfChartContentConfigImpl chartContentConfig = (PdfChartContentConfigImpl) contentConfig;
-            ItextPdfChartContent chartResult = new ItextPdfChartContent(chartContentConfig.getChartType());
-            
-            ChartConfig chartConfig = new ChartConfigImpl();
 
-            chartConfig.setSeriesColours(metaResult.getColourScheme());
-            chartConfig.setSeriesStrokes(metaResult.getStrokes());
-            
-            chartConfig.setLabelFont(LABEL_FONT); 
-            ChartUtil.setMetaResultValueConfiguration(((TableMetaResult) chartContentConfig.getMetaResult()).getMetaResultValue(0), chartConfig);
-            chartResult.setChartConfig(chartConfig);
-
-            TableMetaResult tableMetaResult = (TableMetaResult) chartContentConfig.getMetaResult();
-            adapt(tableMetaResult);
-            
-            EmisContext oldGlobalFilter = tableMetaResult.getGlobalFilter(); 
-            tableMetaResult.setGlobalFilter(mergeFilters(oldGlobalFilter, metaResult.getGlobalFilter(), metaResult.getHierarchy())); 
-            try {
-	            Result[] results = TableResultCollector.getMultiResult(dataSet, tableMetaResult);
-	            chartResult.setResult(results[0]);
-	            result = chartResult;
-	            if (metaResult.getReportConfig().hasShortTitles())
-	            	result.setTitle(MetaResultDimensionUtil.getSimpleTitle(tableMetaResult, false, null).toString()); 
-	            else
-	            	result.setTitle(MetaResultDimensionUtil.getTitle(tableMetaResult, MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NAMES, false));
-            }
-            finally 
-            { tableMetaResult.setGlobalFilter(oldGlobalFilter); }
-        }
-        else if ((contentConfig instanceof PdfTableContentConfigImpl))
-        {
-            PdfTableContentConfigImpl tableContentConfig = (PdfTableContentConfigImpl) contentConfig;
-            ItextPdfTableContent tableResult = new ItextPdfTableContent();
-
-            TableMetaResult tableMetaResult = (TableMetaResult) tableContentConfig.getMetaResult();
-            adapt(tableMetaResult);
-            
-            EmisContext oldGlobalFilter = tableMetaResult.getGlobalFilter(); 
-            tableMetaResult.setGlobalFilter(mergeFilters(oldGlobalFilter, metaResult.getGlobalFilter(), metaResult.getHierarchy())); 
-            try { 
+	protected PdfContent createContent(PdfContentConfig contentConfig) 
+	{
+		PdfContent result = super.createContent(contentConfig); 
+		if (result != null)
+			return result; 
+		
+	    if ((contentConfig instanceof PdfTableContentConfigImpl))
+	    {
+	        PdfTableContentConfigImpl tableContentConfig = (PdfTableContentConfigImpl) contentConfig;
+	        ItextPdfTableContent tableResult = new ItextPdfTableContent();
+	
+	        TableMetaResult tableMetaResult = (TableMetaResult) tableContentConfig.getMetaResult();
+	        adapt(tableMetaResult);
+	        
+	        EmisContext oldGlobalFilter = tableMetaResult.getGlobalFilter(); 
+	        tableMetaResult.setGlobalFilter(mergeFilters(oldGlobalFilter, metaResult.getGlobalFilter(), metaResult.getHierarchy())); 
+	        try { 
 	            Result[] results = TableResultCollector.getMultiResult(dataSet, tableMetaResult);
 	            tableResult.setResult(results[1]);
 	
@@ -140,11 +111,11 @@ public class LegacyPdfReportCreator extends BasePdfReportCreator<PdfReportConfig
 	            	result.setTitle(MetaResultDimensionUtil.getSimpleTitle(tableMetaResult, false, null).toString()); 
 	            else
 	            	result.setTitle(MetaResultDimensionUtil.getTitle(tableMetaResult, MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NONE, false));
-            }
-            finally 
-            { tableMetaResult.setGlobalFilter(oldGlobalFilter); } 
-        }
-        
-        return result; 
-    }
+	        }
+	        finally 
+	        { tableMetaResult.setGlobalFilter(oldGlobalFilter); } 
+	    }
+	    
+	    return result; 
+	}
 }

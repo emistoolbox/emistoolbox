@@ -24,7 +24,7 @@ public class PdfReportRenderer
         if (emis == null)
         	throw new IllegalArgumentException("Failed to load dataset '" + args[0] + "'");
 
-        Map<String, String> params = getParameters(args, 2); 
+        Map<String, String> params = getParameters(args, 1); 
 
         List<String> hierarchyList = NamedUtil.getNames(emis.getMetaDataSet().getHierarchies()); 
         String error = ApiBaseServlet.hasParameters(params, hierarchyList, null, null, null); 

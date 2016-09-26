@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.emistoolbox.common.model.EmisEntity;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
@@ -11,6 +12,7 @@ import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.impl.BasePdfReportCreator;
+import com.emistoolbox.server.renderer.pdfreport.impl.PdfTextContent;
 
 public class LayoutPdfReportCreator extends BasePdfReportCreator<LayoutPdfReportConfig>
 {
@@ -57,9 +59,7 @@ public class LayoutPdfReportCreator extends BasePdfReportCreator<LayoutPdfReport
     	if (result != null)
     		return result; 
     	
-        if ((contentConfig instanceof PdfChartContentConfigImpl))
-        {}
-        else if ((contentConfig instanceof PdfTableContentConfigImpl))
+        if ((contentConfig instanceof PdfTableContentConfigImpl))
         {}
         
         return result; 

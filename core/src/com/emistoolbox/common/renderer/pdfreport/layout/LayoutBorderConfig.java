@@ -9,6 +9,15 @@ public class LayoutBorderConfig implements Serializable
 	private ChartColor color; 
 	private int width;
 
+	public LayoutBorderConfig()
+	{}
+	
+	public LayoutBorderConfig(int width, ChartColor color)
+	{
+		this.color = color; 
+		this.width = width; 
+	}
+	
 	public ChartColor getColour() 
 	{ return color; }
 	

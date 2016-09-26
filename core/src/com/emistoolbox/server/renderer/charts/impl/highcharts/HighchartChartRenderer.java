@@ -18,6 +18,7 @@ import com.emistoolbox.common.results.Result;
 import com.emistoolbox.lib.highchart.renderer.HighchartRenderer;
 import com.emistoolbox.lib.highchart.renderer.HighchartRenderingType;
 import com.emistoolbox.server.renderer.charts.ChartRenderer;
+import com.emistoolbox.server.renderer.charts.impl.BaseChartRenderer;
 import com.googlecode.wickedcharts.highcharts.jackson.JsonRenderer;
 import com.googlecode.wickedcharts.highcharts.options.Axis;
 import com.googlecode.wickedcharts.highcharts.options.ChartOptions;
@@ -42,26 +43,31 @@ import es.jbauer.lib.io.IOInput;
 import es.jbauer.lib.io.IOOutput;
 import es.jbauer.lib.io.impl.IOFileOutput;
 
-public class HighchartChartRenderer implements ChartRenderer 
+public class HighchartChartRenderer extends BaseChartRenderer implements ChartRenderer 
 {
 	private HighchartRenderer renderer; 
 	
 	public HighchartChartRenderer(HighchartRenderer renderer)
 	{ this.renderer = renderer;  }
 	
-	private void render(Options hcOptions, File out)
+	@Override
+	public boolean canCreateContentType(String contentType) 
+	{ return contentType.equals("application/json") || contentType.equals("application/pdf") || contentType.equals("image/png"); }
+
+	private void render(Options hcOptions, IOOutput out)
 		throws IOException
 	{
 		String json = getJson(hcOptions); 
-		System.out.println(json);
 
 		HighchartRenderingType renderType = HighchartRenderingType.PNG; 
 		if (out.getName().toLowerCase().endsWith(".json"))
 		{
-			PrintWriter pout = new PrintWriter(out); 
+			OutputStream os = out.getOutputStream(); 
+			PrintWriter pout = new PrintWriter(os); 
 			pout.print(json);
 			pout.flush();
 			IOUtils.closeQuietly(pout);
+			IOUtils.closeQuietly(os); 
 			
 			return; 
 		}
@@ -74,13 +80,11 @@ public class HighchartChartRenderer implements ChartRenderer
 		catch (InterruptedException ex)
 		{ throw new IOException("Failed to render Highchart", ex); }
 		
-		IOOutput output = new IOFileOutput(out); 
-	
 		InputStream is = null;  
 		OutputStream os = null; 
 		try {
 			is = input.getInputStream();
-			os = output.getOutputStream(); 
+			os = out.getOutputStream(); 
 			IOUtils.copy(is, os);
 			os.flush(); 
 		}
@@ -249,7 +253,7 @@ public class HighchartChartRenderer implements ChartRenderer
 	}
 	
 	@Override
-	public void renderBar(Result data, ChartConfig config, File out) 
+	public void renderBar(Result data, ChartConfig config, IOOutput out) 
 		throws IOException 
 	{
 		Options opts = init(data, config, SeriesType.COLUMN); 
@@ -257,7 +261,7 @@ public class HighchartChartRenderer implements ChartRenderer
 	}
 
 	@Override
-	public void renderStackedBar(Result data, ChartConfig config, File out) 
+	public void renderStackedBar(Result data, ChartConfig config, IOOutput out) 
 		throws IOException 
 	{
 		Options opts = init(data, config, SeriesType.COLUMN); 
@@ -282,7 +286,7 @@ public class HighchartChartRenderer implements ChartRenderer
 	
 
 	@Override
-	public void renderPie(Result data, ChartConfig config, File out) 
+	public void renderPie(Result data, ChartConfig config, IOOutput out) 
 		throws IOException 
 	{
 		Options opts = init(data, config, SeriesType.PIE); 
@@ -290,7 +294,7 @@ public class HighchartChartRenderer implements ChartRenderer
 	}
 
 	@Override
-	public void renderLines(Result data, ChartConfig config, File out) 
+	public void renderLines(Result data, ChartConfig config, IOOutput out) 
 		throws IOException 
 	{
 		Options opts = init(data, config, SeriesType.LINE); 
@@ -298,7 +302,7 @@ public class HighchartChartRenderer implements ChartRenderer
 	}
 
 	@Override
-	public void renderNormalizedStackedBar(Result data, ChartConfig config, File out)
+	public void renderNormalizedStackedBar(Result data, ChartConfig config, IOOutput out)
 		throws IOException 
 	{
 		Options opts = init(data, config, SeriesType.COLUMN); 
