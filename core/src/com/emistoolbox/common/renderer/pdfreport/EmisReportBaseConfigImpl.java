@@ -6,6 +6,7 @@ import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.results.MetaResult;
+import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.common.util.impl.NamedImpl;
 
 public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements EmisPdfReportConfig, Serializable
@@ -117,5 +118,27 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
     
         MetaResult metaResult = ((PdfMetaResultContentConfig) contentConfig).getMetaResult();
         return metaResult.getHierarchy();
+    }
+
+    public boolean allowContentConfig(PdfContentConfig contentConfig)
+    {
+        if (getEntityType() == null)
+            return true;
+
+        if (!(contentConfig instanceof PdfMetaResultContentConfig))
+            return true;
+
+        MetaResult metaResult = ((PdfMetaResultContentConfig) contentConfig).getMetaResult();
+        EmisMetaEntity contentConfigEntity = contentConfig.getSeniorEntity();
+
+        EmisMetaHierarchy currentHierarchy = getHierarchy();
+        if (currentHierarchy != null)
+        {
+            EmisMetaHierarchy contentHierarchy = getHierarchy(contentConfig);
+            if ((contentHierarchy != null) && (!NamedUtil.sameName(contentHierarchy, currentHierarchy)))
+                return false;
+        }
+
+        return (contentConfigEntity != null) && (!getEntityType().isChildOf(contentConfigEntity, metaResult.getHierarchy()));
     }
 }

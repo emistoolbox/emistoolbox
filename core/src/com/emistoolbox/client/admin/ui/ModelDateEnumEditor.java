@@ -35,7 +35,7 @@ public class ModelDateEnumEditor extends FlexTable
         PushButton btn = new PushButton(Message.messageAdmin().mdeeBtnAddDate(), new ClickHandler() {
             public void onClick(ClickEvent event)
             {
-                String name = EmisUtils.getUniqueId((List) null, Message.messageAdmin().mdeePromptEnterDateEnumName());
+                String name = EmisUtils.getUniqueIdByList((List) null, Message.messageAdmin().mdeePromptEnterDateEnumName());
 
                 if ((name == null) || (name.equals("")))
                 {

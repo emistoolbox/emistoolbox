@@ -1,5 +1,6 @@
 package com.emistoolbox.common.renderer.pdfreport.layout.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import com.emistoolbox.common.renderer.pdfreport.TextSetImpl;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 
-public class LayoutPageConfigImpl extends TextSetImpl implements LayoutPageConfig 
+public class LayoutPageConfigImpl extends TextSetImpl implements LayoutPageConfig, Serializable
 {
 	private List<LayoutFrameConfig> frames = new ArrayList<LayoutFrameConfig>(); 
 

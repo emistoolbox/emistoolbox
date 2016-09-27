@@ -1,15 +1,22 @@
 package com.emistoolbox.common.renderer.pdfreport;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class TextSetImpl implements TextSet
+import com.emistoolbox.common.ChartFont;
+
+public class TextSetImpl implements TextSet, Serializable
 {
+	private final static ChartFont DEFAULT_FONT = new ChartFont();  
+	
+	private ChartFont defaultFont = DEFAULT_FONT; 
 	private Set<String> keys = new HashSet<String>(); 
 	private Map<String, String> texts = new HashMap<String, String>(); 
+	private Map<String, ChartFont> fonts= new HashMap<String, ChartFont>(); 
 	
 	public TextSetImpl(String[] keys)
 	{ Collections.addAll(this.keys, keys); }
@@ -26,5 +33,31 @@ public class TextSetImpl implements TextSet
 	{ return texts.get(key); } 
 	
 	public Set<String> getTextKeys()
-	{ return keys; } 
+	{ return keys; }
+
+	@Override
+	public ChartFont getDefaultFont() 
+	{ return defaultFont; } 
+
+	@Override
+	public void setDefaultFont(ChartFont font) 
+	{ defaultFont = font; } 
+	
+	@Override
+	public void putText(String key, String value, ChartFont font) 
+	{
+		putText(key, value); 
+		fonts.put(key, font); 
+	}
+
+	@Override
+	public ChartFont getFont(String key) 
+	{
+		ChartFont result = fonts.get(key); 
+		if (result == null)
+			return defaultFont; 
+		
+		return result;
+	} 
+
 }

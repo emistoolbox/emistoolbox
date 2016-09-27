@@ -30,45 +30,52 @@ public class EmisUtils
 {
     public static String getUniqueId(Tree tree, String prompt)
     {
-        List ids = new ArrayList();
+        List<String> ids = new ArrayList<String>();
         for (int i = 0; i < tree.getItemCount(); i++)
         {
             ids.add(tree.getItem(i).getText());
         }
-        return getUniqueId(ids, prompt);
+        return getUniqueIdByList(ids, prompt);
     }
 
     public static String getUniqueId(NamedIndexList<? extends Named> list, String prompt)
     {
-        List ids = new ArrayList();
+        List<String> ids = new ArrayList<String>();
         for (Named n : list)
-        {
             ids.add(n.getName());
-        }
-        return getUniqueId(ids, prompt);
+
+        return getUniqueIdByList(ids, prompt);
     }
+    
+    public static String getUniqueId(List<? extends Named> list, String prompt)
+    {
+        List<String> ids = new ArrayList<String>();
+        for (Named n : list)
+        	ids.add(n.getName());
+        
+    	return getUniqueIdByList(ids, prompt);
+    }
+    
 
     public static String getUniqueId(TreeItem parent, String prompt)
     {
-        List ids = new ArrayList();
+        List<String> ids = new ArrayList<String>();
         for (int i = 0; i < parent.getChildCount(); i++)
-        {
             ids.add(parent.getChild(i).getText());
-        }
-        return getUniqueId(ids, prompt);
+
+        return getUniqueIdByList(ids, prompt);
     }
 
     public static String getUniqueId(ListBox list, String prompt)
     {
-        List ids = new ArrayList();
+        List<String> ids = new ArrayList<String>();
         for (int i = 0; i < list.getItemCount(); i++)
-        {
             ids.add(list.getItemText(i));
-        }
-        return getUniqueId(ids, prompt);
+
+        return getUniqueIdByList(ids, prompt);
     }
 
-    public static String getUniqueId(List<String> ids, String prompt)
+    public static String getUniqueIdByList(List<String> ids, String prompt)
     {
         String result = "";
         do

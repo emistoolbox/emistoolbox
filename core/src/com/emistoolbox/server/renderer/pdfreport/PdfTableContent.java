@@ -2,13 +2,8 @@ package com.emistoolbox.server.renderer.pdfreport;
 
 import com.emistoolbox.common.ChartFont;
 
-public abstract interface PdfTableContent extends PdfResultContent
+public interface PdfTableContent extends PdfContent
 {
-    public abstract void setFont(FontIdentifier paramFontIdentifier, ChartFont paramChartFont);
+    public void setFont(FontIdentifier paramFontIdentifier, ChartFont paramChartFont);
+    public ChartFont getFont(FontIdentifier paramFontIdentifier);
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.server.renderer.pdfreport.PdfTableContent
- * JD-Core Version: 0.6.0
- */

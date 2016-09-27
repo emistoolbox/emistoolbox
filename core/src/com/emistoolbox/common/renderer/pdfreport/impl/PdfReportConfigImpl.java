@@ -19,32 +19,6 @@ public class PdfReportConfigImpl extends EmisReportBaseConfigImpl implements Pdf
 
     private List<PdfContentConfig> contentConfigs = new ArrayList<PdfContentConfig>();
 
-    public boolean allowContentConfig(PdfContentConfig contentConfig)
-    {
-        if (getEntityType() == null)
-        {
-            return true;
-        }
-        if (!(contentConfig instanceof PdfMetaResultContentConfig))
-        {
-            return true;
-        }
-        MetaResult metaResult = ((PdfMetaResultContentConfig) contentConfig).getMetaResult();
-        EmisMetaEntity contentConfigEntity = contentConfig.getSeniorEntity();
-
-        EmisMetaHierarchy currentHierarchy = getHierarchy();
-        if (currentHierarchy != null)
-        {
-            EmisMetaHierarchy contentHierarchy = getHierarchy(contentConfig);
-            if ((contentHierarchy != null) && (!NamedUtil.sameName(contentHierarchy, currentHierarchy)))
-            {
-                return false;
-            }
-        }
-
-        return (contentConfigEntity != null) && (!getEntityType().isChildOf(contentConfigEntity, metaResult.getHierarchy()));
-    }
-
     public void addContentConfig(PdfContentConfig contentConfig, EmisMetaEntity entityType)
     {
         if (allowContentConfig(contentConfig))

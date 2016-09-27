@@ -1,21 +1,36 @@
 package com.emistoolbox.server.renderer.pdfreport.impl;
 
-public class PdfTextContent extends AbstractPdfContent
+import com.emistoolbox.common.ChartFont;
+import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
+
+public class PdfTextContent extends PdfContentBase<PdfTextContentConfig>
 {
     private String text;
 
-    public PdfTextContent(String title, String text) {
+    private ChartFont titleFont; 
+    private ChartFont textFont; 
+    
+    public PdfTextContent(String title, String text) 
+    {
         setTitle(title);
-        this.text = text;
+        this.text = text; 
     }
 
     public void setText(String text)
-    {
-        this.text = text;
-    }
+    { this.text = text; }
 
     public String getText()
-    {
-        return this.text;
-    }
+    { return this.text; }
+    
+    public ChartFont getTitleFont()
+    { return titleFont; } 
+    
+    public ChartFont getTextFont()
+    { return textFont; } 
+    
+    public void setTitleFont(ChartFont font)
+    { titleFont = font; } 
+    
+    public void setTextFont(ChartFont font)
+    { textFont = font; }
 }

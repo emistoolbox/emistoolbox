@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class PdfHtmlContent extends AbstractPdfContent
+public class PdfHtmlContent extends PdfContentBase
 {
     public String html;
     

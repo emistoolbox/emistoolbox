@@ -16,14 +16,10 @@ public class PdfMetaResultContentConfigImpl<T extends MetaResult> extends PdfCon
     private T metaResult;
 
     public T getMetaResult()
-    {
-        return this.metaResult;
-    }
+    { return this.metaResult; }
 
     public void setMetaResult(T metaResult)
-    {
-        this.metaResult = metaResult;
-    }
+    { this.metaResult = metaResult; }
 
     public String getInfo()
     { return MetaResultDimensionUtil.getTitle(getMetaResult(), MetaResultDimensionUtil.ENTITY_DATE_LEVEL.GENERIC, false); }
@@ -84,10 +80,3 @@ public class PdfMetaResultContentConfigImpl<T extends MetaResult> extends PdfCon
         return result;
     }
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name:
- * com.emistoolbox.common.renderer.pdfreport.impl.PdfMetaResultContentConfigImpl
- * JD-Core Version: 0.6.0
- */

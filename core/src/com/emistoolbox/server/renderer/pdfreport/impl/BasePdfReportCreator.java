@@ -21,19 +21,21 @@ import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
+import com.emistoolbox.common.model.priolist.PriorityListItem;
 import com.emistoolbox.common.renderer.ChartConfig;
 import com.emistoolbox.common.renderer.ChartConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfChartContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfGisContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfPriorityListContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
-import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
-import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
-import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
-import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
 import com.emistoolbox.common.results.GisMetaResult;
 import com.emistoolbox.common.results.MetaResultDimension;
 import com.emistoolbox.common.results.MetaResultDimensionUtil;
+import com.emistoolbox.common.results.PriorityMetaResult;
 import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.common.results.Result;
 import com.emistoolbox.common.results.TableMetaResult;
@@ -46,12 +48,11 @@ import com.emistoolbox.server.renderer.charts.impl.ChartUtil;
 import com.emistoolbox.server.renderer.gis.GisUtil;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
-import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
+import com.emistoolbox.server.renderer.pdfreport.PdfPriorityListContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportCreator;
-import com.emistoolbox.server.renderer.pdfreport.itext.PdfImageContentImpl;
-import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfTableContent;
-import com.emistoolbox.server.renderer.pdfreport.itext.PdfChartContentImpl;
+import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
+import com.emistoolbox.server.results.PriorityResultCollector;
 import com.emistoolbox.server.results.ResultCollector;
 import com.emistoolbox.server.results.TableResultCollector;
 
@@ -197,6 +198,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
             if (!adapt(tableMetaResult.getDimension(i)))
                 return false;
         }
+        
         return true;
     }
 
@@ -409,9 +411,9 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
     {
         PdfContent result = null;
 
-	    if ((contentConfig instanceof PdfChartContentConfigImpl))
+	    if ((contentConfig instanceof PdfChartContentConfig))
 	    {
-	        PdfChartContentConfigImpl chartContentConfig = (PdfChartContentConfigImpl) contentConfig;
+	        PdfChartContentConfig chartContentConfig = (PdfChartContentConfig) contentConfig;
 	        PdfChartContent chartResult = new PdfChartContentImpl(chartContentConfig.getChartType());
 	        
 	        ChartConfig chartConfig = new ChartConfigImpl();
@@ -440,20 +442,23 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 	        finally 
 	        { tableMetaResult.setGlobalFilter(oldGlobalFilter); }
 	    }
-	    else if ((contentConfig instanceof PdfTextContentConfigImpl))
-            result = new PdfTextContent(contentConfig.getTitle(), ((PdfTextContentConfigImpl) contentConfig).getText());
-        else if ((contentConfig instanceof PdfVariableContentConfigImpl))
+	    else if (contentConfig instanceof PdfTextContentConfig)
+	    {
+	    	I NEED FONTS
+            result = new PdfTextContent(contentConfig.getTitle(), ((PdfTextContentConfig) contentConfig).getText());
+	    }
+	    else if ((contentConfig instanceof PdfVariableContentConfigImpl))
         {
-            PdfVariableContentConfig variableConfig = (PdfVariableContentConfig) contentConfig;  
+            PdfVariableContentConfig variableConfig = (PdfVariableContentConfig) contentConfig;
             PdfVariableContent tmp = new PdfVariableContent(contentConfig.getTitle(), variableConfig.getSeniorEntity(), variableConfig.getTitles(), variableConfig.getVariables());  
             if (tmp.setContext(dataSet, metaResult.getContext()))
                 result = tmp; 
         }
-        else if ((contentConfig instanceof PdfGisContentConfigImpl))
+        else if ((contentConfig instanceof PdfGisContentConfig))
         {
             try
             {
-                PdfGisContentConfigImpl gisContentConfig = (PdfGisContentConfigImpl) contentConfig;
+                PdfGisContentConfig gisContentConfig = (PdfGisContentConfig) contentConfig;
                 String[] results = GisUtil.getGisResult((GisMetaResult) gisContentConfig.getMetaResult(), dataSet, null);
                 result = new PdfImageContentImpl(new IOFileInput(new File(results[0])));
                 if (metaResult.getReportConfig().hasShortTitles())
@@ -463,6 +468,21 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
             }
             catch (IOException ex)
             { return null; }
+        }
+        else if (contentConfig instanceof PdfPriorityListContentConfig)
+        {
+        	PdfPriorityListContentConfig prioConfig = (PdfPriorityListContentConfig) contentConfig; 
+        	
+        	PdfPriorityListContent prioContent =new PdfPriorityListContentImpl(); 
+        	prioContent.setConfig((PdfPriorityListContentConfig) contentConfig); 
+        	
+        	PriorityMetaResult prioMetaResult = prioConfig.getMetaResult(); 
+        	adapt(prioMetaResult.getContext());
+        	
+        	PriorityResultCollector collector = new PriorityResultCollector(dataSet, prioMetaResult);
+        	prioContent.setResults(collector.getResults());
+        	        	
+        	result = prioContent; 
         }
 
         return result;

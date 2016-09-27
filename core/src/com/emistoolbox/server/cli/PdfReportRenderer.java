@@ -18,32 +18,35 @@ public class PdfReportRenderer
 	public static void main(String[] args)
 		throws Exception
 	{
-		System.out.println("Usage: [dataset] [key=value]* ");
-
-        EmisDataSet emis = EmisToolboxIO.loadDataset(args[0]); 
-        if (emis == null)
-        	throw new IllegalArgumentException("Failed to load dataset '" + args[0] + "'");
-
-        Map<String, String> params = getParameters(args, 1); 
-
-        List<String> hierarchyList = NamedUtil.getNames(emis.getMetaDataSet().getHierarchies()); 
-        String error = ApiBaseServlet.hasParameters(params, hierarchyList, null, null, null); 
-        if (error != null)
-        {
-        	System.out.println("ERROR: " + error); 
-        	return; 
-        }
-        
-        ObjectRef<String> outError = new ObjectRef<String>(); 
-        ReportMetaResult metaResult = ApiPdfServlet.getReportMetaResult(params, outError, emis); 
-        if (outError.get() != null)
-        {
-        	System.out.println("ERROR: " + outError.get()); 
-        	return; 
-        }
-        
-        String filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult); 
-        System.out.println("PDF Path: " + filename); 
+		try { 
+			System.out.println("Usage: [dataset] [key=value]* ");
+	
+	        EmisDataSet emis = EmisToolboxIO.loadDataset(args[0]); 
+	        if (emis == null)
+	        	throw new IllegalArgumentException("Failed to load dataset '" + args[0] + "'");
+	
+	        Map<String, String> params = getParameters(args, 1); 
+	
+	        List<String> hierarchyList = NamedUtil.getNames(emis.getMetaDataSet().getHierarchies()); 
+	        String error = ApiBaseServlet.hasParameters(params, hierarchyList, null, null, null); 
+	        if (error != null)
+	        {
+	        	System.out.println("ERROR: " + error); 
+	        	return; 
+	        }
+	        
+	        ObjectRef<String> outError = new ObjectRef<String>(); 
+	        ReportMetaResult metaResult = ApiPdfServlet.getReportMetaResult(params, outError, emis); 
+	        if (outError.get() != null)
+	        {
+	        	System.out.println("ERROR: " + outError.get()); 
+	        	return; 
+	        }
+	        
+	        String filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult); 
+	        System.out.println("PDF Path: " + filename); 
+		}
+		finally { System.out.flush(); }
 	}
 	
 	private static Map<String, String> getParameters(String[] args, int index)

@@ -562,7 +562,7 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
                     PdfReportConfig report = (PdfReportConfig) uiReports.getValue();
                     if (report == null)
                     {
-                        String newId = EmisUtils.getUniqueId(NamedUtil.getNames(MetaResultEditor.this.getReportConfig().getPdfReports()), Message.messageAdmin().prcleNewReportId());
+                        String newId = EmisUtils.getUniqueIdByList(NamedUtil.getNames(MetaResultEditor.this.getReportConfig().getPdfReports()), Message.messageAdmin().prcleNewReportId());
                         if (newId == null)
                             return;
                         report = new PdfReportConfigImpl();

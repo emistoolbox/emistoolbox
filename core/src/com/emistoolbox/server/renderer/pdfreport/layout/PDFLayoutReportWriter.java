@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.util.IOUtils;
 
 import com.emistoolbox.common.ChartColor;
+import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.renderer.ChartConfig;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
@@ -27,6 +28,8 @@ import com.emistoolbox.lib.pdf.PDFLayoutRenderer;
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutBorderStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFontStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHighchartElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
@@ -37,11 +40,11 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
 import com.emistoolbox.lib.pdf.util.PDFLayoutLogVisitor;
-import com.emistoolbox.server.renderer.charts.ChartRenderer;
 import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
+import com.emistoolbox.server.renderer.pdfreport.PdfPriorityListContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportWriter;
 import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
@@ -139,17 +142,17 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 		for (LayoutFrame frame : page.getFrames())
 			outerFrame.addElement(createFrame(frame)); 
 		
-		outerFrame.addElement(createAlignedText(page.getText(PdfText.TEXT_FOOTER), PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BOTTOM));
+		outerFrame.addElement(createAlignedText(page.getText(PdfText.TEXT_FOOTER), page.getText(PdfText.TEXT_FOOTER), PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BOTTOM));
 		
 		layout.setOuterFrame(outerFrame); 
 		return layout; 
 	}
 
-	private PDFLayoutElement createAlignedText(String title, PDFLayoutHorizontalAlignment horizontal, PDFLayoutVerticalAlignment vertical)
+	private PDFLayoutElement createAlignedText(String title, ChartFont font, PDFLayoutHorizontalAlignment horizontal, PDFLayoutVerticalAlignment vertical) 
 	{
 		if (StringUtils.isEmpty(title))
 			return null; 
-		return new PDFLayoutTextElement(title, null).align(horizontal, vertical); 
+		return new PDFLayoutTextElement(title, getFont(font)).align(horizontal, vertical); 
 	}
 		
 	private PDFLayoutElement createFrame(LayoutFrame frame)
@@ -170,11 +173,17 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 		else if (content instanceof PdfChartContent)
 			item = renderChart((PdfChartContent) content);   
 		else if (content instanceof PdfTextContent)
-			item = new PDFLayoutTextElement(((PdfTextContent) content).getText(), null); 
+		{
+			// TODO - add title
+			PdfTextContent textContent = (PdfTextContent) content;
+			item = new PDFLayoutTextElement(textContent.getText(), getFont(textContent.getTextFont())); 
+		}
 		else if (content instanceof PdfVariableContent)
 			item = new PDFLayoutTextElement("VARIABLES - to be implemented", null);  
 		else if (content instanceof PdfTableContent)
 			item = new PDFLayoutTextElement("TABLE - to be implemented", null);  
+		else if (content instanceof PdfPriorityListContent)
+			item = new PDFLayoutTextElement("PRIORITY LIST - to be implemented", null);  
 
 		if (item != null)
 			result.addElement(item);
@@ -285,4 +294,31 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 	@Override
 	public void setDateInfo(ReportMetaResult metaInfo) 
 	{}
+	
+	private PDFLayoutFont getFont(ChartFont font)
+	{
+		PDFLayoutFont result = new PDFLayoutFont();
+		result.setFontName(font.getName());
+		result.setFontSize(font.getSize());
+		switch (font.getStyle())
+		{
+		case ChartFont.BOLD: 
+			result.setFontStyle(PDFLayoutFontStyle.BOLD);
+			break; 
+			
+		case ChartFont.ITALIC: 
+			result.setFontStyle(PDFLayoutFontStyle.ITALIC);
+			break; 
+			
+		case ChartFont.ITALIC + ChartFont.BOLD: 
+			result.setFontStyle(PDFLayoutFontStyle.BOLD_ITALIC);
+			break; 
+
+		default: 
+			result.setFontStyle(PDFLayoutFontStyle.PLAIN);
+			break; 
+		}
+		
+		return result; 
+	}
 }

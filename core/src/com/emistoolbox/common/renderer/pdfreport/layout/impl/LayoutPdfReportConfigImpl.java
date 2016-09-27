@@ -30,13 +30,6 @@ public class LayoutPdfReportConfigImpl extends EmisReportBaseConfigImpl implemen
 		
 		return result; 
 	}
-	
-	@Override
-	public boolean allowContentConfig(PdfContentConfig content) 
-	{
-		throw new IllegalArgumentException("Not implemented"); 
-	}
-
 
 	@Override
 	public List<LayoutPageConfig> getPages() 

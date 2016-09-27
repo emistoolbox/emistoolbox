@@ -92,6 +92,8 @@ import com.emistoolbox.common.model.meta.EmisMetaGroupEnum;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.model.meta.GisContext;
 import com.emistoolbox.common.model.meta.GisLayer;
+import com.emistoolbox.common.model.priolist.PriorityReportConfig;
+import com.emistoolbox.common.model.priolist.impl.PriorityReportConfigImpl;
 import com.emistoolbox.common.model.validation.EmisValidationFilter;
 import com.emistoolbox.common.model.validation.EmisValidation;
 import com.emistoolbox.common.model.validation.EmisValidationRule;
@@ -108,6 +110,7 @@ import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.impl.PdfPriorityListContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfReportConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
@@ -123,6 +126,7 @@ import com.emistoolbox.common.results.GisMetaResult;
 import com.emistoolbox.common.results.MetaResult;
 import com.emistoolbox.common.results.MetaResultDimension;
 import com.emistoolbox.common.results.MetaResultValue;
+import com.emistoolbox.common.results.PriorityMetaResult;
 import com.emistoolbox.common.results.TableMetaResult;
 import com.emistoolbox.common.results.impl.GisMetaResultImpl;
 import com.emistoolbox.common.results.impl.MetaResultDimensionDate;
@@ -133,6 +137,7 @@ import com.emistoolbox.common.results.impl.MetaResultDimensionEntityFilter;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntityGrandChildren;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEnum;
 import com.emistoolbox.common.results.impl.MetaResultValueImpl;
+import com.emistoolbox.common.results.impl.PriorityMetaResultImpl;
 import com.emistoolbox.common.results.impl.TableMetaResultImpl;
 import com.emistoolbox.common.user.EmisUser;
 import com.emistoolbox.common.util.LayoutSides;
@@ -358,8 +363,7 @@ public class XmlReader
 					if (StringUtils.isEmpty(entityType))
 						continue;
 
-					Integer entityId = Integer.parseInt(entityTag
-							.getAttribute("entityId"));
+					Integer entityId = Integer.parseInt(entityTag.getAttribute("entityId"));
 					result.addRootEntity(entityType, entityId);
 				} 
 				catch (NumberFormatException ex) 
@@ -916,6 +920,11 @@ public class XmlReader
 			add(pdfReports, getPdfReportConfig(reportTag, indicators));
 		result.setPdfReports(pdfReports);
 
+		List<PriorityReportConfig> priorityReports = new ArrayList<PriorityReportConfig>(); 
+		for (Element prioTag : getElements(tag, null, "priorityReport"))
+			add(priorityReports, getPriorityReport(prioTag, indicators)); 
+		result.setPriorityReports(priorityReports);
+		
 		List<ExcelReportConfig> excelReports = new ArrayList<ExcelReportConfig>();
 		for (Element reportTag : getElements(tag, null,
 				ExcelReportConfigSerializer.TAG_EXCEL_REPORT))
@@ -927,6 +936,15 @@ public class XmlReader
 		return result;
 	}
 
+	private PriorityReportConfig getPriorityReport(Element tag, List<EmisIndicator> indicators)
+	{
+		PriorityReportConfig result = new PriorityReportConfigImpl(); 
+		result.setName(getAttr(tag, "name")); 
+		result.setMetaResult(getPriorityMetaResult(getElement(tag, "prioMetaResult"), indicators));
+		
+		return result; 
+	}
+	
 	private EmisPdfReportConfig getPdfReportConfig(Element tag, List<EmisIndicator> indicators) 
 	{
 		verifyTagName(tag, "pdfReport");
@@ -948,7 +966,7 @@ public class XmlReader
 	private void readEmisPdfReportConfig(Element tag, EmisPdfReportConfig config)
 	{
 		config.setName(getAttr(tag, "name"));
-		config.setEntityType((EmisMetaEntity) find(tag, "entityType", this.meta.getEntities()));
+		config.setEntityType((EmisMetaEntity) find(tag, "entityType", meta.getEntities()));
 
 		PdfReportConfig.PageOrientation orientation = PdfReportConfig.PageOrientation.PORTRAIT;
 		PdfReportConfig.PageSize size = PdfReportConfig.PageSize.A4;
@@ -1061,13 +1079,11 @@ public class XmlReader
 		if (type.equals("chart")) {
 			PdfChartContentConfigImpl tmp = new PdfChartContentConfigImpl();
 			tmp.setChartType(getAttrAsInt(tag, "chartType").intValue());
-			tmp.setMetaResult(getTableMetaResult(
-					getElement(tag, "tableMetaResult"), indicators));
+			tmp.setMetaResult(getTableMetaResult(getElement(tag, "tableMetaResult"), indicators));
 			result = tmp;
 		} else if (type.equals("table")) {
 			PdfTableContentConfigImpl tmp = new PdfTableContentConfigImpl();
-			tmp.setMetaResult(getTableMetaResult(
-					getElement(tag, "tableMetaResult"), indicators));
+			tmp.setMetaResult(getTableMetaResult(getElement(tag, "tableMetaResult"), indicators));
 			result = tmp;
 		} else if (type.equals("gis")) {
 			PdfGisContentConfigImpl tmp = new PdfGisContentConfigImpl();
@@ -1087,6 +1103,11 @@ public class XmlReader
 					this.meta.getEntities()));
 
 			result = tmp;
+		} 
+		else if (type.equals("prio")) 
+		{
+			PdfPriorityListContentConfigImpl tmp = new PdfPriorityListContentConfigImpl(); 
+			tmp.setMetaResult(getPriorityMetaResult(getElement(tag, "prioMetaResult"), indicators)); 
 		}
 
 		result.setTitle(getAttr(tag, "title"));
@@ -1095,22 +1116,42 @@ public class XmlReader
 	}
 
 	public MetaResult getMetaResult(Element tag, List<EmisIndicator> indicators) {
-		if (!tag.getNodeName().equals("metaResult")) {
+		if (!tag.getNodeName().equals("metaResult"))
 			throw new IllegalArgumentException("Expected 'metaResult' tag.");
-		}
+
 		Element child = getElement(tag, "tableMetaResult");
-		if (child != null) {
+		if (child != null) 
 			return getTableMetaResult(child, indicators);
-		}
+
 		child = getElement(tag, "gisMetaResult");
-		if (child != null) {
+		if (child != null)
 			return getGisMetaResult(child, indicators);
-		}
+		
+		child = getElement(tag, "prioMetaResult"); 
+		if (child != null)
+			return getPriorityMetaResult(child, indicators); 
+
 		return null;
 	}
 
-	public TableMetaResult getTableMetaResult(Element tag,
-			List<EmisIndicator> indicators) {
+	public PriorityMetaResult getPriorityMetaResult(Element tag, List<EmisIndicator> indicators)
+	{
+		if (tag == null)
+			return null; 
+		
+		PriorityMetaResult result = new PriorityMetaResultImpl(); 
+		updateMetaResult(result, tag, indicators); 
+		
+		getIdsAsArray(tag, "fields");
+		result.setFilterEmpty(getAttrAsBoolean(tag, "filterEmpty", false));
+		result.setListEntity((EmisMetaEntity) find(tag, "entityType", this.meta.getEntities()));
+		
+		return result; 
+	}
+	
+	
+	public TableMetaResult getTableMetaResult(Element tag, List<EmisIndicator> indicators) 
+	{
 		TableMetaResult result = new TableMetaResultImpl();
 		updateMetaResult(result, tag, indicators);
 		String sort = tag.getAttribute("sort");
@@ -1629,13 +1670,19 @@ public class XmlReader
 	private ChartColor getAttrAsColour(Element tag, String attr)
 	{
 		String value = tag.getAttribute(attr); 
-		if (value == null)
+		if (StringUtils.isEmpty(value))
 			return null; 
 		
 		if (value.startsWith("#"))
 			value = value.substring(1); 
 		
-		int len = value.length() == 3 ? 1 : 2; 
+		int len = 1; 
+		if (value.length() == 3)
+			len = 1; 
+		else if (value.length() == 6)
+			len = 2; 
+		else 
+			return null; 
 		
 		int r = Integer.parseInt(value.substring(0, len), 16); 
 		int g = Integer.parseInt(value.substring(len, 2 * len), 16); 
@@ -1660,7 +1707,14 @@ public class XmlReader
 		Integer value = getAttrAsInt(tag, attr); 
 		return value == null ? defaultValue : value; 
 	}
-
+	private boolean getAttrAsBoolean(Element tag, String attr, boolean defaultValue)
+	{
+		Boolean value = getAttrAsBoolean(tag, attr); 
+		if (value == null)
+			return defaultValue; 
+		return value; 
+	}
+	
 	private Boolean getAttrAsBoolean(Element tag, String attr) {
 		String value = tag.getAttribute(attr);
 		if (value == null)

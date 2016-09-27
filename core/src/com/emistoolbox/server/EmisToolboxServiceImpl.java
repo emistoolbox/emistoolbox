@@ -152,7 +152,7 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
         	cachedPdfRenderer = new ItextPdfReportWriter();    	
     	else if (EmisConfig.RENDERER_PDF_JORIKI.equals(pdfRenderer))
     	{
-    		cachedPdfRenderer = new PDFLayoutReportWriter().setChartRenderer(null);
+    		cachedPdfRenderer = new PDFLayoutReportWriter().setChartRenderer(getChartRenderer());
     		((PDFLayoutReportWriter) cachedPdfRenderer).setDebug(true); 
     	}
     	else

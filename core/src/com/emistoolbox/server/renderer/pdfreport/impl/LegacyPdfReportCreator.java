@@ -21,8 +21,6 @@ import com.emistoolbox.server.renderer.charts.impl.ChartUtil;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPage;
-import com.emistoolbox.server.renderer.pdfreport.itext.ItextPdfTableContent;
-import com.emistoolbox.server.renderer.pdfreport.itext.PdfChartContentImpl;
 import com.emistoolbox.server.results.TableResultCollector;
 
 public class LegacyPdfReportCreator extends BasePdfReportCreator<PdfReportConfig> 
@@ -94,7 +92,7 @@ public class LegacyPdfReportCreator extends BasePdfReportCreator<PdfReportConfig
 	    if ((contentConfig instanceof PdfTableContentConfigImpl))
 	    {
 	        PdfTableContentConfigImpl tableContentConfig = (PdfTableContentConfigImpl) contentConfig;
-	        ItextPdfTableContent tableResult = new ItextPdfTableContent();
+	        PdfResultTableContentImpl tableResult = new PdfResultTableContentImpl();
 	
 	        TableMetaResult tableMetaResult = (TableMetaResult) tableContentConfig.getMetaResult();
 	        adapt(tableMetaResult);

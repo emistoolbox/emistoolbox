@@ -4,7 +4,12 @@ import java.io.Serializable;
 
 public class ChartFont implements Serializable
 {
+	public static String[] FONTS = new String[] { 
+			
+	}; 
+	
     private static final long serialVersionUID = 1L;
+    
     public static final int PLAIN = 0;
     public static final int BOLD = 1;
     public static final int ITALIC = 2;
@@ -15,7 +20,8 @@ public class ChartFont implements Serializable
     public ChartFont() 
     {}
 
-    public ChartFont(String name, int style, int size) {
+    public ChartFont(String name, int style, int size) 
+    {
         this.name = name;
         this.size = size;
         this.style = style;

@@ -58,6 +58,7 @@ import com.emistoolbox.common.model.meta.EmisMetaGroupEnum;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.model.meta.GisContext;
 import com.emistoolbox.common.model.meta.GisLayer;
+import com.emistoolbox.common.model.priolist.PriorityReportConfig;
 import com.emistoolbox.common.model.validation.EmisValidation;
 import com.emistoolbox.common.model.validation.EmisValidationFilter;
 import com.emistoolbox.common.model.validation.EmisValidationRule;
@@ -71,6 +72,7 @@ import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.impl.PdfPriorityListContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
@@ -82,6 +84,7 @@ import com.emistoolbox.common.results.GisMetaResult;
 import com.emistoolbox.common.results.MetaResult;
 import com.emistoolbox.common.results.MetaResultDimension;
 import com.emistoolbox.common.results.MetaResultValue;
+import com.emistoolbox.common.results.PriorityMetaResult;
 import com.emistoolbox.common.results.TableMetaResult;
 import com.emistoolbox.common.results.impl.MetaResultDimensionDate;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntity;
@@ -138,6 +141,8 @@ public class XmlWriter
             addXml(root, (TableMetaResult) metaResult);
         else if ((metaResult instanceof GisMetaResult))
             addXml(root, (GisMetaResult) metaResult);
+        else if (metaResult instanceof PriorityMetaResult)
+        	addXml(root, (PriorityMetaResult) metaResult); 
         else
             return null;
 
@@ -740,6 +745,9 @@ public class XmlWriter
                         
         for (ExcelReportConfig excelReport : reportConfig.getExcelReports())
             ExcelReportConfigSerializer.addXml(parent, excelReport); 
+        
+        for (PriorityReportConfig prioReport : reportConfig.getPriorityReports())
+        	addXml(parent, prioReport); 
     }
 
     private Element getEmisPdfReportConfig(Element parent, EmisPdfReportConfig config, String version)
@@ -767,6 +775,15 @@ public class XmlWriter
     		
     		createElementAndAdd(key, parent).setTextContent(value); 
     	}
+    }
+    
+    private void addXml(Element parent, PriorityReportConfig config)
+    {
+    	if (config == null)
+    		return; 
+    	
+    	Element tag = createElementAndAdd("priorityReport", parent);
+    	addXml(tag, config.getMetaResult()); 
     }
     
     private void addXml(Element parent, LayoutPdfReportConfig config)
@@ -883,6 +900,12 @@ public class XmlWriter
                 varTag.setAttribute("title", varContent.getItemTitle(i));  
             }
         }
+        else if (contentConfig instanceof PdfPriorityListContentConfigImpl)
+        {
+        	PdfPriorityListContentConfigImpl prioConfig= (PdfPriorityListContentConfigImpl) contentConfig; 
+        	setAttr(tag, "type", "prio"); 
+        	addXml(tag, prioConfig.getMetaResult()); 
+        }        
     }
 
     private void updateXml(Element tag, MetaResult metaResult)
@@ -918,11 +941,23 @@ public class XmlWriter
     private void addXml(Element parent, GisMetaResult gisMetaResult)
     {
         if (gisMetaResult == null)
-        {
             return;
-        }
+
         Element tag = createElementAndAdd("gisMetaResult", parent);
         updateXml(tag, gisMetaResult);
+    }
+    
+    private void addXml(Element parent, PriorityMetaResult metaResult)
+    {
+    	if (metaResult == null)
+    		return; 
+    	
+    	Element tag = createElementAndAdd("prioMetaResult", parent); 
+    	updateXml(tag, metaResult); 
+    	
+    	setIds(tag, "fields", metaResult.getAdditionalFields());
+    	setAttr(tag, "filterEmpty", metaResult.getFilterEmpty());
+    	setAttr(tag, "entityType", (Named) metaResult.getListEntity()); 
     }
 
     private void addXml(Element parent, TableMetaResult tableMetaResult)
