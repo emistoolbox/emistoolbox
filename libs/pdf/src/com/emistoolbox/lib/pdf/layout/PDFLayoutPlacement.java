@@ -1,3 +1,5 @@
 package com.emistoolbox.lib.pdf.layout;
 
-abstract public class PDFLayoutPlacement {}
+import java.io.Serializable;
+
+abstract public class PDFLayoutPlacement implements Serializable {}

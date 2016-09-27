@@ -1,9 +1,10 @@
 package com.emistoolbox.lib.pdf.layout;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
 
-abstract public class PDFLayoutElement {
+abstract public class PDFLayoutElement implements Serializable {
 	private PDFLayoutObjectFit objectFit = PDFLayoutObjectFit.NONE;
 	private PDFLayoutPlacement placement;
 	private PDFLayoutSides<Double> padding;

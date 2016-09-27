@@ -1,8 +1,9 @@
 package com.emistoolbox.lib.pdf.layout;
 
 import java.awt.Color;
+import java.io.Serializable;
 
-public class PDFLayoutBorderStyle {
+public class PDFLayoutBorderStyle implements Serializable {
 	PDFLayoutSides<PDFLayoutLineStyle> lineStyles;
 	Double borderRadius;
 

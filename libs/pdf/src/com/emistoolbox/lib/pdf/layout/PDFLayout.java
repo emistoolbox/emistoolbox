@@ -1,8 +1,9 @@
 package com.emistoolbox.lib.pdf.layout;
 
 import java.io.IOException;
+import java.io.Serializable;
 
-public class PDFLayout {
+public class PDFLayout implements Serializable {
 	private PDFLayoutFrameElement outerFrame;
 
 	public PDFLayoutFrameElement getOuterFrame () {
