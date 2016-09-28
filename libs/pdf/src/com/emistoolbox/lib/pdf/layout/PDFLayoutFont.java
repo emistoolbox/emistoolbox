@@ -1,6 +1,8 @@
 package com.emistoolbox.lib.pdf.layout;
 
+import java.awt.Color;
 import java.io.Serializable;
+
 public class PDFLayoutFont implements Serializable {
 	
 	public static final String FONT_TIMES = "Times"; 
@@ -10,6 +12,7 @@ public class PDFLayoutFont implements Serializable {
 	private String fontName;
 	private double fontSize;
 	private PDFLayoutFontStyle fontStyle;
+	private Color color = Color.BLACK;
 
 	public PDFLayoutFont()
 	{}
@@ -43,5 +46,13 @@ public class PDFLayoutFont implements Serializable {
 
 	public void setFontStyle (PDFLayoutFontStyle fontStyle) {
 		this.fontStyle = fontStyle;
+	}
+
+	public Color getColor () {
+		return color;
+	}
+
+	public void setColor (Color color) {
+		this.color = color;
 	}
 }
