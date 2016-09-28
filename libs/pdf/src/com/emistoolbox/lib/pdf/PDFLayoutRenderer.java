@@ -13,6 +13,7 @@ import info.joriki.pdf.PDFStream;
 import info.joriki.pdf.PDFWriter;
 import info.joriki.pdf.TextState;
 
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Stack;
 
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
@@ -42,8 +44,16 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 import es.jbauer.lib.io.IOOutput;
 
 public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
-	ResourceRenamer resourceRenamer;
-	PrintStream ps;
+	final static Color debugBoxColor = Color.LIGHT_GRAY;
+	final static int ndigits = 6;
+
+	private ResourceRenamer resourceRenamer;
+	private PrintStream ps;
+	private boolean debugging;
+
+	public void setDebugging (boolean debugging) {
+		this.debugging = debugging;
+	}
 
 	public void render (List<PDFLayout> layouts,IOOutput output) throws IOException {
 		ConstructiblePDFDocument document = new ConstructiblePDFDocument ();
@@ -115,8 +125,19 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private void drawRectangle (Rectangle r) {
-		outputRectangle (r);
+		outputRectangle ((Rectangle) r.transformedBy (transformStack.peek ()));
 		ps.print ("s\n");
+	}
+
+	private void drawRectangle (Rectangle r,Color color) {
+		pushGraphicsState ();
+		setStrokingColor (color);
+		drawRectangle (r);
+		popGraphicsState ();
+	}
+
+	private void setStrokingColor (Color color) {
+		coordinateCommand ("SC",color.getRGBColorComponents (null));
 	}
 
 	private void outputRectangle (Rectangle r) {
@@ -124,28 +145,48 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private void flip (Rectangle r) {
-		transform (1,0,0,-1,0,r.ymin + r.ymax);
+		transform (new Transformation (1,0,0,-1,0,r.ymin + r.ymax));
 	}
 
 	private void transform (Rectangle from,Rectangle to) {
-		transform (Transformation.matchBoxes (from,to).matrix);
+		transform (Transformation.matchBoxes (from,to));
 	}
 
-	private void transform (double ... m) {
-		coordinateCommand ("cm",m);
+	private Stack<Transformation> transformStack = new Stack<Transformation> ();
+	{
+		transformStack.push (new Transformation ());
+	}
+
+	private void pushTransform () {
+		transformStack.push (transformStack.peek ());
+	}
+
+	private void popTransform () {
+		transformStack.pop ();
+	}
+
+	private void transform (Transformation transform) {
+		transformStack.push (new Transformation (transform,transformStack.pop ()));
+	}
+
+	private void outputTransform (Transformation transform) {
+		coordinateCommand ("cm",transform.matrix);
+	}
+
+	private void coordinateCommand (String command,float ... m) {
+		double [] d = new double [m.length];
+		for (int i = 0;i < m.length;i++)
+			d [i] = m [i];
+		coordinateCommand (command,d);
 	}
 
 	private void coordinateCommand (String command,double ... m) {
 		for (double v : m) {
-			ps.print (toString (v));
+			print (v);
 			ps.print (' ');
 		}
 		ps.print (command);
 		ps.print ('\n');
-	}
-
-	private void translate (double dx,double dy) {
-		transform (1,0,0,1,dx,dy);
 	}
 
 	private void pushGraphicsState () {
@@ -156,8 +197,27 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		ps.print ("Q\n");
 	}
 
-	private String toString (double x) {
-		return String.valueOf (x);
+	private void print (double x) {
+		if (x < 0) {
+			ps.print ('-');
+			print (-x);
+		}
+		else {
+			long l = (long) x;
+			ps.print (l);
+			StringBuilder builder = new StringBuilder ();
+			builder.append ('.');
+			for (int i = 0;i < ndigits;i++) {
+				x -= l;
+				x *= 10;
+				l = (long) x;
+				builder.append (l);
+				if (l != 0) {
+					ps.print (builder);
+					builder.setLength (0);
+				}
+			}
+		}
 	}
 
 	public Void visit(PDFLayout page) throws IOException {
@@ -271,18 +331,24 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					objectFitBox.xmax = newElementBox.xmin;
 			}
 
-			pushGraphicsState ();
-//			drawRectangle (newElementBox);
+			pushTransform ();
+//			can either draw new box before transform or old box after transform
+//			if (debugging)
+//				drawRectangle (newElementBox,debugBoxColor);
 			if (!newElementBox.equals (elementBox))
 				transform (elementBox,newElementBox);
-			drawRectangle (elementBox);
-			// This could be done more elegantly by always flipping here and always flipping frames instead of just the outer one.
-			// All frame flips except the outer one would cancel, but we'd have a lot of unnecessary cancelling transformations
-			// in the output (unless we cancel them explicitly, which would defeat the purpose of elegance)
-			if (!(element instanceof PDFLayoutFrameElement))
+			if (debugging)
+				drawRectangle (elementBox,debugBoxColor);
+			boolean isLeaf = !(element instanceof PDFLayoutFrameElement);
+			if (isLeaf) {
 				flip (elementBox);
+				pushGraphicsState ();
+				outputTransform (transformStack.peek ());
+			}
 			element.accept (this);
-			popGraphicsState ();
+			if (isLeaf)
+				popGraphicsState ();
+			popTransform ();
 			previousElementBox = newElementBox;
 		}
 		return null;

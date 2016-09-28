@@ -22,7 +22,7 @@ public class Transformation
     matrix [0] = matrix [3] = 1;
   }
   
-  public Transformation (double [] matrix)
+  public Transformation (double ... matrix)
   {
     Assertions.expect (matrix.length,6);
     this.matrix = matrix;
