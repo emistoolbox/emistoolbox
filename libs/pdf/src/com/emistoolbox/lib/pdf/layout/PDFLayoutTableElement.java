@@ -91,6 +91,7 @@ public class PDFLayoutTableElement {
 			return null;
 
 		PDFLayoutTextElement textElement = new PDFLayoutTextElement ();
+		textElement.setText (text);
 		PDFLayoutTableFormat format = getFormat (row,col);
 		if (format != null) {
 			textElement.setFont (format.getFont ());
