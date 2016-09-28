@@ -19,7 +19,7 @@ public class ObjectStreamTest
 {
 	public static void main (String [] args) throws Exception 
 	{
-		System.out.println("Usage: ObjectStreamText inputPath outputPath");
+		System.out.println("Usage: ObjectStreamTest inputPath outputPath");
 		if (args.length != 2)
 			return; 
 		
