@@ -1,6 +1,8 @@
 package com.emistoolbox.lib.pdf.layout;
 
-public class PDFLayoutFontStyle {
+import java.io.Serializable;
+
+public class PDFLayoutFontStyle implements Serializable {
 	private final static int italicFlag = 1 << 0;
 	private final static int boldFlag   = 1 << 1;
 

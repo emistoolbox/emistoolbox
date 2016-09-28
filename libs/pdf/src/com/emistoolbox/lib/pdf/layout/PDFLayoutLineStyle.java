@@ -1,8 +1,9 @@
 package com.emistoolbox.lib.pdf.layout;
 
 import java.awt.Color;
+import java.io.Serializable;
 
-public class PDFLayoutLineStyle {
+public class PDFLayoutLineStyle implements Serializable {
 	Double width;
 	Color color;
 

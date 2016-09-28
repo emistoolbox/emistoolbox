@@ -1,6 +1,8 @@
 package com.emistoolbox.lib.pdf.layout;
 
-public class PDFLayoutSides<T> {
+import java.io.Serializable;
+
+public class PDFLayoutSides<T> implements Serializable {
 	private T left;
 	private T right;
 	private T top;

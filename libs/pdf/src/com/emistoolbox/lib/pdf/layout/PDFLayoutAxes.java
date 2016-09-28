@@ -1,6 +1,8 @@
 package com.emistoolbox.lib.pdf.layout;
 
-public class PDFLayoutAxes<T> {
+import java.io.Serializable;
+
+public class PDFLayoutAxes<T> implements Serializable {
 	T [] axes;
 	
 	public PDFLayoutAxes (T ... axes) {
