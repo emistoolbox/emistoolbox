@@ -51,6 +51,14 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	private PrintStream ps;
 	private boolean debugging;
 
+	public PDFLayoutRenderer () {
+		this (false);
+	}
+
+	public PDFLayoutRenderer (boolean debugging) {
+		setDebugging (debugging);
+	}
+
 	public void setDebugging (boolean debugging) {
 		this.debugging = debugging;
 	}

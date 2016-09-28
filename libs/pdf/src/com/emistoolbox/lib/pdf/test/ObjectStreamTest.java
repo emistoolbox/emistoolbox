@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.emistoolbox.lib.pdf.PDFLayoutRenderer;
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
+import com.emistoolbox.lib.pdf.util.PDFLayoutLogVisitor;
 
 import es.jbauer.lib.io.IOInput;
 import es.jbauer.lib.io.IOOutput;
@@ -26,7 +27,7 @@ public class ObjectStreamTest
 		IOInput in = new IOFileInput(new File(args[0])); 
 		IOOutput out = new IOFileOutput(new File(args[1]), "application/pdf", null);
 
-		new PDFLayoutRenderer().render(readLayout(in), out);
+		new PDFLayoutRenderer(true).render(readLayout(in), out);
 	}
 
 	private static List<PDFLayout> readLayout(IOInput in)
