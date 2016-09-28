@@ -1,6 +1,7 @@
 package com.emistoolbox.lib.pdf.layout;
 
-public class PDFLayoutFont {
+import java.io.Serializable;
+public class PDFLayoutFont implements Serializable {
 	
 	public static final String FONT_TIMES = "Times"; 
 	public static final String FONT_HELVETICA = "Helvetica"; 
