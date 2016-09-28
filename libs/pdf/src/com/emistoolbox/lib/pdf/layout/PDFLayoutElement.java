@@ -1,5 +1,6 @@
 package com.emistoolbox.lib.pdf.layout;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
@@ -10,6 +11,7 @@ abstract public class PDFLayoutElement implements Serializable {
 	private PDFLayoutSides<Double> padding;
 	private PDFLayoutBorderStyle borderStyle;
 	private PDFLayoutAxes<Boolean> displacement = new PDFLayoutAxes<Boolean> (false,false);
+	private Color backgroundColor;
 
 	public PDFLayoutObjectFit getObjectFit () {
 		return objectFit;
@@ -75,6 +77,14 @@ abstract public class PDFLayoutElement implements Serializable {
 	public PDFLayoutElement fit (PDFLayoutObjectFit objectFit) {
 		setObjectFit (objectFit);
 		return this;
+	}
+
+	public Color getBackgroundColor () {
+		return backgroundColor;
+	}
+
+	public void setBackgroundColor (Color backgroundColor) {
+		this.backgroundColor = backgroundColor;
 	}
 
 	abstract public <T> T accept (PDFLayoutVisitor<T> visitor) throws IOException;
