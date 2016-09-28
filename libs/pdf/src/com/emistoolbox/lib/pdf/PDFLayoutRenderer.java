@@ -355,13 +355,11 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	public Void visit (PDFLayoutHighchartElement element) throws IOException {
-		// TODO
-		return null;
+		throw new Error ("PDF layout highchart element rendering not implemented");
 	}
 
 	public Void visit (PDFLayoutImageElement element) throws IOException {
-		// TODO 
-		return null;
+		throw new Error ("PDF layout image element rendering not implemented");
 	}
 
 	public Void visit (PDFLayoutPDFElement pdfElement) throws IOException {
@@ -398,10 +396,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			}
 
 			public Rectangle visit (PDFLayoutHighchartElement element) throws IOException {
-				return getPage (element).getMediaBox ().toRectangle ();
+				throw new Error ("PDF layout highchart element bounding box not implemented");
 			}
 			public Rectangle visit (PDFLayoutImageElement element) throws IOException {
-				return getPage (element).getMediaBox ().toRectangle ();
+				throw new Error ("PDF layout image element bounding box not implemented");
 			}
 			public Rectangle visit (PDFLayoutPDFElement element) throws IOException {
 				return getPage (element).getMediaBox ().toRectangle ();
@@ -421,11 +419,11 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		});
 	}
 
-	private Map<PDFLayoutFileElement,PDFDictionary> pageMap = new HashMap<PDFLayoutFileElement,PDFDictionary> ();
+	private Map<PDFLayoutPDFElement,PDFDictionary> pageMap = new HashMap<PDFLayoutPDFElement,PDFDictionary> ();
 
-	private PDFDictionary getPage (PDFLayoutFileElement pdfElement) throws IOException {
+	private PDFDictionary getPage (PDFLayoutPDFElement pdfElement) throws IOException {
 		PDFDictionary page = pageMap.get (pdfElement);
-		if (page== null) {
+		if (page == null) {
 			page = new PDFFile (new SeekableByteArray (Util.toByteArray (pdfElement.getInput ().getInputStream ()))).getDocument ().getPage (1);
 			pageMap.put (pdfElement,page);
 		}
