@@ -1,6 +1,8 @@
 package com.emistoolbox.lib.pdf.layout;
 
 public class PDFLayoutAlignmentPlacement extends PDFLayoutPlacement {
+	public final static PDFLayoutAlignmentPlacement CENTER = new PDFLayoutAlignmentPlacement (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.CENTER);
+
 	private PDFLayoutHorizontalAlignment horizontalAlignment;
 	private PDFLayoutVerticalAlignment verticalAlignment;
 

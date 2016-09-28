@@ -7,7 +7,7 @@ import java.util.Collections;
 
 abstract public class PDFLayoutElement implements Serializable {
 	private PDFLayoutObjectFit objectFit = PDFLayoutObjectFit.NONE;
-	private PDFLayoutPlacement placement;
+	private PDFLayoutPlacement placement = PDFLayoutAlignmentPlacement.CENTER;
 	private PDFLayoutSides<Double> padding;
 	private PDFLayoutBorderStyle borderStyle;
 	private PDFLayoutAxes<Boolean> displacement = new PDFLayoutAxes<Boolean> (false,false);
