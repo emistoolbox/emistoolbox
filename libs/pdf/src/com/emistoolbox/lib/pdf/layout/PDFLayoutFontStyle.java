@@ -24,4 +24,15 @@ public class PDFLayoutFontStyle implements Serializable {
 	public boolean isBold () {
 		return (attributes & boldFlag) != 0;
 	}
+
+	public String toString () {
+		if (attributes == 0)
+			return "plain";
+		String string = "";
+		if (isBold ())
+			string += "Bold";
+		if (isItalic ())
+			string += "Italic";
+		return string;
+	}
 }
