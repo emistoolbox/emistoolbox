@@ -3,6 +3,7 @@ package com.emistoolbox.server.renderer.pdfreport.impl;
 import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.server.renderer.pdfreport.FontIdentifier;
 import com.emistoolbox.server.renderer.pdfreport.PdfContentFontMap;
+import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
 import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
 
 public abstract class PdfTableContentBase extends PdfContentBase implements PdfTableContent 

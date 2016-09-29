@@ -11,8 +11,8 @@ import com.emistoolbox.common.ChartFont;
 
 public class TextSetImpl implements TextSet, Serializable
 {
-	private final static ChartFont DEFAULT_FONT = new ChartFont();  
-	
+	public final static ChartFont DEFAULT_FONT = new ChartFont("Helvetica", ChartFont.PLAIN, 12);  
+
 	private ChartFont defaultFont = DEFAULT_FONT; 
 	private Set<String> keys = new HashSet<String>(); 
 	private Map<String, String> texts = new HashMap<String, String>(); 

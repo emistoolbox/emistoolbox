@@ -36,7 +36,6 @@ public class BasicPdfLayoutTest
 		
 		PDFLayoutFont titleFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 24, PDFLayoutFontStyle.BOLD); 
 		PDFLayoutFont subtitleFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 20, PDFLayoutFontStyle.BOLD);
-//		PDFLayoutFont textFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 16, PDFLayoutFontStyle.BOLD);
 		PDFLayoutFont textFont = new PDFLayoutFont(PDFLayoutFont.FONT_HELVETICA, 16, PDFLayoutFontStyle.PLAIN);
 
 		double textHeight = 50; 

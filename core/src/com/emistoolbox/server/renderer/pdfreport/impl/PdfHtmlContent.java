@@ -1,17 +1,9 @@
 package com.emistoolbox.server.renderer.pdfreport.impl;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.html.simpleparser.HTMLWorker;
-import com.itextpdf.text.html.simpleparser.StyleSheet;
-import com.itextpdf.text.pdf.PdfWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
+import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
 
-public class PdfHtmlContent extends PdfContentBase
+public class PdfHtmlContent extends PdfContentBase<PdfContentConfig>
 {
     public String html;
     
@@ -21,6 +13,10 @@ public class PdfHtmlContent extends PdfContentBase
 
     public void setHtml(String html)
     { this.html = html; }
+
+	@Override
+	public <T> T accept(PdfContentVisitor<T> visitor) 
+	{ return null; }
 
 /*
     public void htmlWorker() throws DocumentException, IOException

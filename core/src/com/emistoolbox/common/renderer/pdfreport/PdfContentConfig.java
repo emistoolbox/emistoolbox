@@ -2,7 +2,7 @@ package com.emistoolbox.common.renderer.pdfreport;
 
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 
-public abstract interface PdfContentConfig
+public abstract interface PdfContentConfig extends PdfContentConfigVisitorElement
 {
     public abstract void setTitle(String paramString);
     public abstract String getTitle();

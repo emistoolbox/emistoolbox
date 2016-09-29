@@ -4,7 +4,7 @@ import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 
 import info.joriki.graphics.Rectangle;
 
-public interface PdfContent<T extends PdfContentConfig>
+public interface PdfContent<T extends PdfContentConfig> extends PdfContentVisitorElement
 {
 	public T getConfig(); 
 	public void setConfig(T config); 

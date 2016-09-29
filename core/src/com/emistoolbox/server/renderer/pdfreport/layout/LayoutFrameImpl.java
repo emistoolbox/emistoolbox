@@ -26,5 +26,9 @@ public class LayoutFrameImpl extends TextSetImpl implements LayoutFrame
 
 	@Override
 	public void setContent(PdfContent content) 
-	{ this.content = content; } 
+	{ this.content = content; }
+
+	@Override
+	public <T> T accept(LayoutVisitor<T> visitor) 
+	{ return visitor.visit(this); } 
 }

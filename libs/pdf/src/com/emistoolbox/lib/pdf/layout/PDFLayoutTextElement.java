@@ -24,7 +24,7 @@ public class PDFLayoutTextElement extends PDFLayoutElement
 		this.text = text;
 	}
 
-	public PDFLayoutFont getFont () {
+	public PDFLayoutFont getFont() {
 		return font;
 	}
 

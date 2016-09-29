@@ -138,7 +138,7 @@
 
   <target name="test" depends="javac,jar">
     <java fork="yes" classname="com.emistoolbox.server.cli.PdfReportRenderer">
-      <arg value="default"/>
+      <arg value="test"/>
       <arg value="report=layoutTest-1"/>
       <arg value="hierarchy=default"/>
 	  <arg value="location=School:1856"/>
@@ -160,9 +160,9 @@
     <copy file="../libs/pdf/lib/joriki.jar" todir="${lib}" overwrite="true"/>
   </target>
   
-  <target name="renderlayout" depends="javac,jar">
+  <target name="render" depends="javac,jar">
     <java fork="yes" classname="com.emistoolbox.lib.pdf.test.ObjectStreamTest">
-      <arg value="c:\emistoolbox\reports\report9101754341916124034.layout"/>
+      <arg value="c:\emistoolbox\reports\report989318348738940123.layout"/>
       <arg value="out.pdf"/>
       <classpath>
         <path refid="testPath"/>

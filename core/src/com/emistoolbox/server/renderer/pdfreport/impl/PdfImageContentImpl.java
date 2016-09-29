@@ -1,5 +1,6 @@
 package com.emistoolbox.server.renderer.pdfreport.impl;
 
+import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
 import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
 
 import es.jbauer.lib.io.IOInput;
@@ -12,5 +13,9 @@ public class PdfImageContentImpl extends PdfContentBase implements PdfImageConte
     { this.file = file; } 
 
     public IOInput getFile()
-    { return file; } 
+    { return file; }
+
+	@Override
+	public <T> T accept(PdfContentVisitor<T> visitor) 
+	{ return visitor.visit(this); }
 }

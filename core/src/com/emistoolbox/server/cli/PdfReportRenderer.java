@@ -40,7 +40,7 @@ public class PdfReportRenderer
 	        if (outError.get() != null)
 	        {
 	        	System.out.println("ERROR: " + outError.get()); 
-	        	return; 
+	        	return; 	
 	        }
 	        
 	        String filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult); 

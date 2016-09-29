@@ -14,6 +14,7 @@ import com.emistoolbox.server.model.EmisDataSet;
 import com.emistoolbox.server.model.EmisEntityData;
 import com.emistoolbox.server.model.EmisEntityDataSet;
 import com.emistoolbox.server.model.impl.EntityDataAccess;
+import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -112,4 +113,8 @@ public class PdfVariableContent extends PdfContentBase
     
     public int getSize()
     { return names.size(); }
+
+	@Override
+	public <T> T accept(PdfContentVisitor<T> visitor) 
+	{ return visitor.visit(this); } 
 }

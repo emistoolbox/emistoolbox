@@ -11,7 +11,7 @@ import com.emistoolbox.common.results.MetaResultDimensionUtil;
 
 import java.io.Serializable;
 
-public class PdfMetaResultContentConfigImpl<T extends MetaResult> extends PdfContentConfigImpl implements PdfMetaResultContentConfig<T>, Serializable
+public abstract class PdfMetaResultContentConfigImpl<T extends MetaResult> extends PdfContentConfigImpl implements PdfMetaResultContentConfig<T>, Serializable
 {
     private T metaResult;
 

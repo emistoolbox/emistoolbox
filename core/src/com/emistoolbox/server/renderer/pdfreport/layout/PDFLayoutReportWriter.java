@@ -142,7 +142,7 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 		for (LayoutFrame frame : page.getFrames())
 			outerFrame.addElement(createFrame(frame)); 
 		
-		outerFrame.addElement(createAlignedText(page.getText(PdfText.TEXT_FOOTER), page.getText(PdfText.TEXT_FOOTER), PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BOTTOM));
+		outerFrame.addElement(createAlignedText(page.getText(PdfText.TEXT_FOOTER), page.getFont(PdfText.TEXT_FOOTER), PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BOTTOM));
 		
 		layout.setOuterFrame(outerFrame); 
 		return layout; 
@@ -160,7 +160,6 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 	{
 		PDFLayoutFrameElement result = new PDFLayoutFrameElement(); 
 		LayoutFrameConfig config = frame.getFrameConfig(); 
-
 		setFramePlacement(result, config); 
 		setFrameBorder(result, config); 
 		setFramePadding(result, config); 
@@ -171,12 +170,16 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 		if (content instanceof PdfImageContent)
 			item = new PDFLayoutImageElement(((PdfImageContent) content).getFile());  
 		else if (content instanceof PdfChartContent)
-			item = renderChart((PdfChartContent) content);   
+			item = renderChart((PdfChartContent) content, config.getPosition().getWidth(), config.getPosition().getHeight());   
 		else if (content instanceof PdfTextContent)
 		{
-			// TODO - add title
 			PdfTextContent textContent = (PdfTextContent) content;
-			item = new PDFLayoutTextElement(textContent.getText(), getFont(textContent.getTextFont())); 
+
+			PDFLayoutFrameElement txtFrame = new PDFLayoutFrameElement();
+			txtFrame.addElement(new PDFLayoutTextElement(textContent.getTitle(), getFont(textContent.getTitleFont())));  
+			txtFrame.addElement(new PDFLayoutTextElement(textContent.getText(), getFont(textContent.getTextFont())));  
+			
+			item = txtFrame; 
 		}
 		else if (content instanceof PdfVariableContent)
 			item = new PDFLayoutTextElement("VARIABLES - to be implemented", null);  
@@ -191,18 +194,19 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 		return result; 
 	}
 	
-	private PDFLayoutElement renderChart(PdfChartContent content)
+	private PDFLayoutElement renderChart(PdfChartContent content, double width, double height)
 		throws IOException
 	{
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
 
 		IOOutput out = null; 
-		if (getChartRenderer().canCreateContentType("application/json"))
-			out = new IOOutputStreamOutput(buffer, "chart.json", "application/json", null); 
+		if (getChartRenderer().canCreateContentType("application/pdf"))
+			out = new IOOutputStreamOutput(buffer, "chart.pdf", "application/pdf", null); 
 		else
 			out = new IOOutputStreamOutput(buffer, "chart.png", "image/png", null); 
 
 		ChartConfig chartConfig = content.getChartConfig();  
+		chartConfig.setChartSize((int) Math.round(width), (int) Math.round(height));
 		getChartRenderer().render(content.getType(), content.getResult(), chartConfig, out);
 		
 		IOInput in = new IOInputStreamInput(new ByteArrayInputStream(buffer.toByteArray()), out.getName(), out.getContentType(), null); 
@@ -221,7 +225,7 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 		if (config.getPosition() == null)
 			return; 
 		
-		el.position(config.getPosition().getLeft(), config.getPosition().getRight()); 
+		el.position(config.getPosition().getLeft(), config.getPosition().getTop()); 
 		el.setWidth(config.getPosition().getWidth() - config.getPadding().getLeft() - config.getPadding().getRight());
 		el.setHeight(config.getPosition().getHeight() - config.getPadding().getTop() - config.getPadding().getBottom());
 	}

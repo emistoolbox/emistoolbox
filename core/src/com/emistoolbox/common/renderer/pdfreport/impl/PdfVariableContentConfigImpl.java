@@ -8,6 +8,7 @@ import java.util.Set;
 import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
+import com.emistoolbox.common.renderer.pdfreport.PdfContentConfigVisitor;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
 import com.emistoolbox.common.util.NamedUtil;
 
@@ -80,4 +81,8 @@ public class PdfVariableContentConfigImpl extends PdfContentConfigImpl implement
 		
 		return result; 
 	}
+
+	@Override
+	public <T> T accept(PdfContentConfigVisitor<T> visitor) 
+	{ return visitor.visit(this); }
 }

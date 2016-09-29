@@ -1,6 +1,7 @@
 package com.emistoolbox.server;
 
 import com.emistoolbox.common.ChartColor;
+import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.excelMerge.ExcelReportConfig;
 import com.emistoolbox.common.model.EmisEntity;
 import com.emistoolbox.common.model.EmisEnumSet;
@@ -983,9 +984,20 @@ public class XmlReader
 	private void readTexts(Element parent, TextSet texts)
 	{
 		for (String key : texts.getTextKeys())
-			texts.putText(key, getElementText(parent, key)); 
+		{
+			Element tag = getElement(parent, key);
+			if (tag == null)
+				continue; 
+			
+			texts.putText(key, tag.getTextContent(), getFont(tag)); 
+		}
 	}
 	
+	private ChartFont getFont(Element tag)
+	{
+		ChartColor col = getAttrAsColour(tag, "colour"); 
+		return new ChartFont(getAttr(tag, "font", "Helvetica"), getAttrAsInt(tag, "fontSize", 12), getAttrAsInt(tag, "fontStyle", 0)); 
+	}
 	
 	private EmisPdfReportConfig getLayoutPdfReport(Element tag, List<EmisIndicator> indicators)
 	{
@@ -1665,6 +1677,15 @@ public class XmlReader
 			return null;
 		}
 		return tag.getAttribute(attr);
+	}
+
+	private String getAttr(Element tag, String attr, String defaultValue) 
+	{
+		String value = getAttr(tag, attr); 
+		if (value == null)
+			return defaultValue; 
+		
+		return value; 
 	}
 
 	private ChartColor getAttrAsColour(Element tag, String attr)

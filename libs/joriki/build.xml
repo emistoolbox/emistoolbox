@@ -53,6 +53,9 @@
         <fileset dir="${jar}">
           <exclude name="**/Manifest.mf"/>
         </fileset>
+        <fileset dir="${src}">
+          <exclude name="**/*.java"/>
+        </fileset>
     </jar>
   </target>
 

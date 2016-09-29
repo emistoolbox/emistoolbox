@@ -9,9 +9,8 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHighchartElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutImageElement;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutLineStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutFileElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 
@@ -59,9 +58,13 @@ public class PDFLayoutLogVisitor implements PDFLayoutVisitor<Void>
 	public Void visit(PDFLayoutFrameElement frame) throws IOException 
 	{
 		os.println(indent + "Element - Frame: " + frame.getWidth() + " x " + frame.getHeight()); 
-		output(frame);
-		for (PDFLayoutElement e : frame.getElements())
-			e.accept(this); 
+		indent(); 
+		try { 
+			output(frame);
+			for (PDFLayoutElement e : frame.getElements())
+				e.accept(this); 
+		}
+		finally { unindent(); } 
 		
 		return null;
 	}
@@ -87,10 +90,22 @@ public class PDFLayoutLogVisitor implements PDFLayoutVisitor<Void>
 		return null; 
 	}
 
+	public Void visit(PDFLayoutFont font)
+	{
+		os.println(indent + "Font: " + font.getFontName() + ", size: " + font.getFontSize() + ", style: " + font.getFontStyle() + ", col: " + font.getColor()); 
+		return null; 
+	}
+
 	@Override
 	public Void visit(PDFLayoutTextElement textContent) {
 		os.println(indent + "Element - Text: " + textContent.getText());
-		output(textContent); 
+		try { 
+			indent(); 
+			visit(textContent.getFont());  
+			output(textContent); 
+		}
+		finally { unindent(); }
+		
 		return null; 
 	}
 	

@@ -2,6 +2,7 @@ package com.emistoolbox.server.renderer.pdfreport.impl;
 
 import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
+import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
 
 public class PdfTextContent extends PdfContentBase<PdfTextContentConfig>
 {
@@ -33,4 +34,8 @@ public class PdfTextContent extends PdfContentBase<PdfTextContentConfig>
     
     public void setTextFont(ChartFont font)
     { textFont = font; }
+
+	@Override
+	public <T> T accept(PdfContentVisitor<T> visitor) 
+	{ return visitor.visit(this); } 
 }

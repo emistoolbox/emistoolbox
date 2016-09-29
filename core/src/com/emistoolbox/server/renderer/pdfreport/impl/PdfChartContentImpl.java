@@ -6,6 +6,7 @@ import com.emistoolbox.common.renderer.pdfreport.PdfChartContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.results.Result;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
+import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
 
 public class PdfChartContentImpl extends PdfContentBase<PdfChartContentConfig> implements PdfChartContent
 {
@@ -41,4 +42,8 @@ public class PdfChartContentImpl extends PdfContentBase<PdfChartContentConfig> i
 
 	public String toString()
     { return String.format("%s - %s", new Object[] { getClass().getSimpleName(), this.type }); }
+
+	@Override
+	public <T> T accept(PdfContentVisitor<T> visitor) 
+	{ return visitor.visit(this); } 	
 }

@@ -39,5 +39,9 @@ public class LayoutPageImpl extends TextSetImpl implements LayoutPage
 
 	@Override
 	public void addFrame(LayoutFrame frame) 
-	{ this.frames.add(frame); } 
+	{ this.frames.add(frame); }
+
+	@Override
+	public <T> T accept(LayoutVisitor<T> visitor) 
+	{ return visitor.visit(this); } 
 }

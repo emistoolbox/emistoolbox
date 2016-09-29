@@ -21,7 +21,6 @@ import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
-import com.emistoolbox.common.model.priolist.PriorityListItem;
 import com.emistoolbox.common.renderer.ChartConfig;
 import com.emistoolbox.common.renderer.ChartConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
@@ -29,6 +28,7 @@ import com.emistoolbox.common.renderer.pdfreport.PdfChartContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfGisContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfPriorityListContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
@@ -51,7 +51,6 @@ import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPriorityListContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportCreator;
-import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
 import com.emistoolbox.server.results.PriorityResultCollector;
 import com.emistoolbox.server.results.ResultCollector;
 import com.emistoolbox.server.results.TableResultCollector;
@@ -414,7 +413,9 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 	    if ((contentConfig instanceof PdfChartContentConfig))
 	    {
 	        PdfChartContentConfig chartContentConfig = (PdfChartContentConfig) contentConfig;
+
 	        PdfChartContent chartResult = new PdfChartContentImpl(chartContentConfig.getChartType());
+	        chartResult.setConfig(chartContentConfig);
 	        
 	        ChartConfig chartConfig = new ChartConfigImpl();
 	
@@ -444,8 +445,13 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 	    }
 	    else if (contentConfig instanceof PdfTextContentConfig)
 	    {
-	    	I NEED FONTS
-            result = new PdfTextContent(contentConfig.getTitle(), ((PdfTextContentConfig) contentConfig).getText());
+	    	PdfTextContentConfig txtConfig = (PdfTextContentConfig) contentConfig; 
+	    	PdfTextContent txtContent = new PdfTextContent(contentConfig.getTitle(), ((PdfTextContentConfig) contentConfig).getText());
+	    	txtContent.setConfig(txtConfig);
+	    	txtContent.setTitleFont(PdfText.DEFAULT_TITLE_FONT_HACK);
+	    	txtContent.setTextFont(PdfText.DEFAULT_FONT_HACK);
+	    	
+	    	result = txtContent; 
 	    }
 	    else if ((contentConfig instanceof PdfVariableContentConfigImpl))
         {
@@ -474,7 +480,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         	PdfPriorityListContentConfig prioConfig = (PdfPriorityListContentConfig) contentConfig; 
         	
         	PdfPriorityListContent prioContent =new PdfPriorityListContentImpl(); 
-        	prioContent.setConfig((PdfPriorityListContentConfig) contentConfig); 
+        	prioContent.setConfig(prioConfig); 
         	
         	PriorityMetaResult prioMetaResult = prioConfig.getMetaResult(); 
         	adapt(prioMetaResult.getContext());

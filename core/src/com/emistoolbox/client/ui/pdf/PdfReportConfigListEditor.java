@@ -11,6 +11,8 @@ import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfReportConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutPdfReportConfigImpl;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedUtil;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -22,6 +24,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import java.util.ArrayList;
@@ -30,21 +33,23 @@ import java.util.List;
 public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<List<EmisPdfReportConfig>>
 {
     private ListBoxWithUserObjects<EmisPdfReportConfig> uiReports = new ListBoxWithUserObjects<EmisPdfReportConfig>();
-    private PdfReportEditor uiEditor;
+    private EmisPdfReportEditor uiEditor; 
     private PushButton uiAddReportButton = new PushButton(Message.messageAdmin().prcleAdd());
+    private PushButton uiAddAdvancedReportButton = new PushButton(Message.messageAdmin().prcleAdd() + " Advanced");
     private PushButton uiDelReportButton = new PushButton(Message.messageAdmin().prcleDel());
     private PushButton uiViewReportButton = new PushButton(Message.messageAdmin().prcleView());
 
-    public PdfReportConfigListEditor(EmisMeta meta, final ReportModule module) {
-        this.uiEditor = new PdfReportEditor(meta);
-        this.uiEditor.setVisible(false);
-
+    public PdfReportConfigListEditor(EmisMeta meta, final ReportModule module) 
+    {
+        this.uiEditor = new EmisPdfReportEditor(meta);
         this.uiReports.setVisibleItemCount(20);
 
         HorizontalPanel buttons = new HorizontalPanel();
         buttons.setSpacing(2);
         EmisUtils.init(this.uiAddReportButton, 60);
         buttons.add(this.uiAddReportButton);
+        EmisUtils.init(this.uiAddAdvancedReportButton, 60);
+        buttons.add(this.uiAddAdvancedReportButton);
         EmisUtils.init(this.uiDelReportButton, 60);
         buttons.add(this.uiDelReportButton);
         EmisUtils.init(this.uiViewReportButton, 60);
@@ -63,15 +68,29 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
             {
                 String newId = EmisUtils.getUniqueId(PdfReportConfigListEditor.this.uiReports, Message.messageAdmin().prcleNewReportId());
                 if (newId == null)
-                {
                     return;
-                }
+
                 PdfReportConfig report = new PdfReportConfigImpl();
                 report.setName(newId);
                 PdfReportConfigListEditor.this.uiReports.addItem(newId, report);
                 PdfReportConfigListEditor.this.selectReport(PdfReportConfigListEditor.this.uiReports.getItemCount() - 1, true);
             }
         });
+        
+        this.uiAddAdvancedReportButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event)
+            {
+                String newId = EmisUtils.getUniqueId(PdfReportConfigListEditor.this.uiReports, Message.messageAdmin().prcleNewReportId());
+                if (newId == null)
+                    return;
+
+                LayoutPdfReportConfig report = new LayoutPdfReportConfigImpl();
+                report.setName(newId);
+                PdfReportConfigListEditor.this.uiReports.addItem(newId, report);
+                PdfReportConfigListEditor.this.selectReport(PdfReportConfigListEditor.this.uiReports.getItemCount() - 1, true);
+            }
+        });
+        
         this.uiDelReportButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event)
             {
@@ -82,7 +101,7 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
                 }
                 index = Math.min(index, PdfReportConfigListEditor.this.uiReports.getItemCount() - 1);
                 if (index == -1)
-                    PdfReportConfigListEditor.this.show(null);
+                    uiEditor.set(null);
                 else
                     PdfReportConfigListEditor.this.selectReport(index, true);
             }
@@ -119,18 +138,15 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
 
     private void selectReport(int index, boolean updateUi)
     {
-        if (this.uiEditor.isVisible())
-        {
-            this.uiEditor.commit();
-        }
+    	uiEditor.commit();
+
         if (updateUi)
-        {
             this.uiReports.setSelectedIndex(index);
-        }
+
         if (index == -1)
-            show(null);
+        	uiEditor.set(null);
         else
-            show((PdfReportConfig) this.uiReports.getUserObject(index));
+        	uiEditor.set((PdfReportConfig) this.uiReports.getUserObject(index));
     }
 
     public void set(List<EmisPdfReportConfig> configs)
@@ -147,9 +163,7 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
     }
 
     public void commit()
-    {
-        this.uiEditor.commit();
-    }
+    { uiEditor.commit(); }
 
     public List<EmisPdfReportConfig> get()
     {
@@ -159,19 +173,6 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
             result.add(this.uiReports.getUserObject(i));
 
         return result;
-    }
-
-    private void show(PdfReportConfig reportConfig)
-    {
-        if (reportConfig == null)
-        {
-            this.uiEditor.setVisible(false);
-        }
-        else
-        {
-            this.uiEditor.setVisible(true);
-            this.uiEditor.set(reportConfig);
-        }
     }
 }
 
