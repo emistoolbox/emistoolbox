@@ -30,6 +30,7 @@ import com.emistoolbox.common.model.impl.Entity;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.priolist.PriorityListItem;
 import com.emistoolbox.common.model.validation.EmisValidationResult;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.results.ExcelReportMetaResult;
 import com.emistoolbox.common.results.GisMetaResult;
@@ -49,7 +50,6 @@ import com.emistoolbox.common.results.impl.ValidationMetaResultImpl;
 import com.emistoolbox.common.user.EmisUser;
 import com.emistoolbox.common.user.EmisUser.AccessLevel;
 import com.emistoolbox.common.util.NamedUtil;
-import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -356,9 +356,9 @@ public class ReportModule
             return;
         }
 
-        ValueChangeHandler<PdfReportConfig> showReportHandler = new ValueChangeHandler<PdfReportConfig>() {
-            public void onValueChange(ValueChangeEvent<PdfReportConfig> event)
-            { ReportModule.this.showReports((PdfReportConfig) event.getValue()); }
+        ValueChangeHandler<EmisPdfReportConfig> showReportHandler = new ValueChangeHandler<EmisPdfReportConfig>() {
+            public void onValueChange(ValueChangeEvent<EmisPdfReportConfig> event)
+            { ReportModule.this.showReports((EmisPdfReportConfig) event.getValue()); }
         };
 
         final TableMetaResultEditor editor = new TableMetaResultEditor(this.toolbox, this.config.getModel(), this.config.getReportConfig(), getRootEntities());
@@ -620,7 +620,7 @@ public class ReportModule
         return false;
     }
 
-    public void showReports(PdfReportConfig report)
+    public void showReports(EmisPdfReportConfig report)
     {
         selectButton(2);
         if ((this.config.getReportConfig().getIndicators() == null) || (this.config.getReportConfig().getIndicators().size() == 0))

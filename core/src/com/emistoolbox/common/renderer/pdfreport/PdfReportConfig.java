@@ -5,8 +5,6 @@ import java.util.List;
 
 public abstract interface PdfReportConfig extends EmisPdfReportConfig
 {
-    public abstract void addContentConfig(PdfContentConfig paramPdfContentConfig, EmisMetaEntity paramEmisMetaEntity);
-
     public abstract List<PdfContentConfig> getContentConfigs();
 
     public abstract void setContentConfigs(List<PdfContentConfig> paramList);

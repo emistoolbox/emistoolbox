@@ -10,6 +10,6 @@ public class PdfText
 	public static final String TEXT_PLAIN = "plain";
 	public static final String TEXT_FOOTER = "footer";
 
-	public final static ChartFont DEFAULT_FONT_HACK = new ChartFont(PDFLayoutFont.FONT_HELVETICA, ChartFont.PLAIN, 12);  
-	public final static ChartFont DEFAULT_TITLE_FONT_HACK = new ChartFont(PDFLayoutFont.FONT_HELVETICA, ChartFont.BOLD, 14);  
+	public final static ChartFont DEFAULT_FONT_HACK = new ChartFont(ChartFont.FONT_HELVETICA, ChartFont.PLAIN, 12);  
+	public final static ChartFont DEFAULT_TITLE_FONT_HACK = new ChartFont(ChartFont.FONT_HELVETICA, ChartFont.BOLD, 14);  
 }

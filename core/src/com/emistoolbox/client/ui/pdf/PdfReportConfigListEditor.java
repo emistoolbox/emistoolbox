@@ -35,7 +35,7 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
     private ListBoxWithUserObjects<EmisPdfReportConfig> uiReports = new ListBoxWithUserObjects<EmisPdfReportConfig>();
     private EmisPdfReportEditor uiEditor; 
     private PushButton uiAddReportButton = new PushButton(Message.messageAdmin().prcleAdd());
-    private PushButton uiAddAdvancedReportButton = new PushButton(Message.messageAdmin().prcleAdd() + " Advanced");
+    private PushButton uiAddAdvancedReportButton = new PushButton(Message.messageAdmin().prcleAdd() + " Adv");
     private PushButton uiDelReportButton = new PushButton(Message.messageAdmin().prcleDel());
     private PushButton uiViewReportButton = new PushButton(Message.messageAdmin().prcleView());
 
@@ -125,7 +125,7 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
         });
     }
 
-    public void selectReport(PdfReportConfig report)
+    public void selectReport(EmisPdfReportConfig report)
     {
         for (int i = 0; i < this.uiReports.getItemCount(); i++)
         {
@@ -146,7 +146,7 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
         if (index == -1)
         	uiEditor.set(null);
         else
-        	uiEditor.set((PdfReportConfig) this.uiReports.getUserObject(index));
+        	uiEditor.set((EmisPdfReportConfig) this.uiReports.getUserObject(index));
     }
 
     public void set(List<EmisPdfReportConfig> configs)
@@ -175,9 +175,3 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
         return result;
     }
 }
-
-/*
- * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
- * Qualified Name: com.emistoolbox.client.ui.pdf.PdfReportConfigListEditor
- * JD-Core Version: 0.6.0
- */

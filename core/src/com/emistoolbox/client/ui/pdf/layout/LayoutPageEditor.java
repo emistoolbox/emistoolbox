@@ -3,10 +3,19 @@ package com.emistoolbox.client.ui.pdf.layout;
 import com.emistoolbox.client.EmisEditor;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.SimplePanel;
 
-public class LayoutPageEditor extends FlexTable implements EmisEditor<LayoutPageConfig> 
+public class LayoutPageEditor extends SimplePanel implements EmisEditor<LayoutPageConfig> 
 {
 	private LayoutPageConfig pageConfig; 
+	private HTML uiLayout = new HTML(); 
+	
+	public LayoutPageEditor()
+	{
+		setWidget(uiLayout); 
+	}
 	
 	@Override
 	public void commit() 
@@ -23,14 +32,17 @@ public class LayoutPageEditor extends FlexTable implements EmisEditor<LayoutPage
 	public void set(LayoutPageConfig pageConfig) 
 	{
 		this.pageConfig = pageConfig; 
+		
+		StringBuffer html = new StringBuffer();
+		
 		updateUi(); 
 	}
 
 	private void updateUi()
 	{
 		if (pageConfig == null)
-			setText(0, 0, "none"); 
+			setWidget(new HTML("none")); 
 		else
-			setText(0, 0, "PAGE SET"); 
+			setWidget(new HTML("PAGE SET")); 
 	}
 }

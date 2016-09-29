@@ -27,6 +27,7 @@ import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfReportConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutPdfReportConfigImpl;
 import com.emistoolbox.common.results.ListEntityMetaResult;
 import com.emistoolbox.common.results.MetaResult;
 import com.emistoolbox.common.results.MetaResultValue;
@@ -78,10 +79,10 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
 
     private List<EmisEntity> rootEntities; 
     
-    private HasValueChangeHandlers<PdfReportConfig> showReportHasHandlers = new HasValueChangeHandlers<PdfReportConfig>() {
+    private HasValueChangeHandlers<EmisPdfReportConfig> showReportHasHandlers = new HasValueChangeHandlers<EmisPdfReportConfig>() {
         private HandlerManager showReportHandlerManager = new HandlerManager(MetaResultEditor.this);
 
-        public HandlerRegistration addValueChangeHandler(ValueChangeHandler<PdfReportConfig> handler)
+        public HandlerRegistration addValueChangeHandler(ValueChangeHandler<EmisPdfReportConfig> handler)
         { return this.showReportHandlerManager.addHandler(ValueChangeEvent.getType(), handler); }
 
         public void fireEvent(GwtEvent<?> event)
@@ -119,10 +120,8 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
     public List<EmisEntity> getRootEntities()
     { return rootEntities; }
     
-    public HandlerRegistration addShowReportHandler(ValueChangeHandler<PdfReportConfig> showReportHandler)
-    {
-        return this.showReportHasHandlers.addValueChangeHandler(showReportHandler);
-    }
+    public HandlerRegistration addShowReportHandler(ValueChangeHandler<EmisPdfReportConfig> showReportHandler)
+    { return this.showReportHasHandlers.addValueChangeHandler(showReportHandler); }
 
 	protected abstract void updateUi();
     
@@ -540,7 +539,8 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
         List<EmisPdfReportConfig> reports = getReportConfig().getPdfReports();
 
         final ListBoxWithUserObjects<EmisPdfReportConfig> uiReports = new ListBoxWithUserObjects<EmisPdfReportConfig>();
-        uiReports.add(Message.messageAdmin().mreHtmlCreateNewReport(), null);
+        uiReports.add("(new report)", null);
+        uiReports.add("(new advanced report)", null);
 
         PdfContentConfig contentConfig = getContentConfig(0);
         for (EmisPdfReportConfig report : reports)
@@ -559,13 +559,18 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
             PushButton btnAdd = new PushButton(addButtons[i], new ClickHandler() {
                 public void onClick(ClickEvent event)
                 {
-                    PdfReportConfig report = (PdfReportConfig) uiReports.getValue();
+                    EmisPdfReportConfig report = (EmisPdfReportConfig) uiReports.getValue();
                     if (report == null)
                     {
                         String newId = EmisUtils.getUniqueIdByList(NamedUtil.getNames(MetaResultEditor.this.getReportConfig().getPdfReports()), Message.messageAdmin().prcleNewReportId());
                         if (newId == null)
                             return;
-                        report = new PdfReportConfigImpl();
+                        
+                        if (uiReports.getSelectedIndex() == 0)
+                        	report = new PdfReportConfigImpl();
+                        else
+                        	report = new LayoutPdfReportConfigImpl(); 
+
                         report.setName(newId);
                         MetaResultEditor.this.getReportConfig().getPdfReports().add(report);
 

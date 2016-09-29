@@ -20,10 +20,12 @@ import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrienta
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportWriterException;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
+import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutBorderConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.common.results.ReportMetaResult;
+import com.emistoolbox.common.util.LayoutSides;
 import com.emistoolbox.lib.pdf.PDFLayoutRenderer;
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutBorderStyle;
@@ -35,6 +37,7 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutHighchartElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutImageElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutLineStyle;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
@@ -138,7 +141,10 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 	{
 		PDFLayout layout = new PDFLayout();  
 		
-		PDFLayoutFrameElement outerFrame = new PDFLayoutFrameElement(size.x - margins.xmin - margins.xmax, size.y - margins.ymin - margins.ymax);
+		PDFLayoutFrameElement outerFrame = new PDFLayoutFrameElement(size.x, size.y);
+		outerFrame.setPadding(new PDFLayoutSides<Double>(new Double[] { margins.xmin, margins.ymin, margins.xmax, margins.ymax }));
+
+		// TODO - handle titles of page (maybe defined in frame already as part of the LayoutPdfReportCreator)
 		for (LayoutFrame frame : page.getFrames())
 			outerFrame.addElement(createFrame(frame)); 
 		
@@ -170,16 +176,17 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 		if (content instanceof PdfImageContent)
 			item = new PDFLayoutImageElement(((PdfImageContent) content).getFile());  
 		else if (content instanceof PdfChartContent)
+		{
+			PdfChartContent chartContent = (PdfChartContent) content; 
+			updateFrameTitle(frame, chartContent.getTitle());
 			item = renderChart((PdfChartContent) content, config.getPosition().getWidth(), config.getPosition().getHeight());   
+			item.fit(PDFLayoutObjectFit.COVER); 
+		}
 		else if (content instanceof PdfTextContent)
 		{
 			PdfTextContent textContent = (PdfTextContent) content;
-
-			PDFLayoutFrameElement txtFrame = new PDFLayoutFrameElement();
-			txtFrame.addElement(new PDFLayoutTextElement(textContent.getTitle(), getFont(textContent.getTitleFont())));  
-			txtFrame.addElement(new PDFLayoutTextElement(textContent.getText(), getFont(textContent.getTextFont())));  
-			
-			item = txtFrame; 
+			updateFrameTitle(frame, textContent.getTitle()); 
+			item = new PDFLayoutTextElement(textContent.getText(), getFont(textContent.getTextFont()));  
 		}
 		else if (content instanceof PdfVariableContent)
 			item = new PDFLayoutTextElement("VARIABLES - to be implemented", null);  
@@ -189,9 +196,56 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 			item = new PDFLayoutTextElement("PRIORITY LIST - to be implemented", null);  
 
 		if (item != null)
-			result.addElement(item);
-
+		{
+			// Wrap content with title, subtitle and footer.  
+			item.fit(PDFLayoutObjectFit.CONTAIN);
+			addTitlesAndContent(result, item, frame);
+			
+			// style box
+			addStyles(item, frame); 
+		}
+		
 		return result; 
+	}
+	
+	private void updateFrameTitle(LayoutFrame frame, String title)
+	{
+		if (!StringUtils.isEmpty(title) && StringUtils.isEmpty(frame.getText(PdfText.TEXT_TITLE)))
+			frame.putText(PdfText.TEXT_TITLE, title); 
+	}
+	
+	private void addStyles(PDFLayoutElement content, LayoutFrame frame)
+	{
+		LayoutFrameConfig config = frame.getFrameConfig(); 
+		
+		content.setBackgroundColor(getColor(config.getBackgroundColour())); 
+		content.setBorderStyle(getBorder(config.getBorderRadius(), config.getBorders()));
+		content.setPadding(getSides(config.getPadding()));
+	}
+		
+	private void addTitlesAndContent(PDFLayoutFrameElement frame, PDFLayoutElement content, TextSet text)
+	{
+		PDFLayoutElement title = getTextElement(text, PdfText.TEXT_TITLE, PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.BELOW); 
+		if (title != null)
+			frame.addElement(title.pad(0, 0, 0, 6)); 
+		frame.addElement(getTextElement(text, PdfText.TEXT_SUBTITLE, PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.BELOW)); 
+		frame.addElement(content);
+		content.align(PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BELOW);
+		frame.addElement(getTextElement(text, PdfText.TEXT_FOOTER, PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.BOTTOM));
+	}
+
+	private PDFLayoutElement getTextElement(TextSet text, String key, PDFLayoutHorizontalAlignment horz, PDFLayoutVerticalAlignment vert)
+	{
+		if (text.getText(key) == null)
+			return null; 
+		
+		PDFLayoutTextElement result = new PDFLayoutTextElement(); 
+		result.setText(text.getText(key));
+		result.setFont(getFont(text.getFont(key)));
+		result.align(horz, vert);
+//		result.setDisplacement(null); // TODO 
+		
+		return result;
 	}
 	
 	private PDFLayoutElement renderChart(PdfChartContent content, double width, double height)
@@ -206,7 +260,7 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 			out = new IOOutputStreamOutput(buffer, "chart.png", "image/png", null); 
 
 		ChartConfig chartConfig = content.getChartConfig();  
-		chartConfig.setChartSize((int) Math.round(width), (int) Math.round(height));
+		chartConfig.setChartSize((int) Math.round(2 * width), (int) Math.round(2 * height));
 		getChartRenderer().render(content.getType(), content.getResult(), chartConfig, out);
 		
 		IOInput in = new IOInputStreamInput(new ByteArrayInputStream(buffer.toByteArray()), out.getName(), out.getContentType(), null); 
@@ -255,6 +309,24 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 
 	private void setFramePadding(PDFLayoutElement el, LayoutFrameConfig config)
 	{ el.setPadding(new PDFLayoutSides<Double>(config.getPadding().getValues(new Double[4]))); }
+	
+	private PDFLayoutBorderStyle getBorder(int radius, LayoutSides<LayoutBorderConfig> borders)
+	{
+		LayoutBorderConfig[] layoutLines = borders.getValues(new LayoutBorderConfig[4]); 
+		PDFLayoutLineStyle[] lines = new PDFLayoutLineStyle[layoutLines.length]; 
+		for (int i = 0; i < lines.length; i++)
+		{
+			if (layoutLines[i] == null)
+				lines[i] = new PDFLayoutLineStyle(0.0, null);  
+			else
+				lines[i] = new PDFLayoutLineStyle(1.0 * layoutLines[i].getWidth(), getColor(layoutLines[i].getColour())); 
+		}
+		
+		return new PDFLayoutBorderStyle(new PDFLayoutSides<PDFLayoutLineStyle>(lines), 1.0 * radius); 
+	}
+	
+	private PDFLayoutSides<Double> getSides(LayoutSides<Double> values)
+	{ return new PDFLayoutSides<Double>(values.getValues(new Double[4])); }
 	
 	private Color getColor(ChartColor color)
 	{

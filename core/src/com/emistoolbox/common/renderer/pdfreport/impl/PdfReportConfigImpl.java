@@ -22,9 +22,8 @@ public class PdfReportConfigImpl extends EmisReportBaseConfigImpl implements Pdf
     public void addContentConfig(PdfContentConfig contentConfig, EmisMetaEntity entityType)
     {
         if (allowContentConfig(contentConfig))
-        {
             this.contentConfigs.add(contentConfig);
-        }
+
         if (getEntityType() == null)
             setEntityType(entityType);
     }

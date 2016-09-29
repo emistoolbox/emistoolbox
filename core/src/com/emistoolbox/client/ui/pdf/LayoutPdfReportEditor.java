@@ -6,12 +6,13 @@ import com.emistoolbox.client.ui.pdf.layout.LayoutPageEditor;
 import com.emistoolbox.client.ui.pdf.layout.LayoutPageListEditor;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<LayoutPdfReportConfig> 
 {
 	private LayoutPdfReportConfig reportConfig; 
-	
+
 	private LayoutPageListEditor uiPageList;
 	private LayoutContentListEditor uiContentList;
 	private LayoutPageEditor uiPageEditor;
@@ -20,7 +21,8 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	public LayoutPdfReportEditor()
 	{
 		uiPageEditor = new LayoutPageEditor(); 
-		uiPageList = new LayoutPageListEditor(uiPageEditor);
+		uiContentList = new LayoutContentListEditor(); 
+		uiPageList = new LayoutPageListEditor(uiPageEditor, uiContentList);
 
 		setWidget(0, 0, uiPageList); 
 		setWidget(1, 0, uiContentList); 
@@ -40,13 +42,27 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	
 	@Override
 	public void commit() 
-	{}
+	{
+		uiPageEditor.commit(); 
+		uiPageList.commit();
+		uiContentList.commit();
+		reportConfig.setUnusedContentConfigs(uiContentList.get()); 
+		
+		reportConfig.setPages(uiPageList.get()); 
+	}
 
 	@Override
 	public LayoutPdfReportConfig get() 
-	{ return reportConfig; } 
-
+	{
+		commit(); 
+		return reportConfig; 
+	}
+	
 	@Override
 	public void set(LayoutPdfReportConfig reportConfig) 
-	{ this.reportConfig = reportConfig; }
+	{
+		this.reportConfig = reportConfig; 
+		uiPageList.set(reportConfig.getPages());
+		uiContentList.set(reportConfig.getUnusedContentConfigs());
+	}
 }

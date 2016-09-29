@@ -15,23 +15,18 @@ public class PDFLayoutLineStyle implements Serializable {
 		this.color = color;
 	}
 
-	public Double getWidth () {
-		return width;
-	}
+	public Double getWidth () 
+	{ return width; }
 
-	public void setWidth (Double width) {
-		this.width = width;
-	}
+	public void setWidth (Double width) 
+	{ this.width = width; }
 
-	public Color getColor () {
-		return color;
-	}
+	public Color getColor () 
+	{ return color; }
 
-	public void setColor (Color color) {
-		this.color = color;
-	}
+	public void setColor (Color color) 
+	{ this.color = color; }
 	
-	public String toString () { 
-		return "w=" + width + ", " + color; 
-	}
+	public String toString () 
+	{ return "w=" + width + ", " + color; }
 }

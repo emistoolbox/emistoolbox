@@ -53,6 +53,18 @@ abstract public class PDFLayoutElement implements Serializable {
 		this.displacement = displacement;
 	}
 
+	public PDFLayoutElement pad (double padding)
+	{ return pad (padding, padding); }
+	
+	public PDFLayoutElement pad (double xpad, double ypad)
+	{ return pad (xpad, ypad, xpad, ypad); }
+	
+	public PDFLayoutElement pad (double left, double top, double right, double bottom)
+	{
+		this.setPadding(new PDFLayoutSides<Double>(new Double[] { left, top, right, bottom })); 
+		return this; 
+	}
+	
 	public PDFLayoutFrameElement wrap (double width,double height) {
 		align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.CENTER);
 		setObjectFit (PDFLayoutObjectFit.CONTAIN);

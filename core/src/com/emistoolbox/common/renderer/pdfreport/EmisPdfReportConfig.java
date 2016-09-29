@@ -33,4 +33,5 @@ public interface EmisPdfReportConfig extends Named, TextSet
     { A4, A5, LETTER; }
     
     public boolean allowContentConfig(PdfContentConfig content);
+    public void addContentConfig(PdfContentConfig paramPdfContentConfig, EmisMetaEntity paramEmisMetaEntity);
 }

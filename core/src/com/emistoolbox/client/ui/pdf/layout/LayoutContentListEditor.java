@@ -1,8 +1,12 @@
 package com.emistoolbox.client.ui.pdf.layout;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.emistoolbox.client.EmisEditor;
+import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.client.admin.ui.ListBoxWithUserObjects;
+import com.emistoolbox.common.renderer.ChartConfig.ChartType;
 import com.emistoolbox.common.renderer.pdfreport.PdfChartContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfigVisitor;
@@ -14,28 +18,69 @@ import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
 import com.emistoolbox.common.results.MetaResult;
 import com.emistoolbox.common.results.MetaResultDimension;
 import com.emistoolbox.common.results.TableMetaResult;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class LayoutContentListEditor extends VerticalPanel
+public class LayoutContentListEditor extends VerticalPanel implements EmisEditor<List<PdfContentConfig>>
 {
 	private ListBoxWithUserObjects<PdfContentConfig> uiConfigs = new ListBoxWithUserObjects<PdfContentConfig>(); 
+	private PushButton btnAddToPage = new PushButton("Add to Page"); 
 	private PushButton btnDel = new PushButton("Del"); 
 
 	public LayoutContentListEditor()
 	{
-		add(new HTML("Available Content")); 
+		setWidth("100%"); 
+		
+		add(new HTML("<div class='section'>Available Content</div>")); 
 		add(uiConfigs); 
+		uiConfigs.setVisibleItemCount(10);
+		uiConfigs.setWidth("100%");
 		
 		// Buttons. 
+		EmisUtils.init(btnAddToPage, 100);
+		EmisUtils.init(btnDel, 60);
 		HorizontalPanel hp = new HorizontalPanel(); 
+		hp.add(btnAddToPage);
 		hp.add(btnDel);
 		setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		add(hp); 
+		
+		btnDel.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				removeContent(); 
+			}
+		}); 
 	}
+	
+	public void addAddToPageHandler(ClickHandler handler)
+	{ btnAddToPage.addClickHandler(handler); } 
+
+	public PdfContentConfig removeContent()
+	{
+		int index = uiConfigs.getSelectedIndex(); 
+		if (index == -1)
+			return null; 
+		
+		PdfContentConfig content = uiConfigs.getUserObject(index); 
+		uiConfigs.removeItem(index);
+		uiConfigs.removeEmptyGroups();
+		
+		if (index >= uiConfigs.getItemCount())
+			index--; 
+		
+		if (index != -1)
+			uiConfigs.setSelectedIndex(index); 
+		
+		return content; 
+	}
+
+	public void enableAddButton(boolean enabled)
+	{ btnAddToPage.setEnabled(enabled); }
 	
 	public void set(List<PdfContentConfig> configs)
 	{
@@ -44,11 +89,23 @@ public class LayoutContentListEditor extends VerticalPanel
 			uiConfigs.add(getGroup(config), getTitle(config), config); 
 	}
 	
+	public void commit()
+	{}
+	
+	public List<PdfContentConfig> get()
+	{
+		List<PdfContentConfig> result = new ArrayList<PdfContentConfig>(); 
+		for (int i = 0; i < uiConfigs.getItemCount(); i++)
+			result.add(uiConfigs.getUserObject(i));
+		
+		return result; 
+	}
+	
 	private String getGroup(PdfContentConfig config)
 	{ return config.accept(new GroupNameVisitor()); }
 	
 	private String getTitle(PdfContentConfig config)
-	{ return null;  }
+	{ return config.accept(new SummaryVisitor()); }
 }
 
 class GroupNameVisitor implements PdfContentConfigVisitor<String>
@@ -67,11 +124,11 @@ class GroupNameVisitor implements PdfContentConfigVisitor<String>
 
 	@Override
 	public String visit(PdfPriorityListContentConfig config) 
-	{ return "Priority Lists"; }
+	{ return "Prio Lists"; }
 
 	@Override
 	public String visit(PdfTableContentConfig config) 
-	{ return "Data Table"; } 
+	{ return "Tables"; } 
 }
 
 class SummaryVisitor implements PdfContentConfigVisitor<String>
@@ -106,10 +163,16 @@ class SummaryVisitor implements PdfContentConfigVisitor<String>
 		return text.substring(0, maxLength) + ".."; 
 	}
 	
+	private String getChartTypeName(int chartType)
+	{
+		ChartType result = ChartType.values()[chartType];
+		return result.name().toLowerCase();
+	}
+	
 	public String visit(PdfChartContentConfig config) 
 	{
 		StringBuffer result = new StringBuffer(); 
-		result.append(config.getChartType() + " for ");  
+		result.append(getChartTypeName(config.getChartType()) + " for ");  
 		result.append(config.getSeniorEntity().getName());
 
 		String delim = " shown by "; 

@@ -3,8 +3,8 @@ package com.emistoolbox.lib.pdf.layout;
 import java.awt.Color;
 import java.io.Serializable;
 
-public class PDFLayoutFont implements Serializable {
-	
+public class PDFLayoutFont implements Serializable 
+{
 	public static final String FONT_TIMES = "Times"; 
 	public static final String FONT_HELVETICA = "Helvetica"; 
 	public static final String FONT_COURIER= "Courier"; 

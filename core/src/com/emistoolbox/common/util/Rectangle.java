@@ -11,8 +11,8 @@ public class Rectangle implements Serializable
 	
 	public Rectangle()
 	{}
-	
-	public Rectangle(double[] values)
+
+	public Rectangle(double ... values)
 	{
 		left = values[0]; 
 		top = values[1]; 
