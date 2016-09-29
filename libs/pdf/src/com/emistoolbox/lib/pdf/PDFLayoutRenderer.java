@@ -145,7 +145,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private void setStrokingColor (Color color) {
-		coordinateCommand ("SC",color.getRGBColorComponents (null));
+		coordinateCommand ("RG",color.getRGBColorComponents (null));
 	}
 
 	private void outputRectangle (Rectangle r) {
