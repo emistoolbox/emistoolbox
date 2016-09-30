@@ -47,6 +47,7 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTableElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutTableFormat;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 import com.emistoolbox.lib.pdf.util.RangeFinder;
@@ -118,21 +119,28 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return PDFFont.getInstance (fontLabeler.getResource (layoutFont),null);
 	}
 
-	private void strokeRectangle (Rectangle r) {
-		outputRectangle (r);
-		ps.print ("s\n");
-	}
-
-	private void strokeRectangle (Rectangle r,Color color) {
-		pushGraphicsState ();
-		setStrokeColor (color);
-		strokeRectangle (r);
-		popGraphicsState ();
+	private void debugRectangle (Rectangle r,Color c) {
+		if (debugging) {
+			pushGraphicsState ();
+			ps.print ("0 w\n");
+			setStrokeColor (c);
+			outputRectangle (r);
+			ps.print ("s\n");
+			popGraphicsState ();
+		}
 	}
 
 	private void fillRectangle (Rectangle r) {
 		outputRectangle (r);
 		ps.print ("f\n");
+	}
+
+	private void fillRectangle (Rectangle r,Color c) {
+		pushGraphicsState ();
+		setFillColor (c);
+		outputRectangle (r);
+		ps.print ("f\n");
+		popGraphicsState ();
 	}
 
 	private void setColor (Color color,String rgbCommand) {
@@ -383,19 +391,16 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		Rectangle paddedElementBox = new Rectangle (elementBox);
 		paddedElementBox.transformBy (getCurrentTransform ());
 
-		if (debugging)
-			strokeRectangle (paddedElementBox,debugElementBoxColor);
+		debugRectangle (paddedElementBox,debugElementBoxColor);
 
 		applyPadding (paddedElementBox,element,1);
 
-		if (debugging)
-			strokeRectangle (paddedElementBox,debugPaddingBoxColor);
+		debugRectangle (paddedElementBox,debugPaddingBoxColor);
 
 		Rectangle borderElementBox = new Rectangle (paddedElementBox);
 		applyBorder (borderElementBox,element,1);
 
-		if (debugging)
-			strokeRectangle (borderElementBox,debugBorderBoxColor);
+		debugRectangle (borderElementBox,debugBorderBoxColor);
 
 		// TODO: borders with different colours
 		// TODO: don't use splines if the radius is zero
@@ -482,15 +487,12 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		TableLayout tableLayout = new TableLayout (tableElement);
 		for (int row = 0;row < tableElement.getRowCount ();row++)
 			for (int col = 0;col < tableElement.getColCount ();col++) {
-				if (debugging) {
-					pushGraphicsState ();
-					coordinateCommand ("0 w");
-					setStrokeColor (debugTableBoxColor);
-					outputRectangle (tableLayout.getCellBox (row,col));
-					coordinateCommand ("s");
-					popGraphicsState ();
-				}
-				render (tableElement.getElement (row,col),tableLayout.getCellBox (row,col));
+				Rectangle cellBox = tableLayout.getCellBox (row,col);
+				PDFLayoutTableFormat format = tableElement.getFormat (row,col);
+				if (format != null && format.getBackgroundColor () != null)
+					fillRectangle (cellBox,format.getBackgroundColor ());
+				render (tableElement.getElement (row,col),cellBox);
+				debugRectangle (cellBox,debugTableBoxColor);
 			}
 		
 		pushGraphicsState ();

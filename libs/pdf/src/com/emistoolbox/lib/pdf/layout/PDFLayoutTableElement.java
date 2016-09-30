@@ -107,7 +107,6 @@ public class PDFLayoutTableElement extends PDFLayoutElement {
 		PDFLayoutTableFormat format = getFormat (row,col);
 		if (format != null) {
 			textElement.setFont (format.getFont ());
-			textElement.setBackgroundColor (format.getBackgroundColor ());
 			textElement.setPlacement (format.getPlacement ());
 			textElement.setObjectFit (format.getObjectFit ());
 			textElement.setPadding (format.getPadding ());
