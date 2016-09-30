@@ -14,8 +14,8 @@ public interface LayoutFrameConfig extends TextSet
 	public Rectangle getPosition(); 
 	public void setPosition(Rectangle dimension); 
 	
-	public LayoutSides<LayoutBorderConfig> getBorders(); 
-	public void setBorders(LayoutSides<LayoutBorderConfig> borders); 
+	public LayoutSides<BorderStyle> getBorders(); 
+	public void setBorders(LayoutSides<BorderStyle> borders); 
 	
 	public int getBorderRadius(); 
 	public void setBorderRadius(int radius); 

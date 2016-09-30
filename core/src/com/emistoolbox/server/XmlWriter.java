@@ -1,6 +1,7 @@
 package com.emistoolbox.server;
 
 import com.emistoolbox.common.ChartColor;
+import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.excelMerge.ExcelReportConfig;
 import com.emistoolbox.common.model.EmisEntity;
 import com.emistoolbox.common.model.EmisEnumSet;
@@ -67,8 +68,10 @@ import com.emistoolbox.common.model.validation.impl.ValidationNotExceedingRule;
 import com.emistoolbox.common.model.validation.impl.ValidationRatioRuleImpl;
 import com.emistoolbox.common.model.validation.impl.ValidationTimeRatioRuleImpl;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.EmisTableStyle;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfTableContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
@@ -76,7 +79,8 @@ import com.emistoolbox.common.renderer.pdfreport.impl.PdfPriorityListContentConf
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
-import com.emistoolbox.common.renderer.pdfreport.layout.LayoutBorderConfig;
+import com.emistoolbox.common.renderer.pdfreport.impl.SimpleTableStyle;
+import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
@@ -98,6 +102,7 @@ import com.emistoolbox.common.util.LayoutSides;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.server.excelMerge.ExcelReportConfigSerializer;
+import com.emistoolbox.server.renderer.pdfreport.PdfContentWithResult;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -811,7 +816,7 @@ public class XmlWriter
 
     	Element borderTag = createElementAndAdd("borders", tag); 
     	
-    	LayoutSides<LayoutBorderConfig> borders = frame.getBorders(); 
+    	LayoutSides<BorderStyle> borders = frame.getBorders(); 
     	if (borders != null)
     	{
     		addXml(borderTag, borders.getLeft(), "left");
@@ -832,7 +837,7 @@ public class XmlWriter
     	addXml(tag, frame.getContentConfig());
     }
     
-    private void addXml(Element parent, LayoutBorderConfig border, String side)
+    private void addXml(Element parent, BorderStyle border, String side)
     {
     	if (border == null)
     		return; 
@@ -871,11 +876,6 @@ public class XmlWriter
             setAttr(tag, "chartType", Integer.valueOf(((PdfChartContentConfigImpl) contentConfig).getChartType()));
             addXml(tag, (TableMetaResult) ((PdfChartContentConfigImpl) contentConfig).getMetaResult());
         }
-        else if ((contentConfig instanceof PdfTableContentConfigImpl))
-        {
-            setAttr(tag, "type", "table");
-            addXml(tag, (TableMetaResult) ((PdfTableContentConfigImpl) contentConfig).getMetaResult());
-        }
         else if ((contentConfig instanceof PdfGisContentConfigImpl))
         {
             setAttr(tag, "type", "gis");
@@ -891,6 +891,7 @@ public class XmlWriter
             PdfVariableContentConfigImpl varContent = (PdfVariableContentConfigImpl) contentConfig; 
             
             setAttr(tag, "type", "vars");
+        	addXml(tag, varContent.getTableStyle());  
             setAttr(tag, "entityType", varContent.getEntityType().getName()); 
             
             for (int i = 0; i < varContent.getItemCount(); i++)
@@ -902,12 +903,42 @@ public class XmlWriter
         }
         else if (contentConfig instanceof PdfPriorityListContentConfigImpl)
         {
-        	PdfPriorityListContentConfigImpl prioConfig= (PdfPriorityListContentConfigImpl) contentConfig; 
+        	PdfPriorityListContentConfigImpl prioConfig = (PdfPriorityListContentConfigImpl) contentConfig; 
         	setAttr(tag, "type", "prio"); 
+        	addXml(tag, prioConfig.getTableStyle());  
         	addXml(tag, prioConfig.getMetaResult()); 
         }        
+        else if (contentConfig instanceof PdfTableContentConfig)
+        {
+        	PdfTableContentConfig tableConfig = (PdfTableContentConfig) contentConfig;
+        	setAttr(tag, "type", "table"); 
+        	addXml(tag, tableConfig.getTableStyle());  
+            addXml(tag, (TableMetaResult) ((PdfTableContentConfigImpl) contentConfig).getMetaResult());
+        }
     }
 
+    private void addXml(Element parent, EmisTableStyle emisStyle)
+    {
+    	Element tag = createElementAndAdd("tableStyle", parent);
+    	if (emisStyle instanceof SimpleTableStyle)
+    	{
+    		SimpleTableStyle style = (SimpleTableStyle) emisStyle; 
+    		
+    		setAttr(tag, "style", "simple"); 
+    		
+    		addXml(tag, style.getDataFont(), "dataFont"); 
+    		addXml(tag, style.getHeaderFont(), "headerFont");
+    		setAttr(tag, "dataBackground", style.getDataBackground()); 
+    		setAttr(tag, "headerBackground", style.getHeaderBackground()); 
+
+			addXml(tag, style.getDataBorder(), "data");
+			addXml(tag, style.getHeaderBorder(), "header");
+			addXml(tag, style.getTableBorder(), "table");
+			
+			setAttr(tag, "padding", style.getPadding()); 
+    	}
+    }
+    
     private void updateXml(Element tag, MetaResult metaResult)
     {
         setAttr(tag, "hierarchy", metaResult.getHierarchy());
@@ -954,7 +985,7 @@ public class XmlWriter
     	
     	Element tag = createElementAndAdd("prioMetaResult", parent); 
     	updateXml(tag, metaResult); 
-    	
+   	
     	setIds(tag, "fields", metaResult.getAdditionalFields());
     	setAttr(tag, "filterEmpty", metaResult.getFilterEmpty());
     	setAttr(tag, "entityType", (Named) metaResult.getListEntity()); 
@@ -1226,8 +1257,32 @@ public class XmlWriter
     	if (color == null)
     		return;
     	
-    	setAttr(tag, attr, String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue())); 
+    	if (color.getTransparency() == 0)
+        	setAttr(tag, attr, String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue())); 
+    	else
+    		setAttr(tag, attr, String.format("#%02X%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue(), color.getTransparency())); 
     }
+    
+    private void addXml(Element parent, ChartFont font, String tagName)
+    {
+    	if (font == null)
+    		return; 
+    	
+    	Element tag = createElementAndAdd(tagName, parent);
+    	setAttributes(tag, font); 
+    }
+    
+    private void setAttributes(Element tag, ChartFont font)
+    {
+    	if (font == null)
+    		return; 
+    	
+    	setAttr(tag, "font", font.getName());
+    	setAttr(tag, "fontSize", font.getSize()); 
+    	setAttr(tag, "fontStyle", font.getStyle());
+    	setAttr(tag, "fontColor", font.getColor()); 
+    }
+    
     
     private void setAttr(Element tag, String attr, Named named)
     {

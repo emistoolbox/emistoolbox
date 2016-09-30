@@ -55,9 +55,6 @@ public class LayoutPdfReportCreator extends BasePdfReportCreator<LayoutPdfReport
     	if (result != null)
     		return result; 
     	
-        if ((contentConfig instanceof PdfTableContentConfigImpl))
-        {}
-        
         return result; 
     }
 }

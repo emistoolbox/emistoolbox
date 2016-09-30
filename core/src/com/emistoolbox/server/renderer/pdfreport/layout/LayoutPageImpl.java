@@ -2,7 +2,6 @@ package com.emistoolbox.server.renderer.pdfreport.layout;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.renderer.pdfreport.TextSetImpl;

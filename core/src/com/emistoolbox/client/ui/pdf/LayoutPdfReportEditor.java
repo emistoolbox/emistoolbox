@@ -4,6 +4,7 @@ import com.emistoolbox.client.EmisEditor;
 import com.emistoolbox.client.ui.pdf.layout.LayoutContentListEditor;
 import com.emistoolbox.client.ui.pdf.layout.LayoutPageEditor;
 import com.emistoolbox.client.ui.pdf.layout.LayoutPageListEditor;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
@@ -61,6 +62,7 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	@Override
 	public void set(LayoutPdfReportConfig reportConfig) 
 	{
+//		uiPageEditor.setPageSize(reportConfig.getPageSize(), reportConfig.getOrientation()); 
 		this.reportConfig = reportConfig; 
 		uiPageList.set(reportConfig.getPages());
 		uiContentList.set(reportConfig.getUnusedContentConfigs());

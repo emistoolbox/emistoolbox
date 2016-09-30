@@ -106,6 +106,7 @@ import com.emistoolbox.common.model.validation.impl.ValidationNotExceedingRule;
 import com.emistoolbox.common.model.validation.impl.ValidationRatioRuleImpl;
 import com.emistoolbox.common.model.validation.impl.ValidationTimeRatioRuleImpl;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.EmisTableStyle;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
@@ -116,7 +117,8 @@ import com.emistoolbox.common.renderer.pdfreport.impl.PdfReportConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
-import com.emistoolbox.common.renderer.pdfreport.layout.LayoutBorderConfig;
+import com.emistoolbox.common.renderer.pdfreport.impl.SimpleTableStyle;
+import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
@@ -995,8 +997,11 @@ public class XmlReader
 	
 	private ChartFont getFont(Element tag)
 	{
-		ChartColor col = getAttrAsColour(tag, "colour"); 
-		return new ChartFont(getAttr(tag, "font", "Helvetica"), getAttrAsInt(tag, "fontSize", 12), getAttrAsInt(tag, "fontStyle", 0)); 
+		ChartColor col = getAttrAsColour(tag, "fontColor"); 
+		ChartFont font = new ChartFont(getAttr(tag, "font", "Helvetica"), getAttrAsInt(tag, "fontSize", 12), getAttrAsInt(tag, "fontStyle", 0));
+		font.setColor(col);
+		
+		return font; 
 	}
 	
 	private EmisPdfReportConfig getLayoutPdfReport(Element tag, List<EmisIndicator> indicators)
@@ -1030,11 +1035,11 @@ public class XmlReader
 		if (borderTag != null)
 		{
 			frame.setBorderRadius(getAttrAsInt(borderTag, "radius", 0)); 
-			LayoutSides<LayoutBorderConfig> borders = new LayoutSides<LayoutBorderConfig>(); 
-			borders.setLeft(getBorderConfig(borderTag, "left"));   
-			borders.setTop(getBorderConfig(borderTag, "top"));  
-			borders.setRight(getBorderConfig(borderTag, "right"));  
-			borders.setBottom(getBorderConfig(borderTag, "bottom"));  
+			LayoutSides<BorderStyle> borders = new LayoutSides<BorderStyle>(); 
+			borders.setLeft(getBorderStyle(borderTag, "left"));   
+			borders.setTop(getBorderStyle(borderTag, "top"));  
+			borders.setRight(getBorderStyle(borderTag, "right"));  
+			borders.setBottom(getBorderStyle(borderTag, "bottom"));  
 
 			frame.setBorders(borders);
 		}
@@ -1052,13 +1057,13 @@ public class XmlReader
 		return frame;
 	}
 	
-	private LayoutBorderConfig getBorderConfig(Element tag, String side)
+	private BorderStyle getBorderStyle(Element tag, String side)
 	{
 		Element borderTag = getElement(tag, "border", "side", side);
 		if (borderTag == null)
 			return null; 
 		
-		LayoutBorderConfig result = new LayoutBorderConfig();
+		BorderStyle result = new BorderStyle();
 		result.setColor(getAttrAsColour(borderTag, "colour")); 
 		result.setWidth(getAttrAsInt(borderTag, "width", 1));
 		
@@ -1096,6 +1101,7 @@ public class XmlReader
 		} else if (type.equals("table")) {
 			PdfTableContentConfigImpl tmp = new PdfTableContentConfigImpl();
 			tmp.setMetaResult(getTableMetaResult(getElement(tag, "tableMetaResult"), indicators));
+			tmp.setTableStyle(getTableStyle(getElement(tag, "tableStyle")));
 			result = tmp;
 		} else if (type.equals("gis")) {
 			PdfGisContentConfigImpl tmp = new PdfGisContentConfigImpl();
@@ -1108,6 +1114,7 @@ public class XmlReader
 			result = tmp;
 		} else if (type.equals("vars")) {
 			PdfVariableContentConfigImpl tmp = new PdfVariableContentConfigImpl();
+			tmp.setTableStyle(getTableStyle(getElement(tag, "tableStyle")));
 			for (Element entryTag : getElements(tag, null, "entry"))
 				tmp.addItem(entryTag.getAttribute("title"),
 						entryTag.getAttribute("variable"));
@@ -1119,6 +1126,7 @@ public class XmlReader
 		else if (type.equals("prio")) 
 		{
 			PdfPriorityListContentConfigImpl tmp = new PdfPriorityListContentConfigImpl(); 
+			tmp.setTableStyle(getTableStyle(getElement(tag, "tableStyle")));
 			tmp.setMetaResult(getPriorityMetaResult(getElement(tag, "prioMetaResult"), indicators)); 
 		}
 
@@ -1146,6 +1154,32 @@ public class XmlReader
 		return null;
 	}
 
+	public EmisTableStyle getTableStyle(Element tag)
+	{
+		String type = tag.getAttribute("type");
+		if (type.equals("simple"))
+		{
+			SimpleTableStyle result = new SimpleTableStyle(); 
+
+			result.setDataFont(getFont(getElement(tag, "dataFont")));
+			result.setHeaderFont(getFont(getElement(tag, "headerFont"))); 
+			result.setDataBackground(getAttrAsColour(tag, "dataBackground")); 
+			result.setHeaderBackground(getAttrAsColour(tag, "headerBackground"));
+
+			result.setDataBorder(getBorderStyle(tag, "data")); 
+			result.setHeaderBorder(getBorderStyle(tag, "header"));
+			result.setTableBorder(getBorderStyle(tag, "table"));
+
+			result.setPadding(getAttrAsDouble(tag, "padding"));
+
+			result.init(); 
+			
+			return result; 
+		}
+		
+		return null; 
+	}
+	
 	public PriorityMetaResult getPriorityMetaResult(Element tag, List<EmisIndicator> indicators)
 	{
 		if (tag == null)
@@ -1673,9 +1707,12 @@ public class XmlReader
 	}
 
 	private String getAttr(Element tag, String attr) {
-		if (StringUtils.isEmpty(tag.getAttribute(attr))) {
+		if (tag == null)
+			return null; 
+		
+		if (StringUtils.isEmpty(tag.getAttribute(attr))) 
 			return null;
-		}
+
 		return tag.getAttribute(attr);
 	}
 
@@ -1690,7 +1727,7 @@ public class XmlReader
 
 	private ChartColor getAttrAsColour(Element tag, String attr)
 	{
-		String value = tag.getAttribute(attr); 
+		String value = getAttr(tag, attr, "#000"); 
 		if (StringUtils.isEmpty(value))
 			return null; 
 		
@@ -1698,9 +1735,9 @@ public class XmlReader
 			value = value.substring(1); 
 		
 		int len = 1; 
-		if (value.length() == 3)
+		if (value.length() == 4 || value.length() == 3)
 			len = 1; 
-		else if (value.length() == 6)
+		else if (value.length() == 8 || value.length() == 6)
 			len = 2; 
 		else 
 			return null; 
@@ -1708,8 +1745,12 @@ public class XmlReader
 		int r = Integer.parseInt(value.substring(0, len), 16); 
 		int g = Integer.parseInt(value.substring(len, 2 * len), 16); 
 		int b = Integer.parseInt(value.substring(2 * len, 3 * len), 16); 
+		int a = (value.length() == 6 || value.length() == 3) ? 0 : Integer.parseInt(value.substring(3 * len, 4 * len), 16); 
 		
-		return new ChartColor(r, g, b);  
+		ChartColor result = new ChartColor(r, g, b);
+		result.setTransparency(a);
+		
+		return result; 
 	}
 	
 	private Integer getAttrAsInt(Element tag, String attr) {

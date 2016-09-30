@@ -27,10 +27,14 @@ import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfChartContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfGisContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfMetaResultContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfPriorityListContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfTableContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.TableStyleConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
 import com.emistoolbox.common.results.GisMetaResult;
 import com.emistoolbox.common.results.MetaResultDimension;
@@ -490,6 +494,32 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         	        	
         	result = prioContent; 
         }
+        else if (contentConfig instanceof PdfTableContentConfig)
+	    {
+        	PdfTableContentConfig config = (PdfTableContentConfig) contentConfig; 
+        	
+	        TableMetaResult tableMetaResult = (TableMetaResult) ((PdfMetaResultContentConfig) contentConfig).getMetaResult();
+	        adapt(tableMetaResult);
+	        
+	        EmisContext oldGlobalFilter = tableMetaResult.getGlobalFilter(); 
+	        tableMetaResult.setGlobalFilter(mergeFilters(oldGlobalFilter, metaResult.getGlobalFilter(), metaResult.getHierarchy())); 
+	        try { 
+	            Result[] results = TableResultCollector.getMultiResult(dataSet, tableMetaResult);
+
+		        PdfResultTableContentImpl tableResult = results[1].getDimensions() == 1 ? new Result1dTableContentImpl() : new Result2dTableContentImpl();
+		        tableResult.setConfig(config); 
+		        tableResult.setResult(results[1]);
+	
+	            result = tableResult;
+	            
+	            if (metaResult.getReportConfig().hasShortTitles())
+	            	result.setTitle(MetaResultDimensionUtil.getSimpleTitle(tableMetaResult, false, null).toString()); 
+	            else
+	            	result.setTitle(MetaResultDimensionUtil.getTitle(tableMetaResult, MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NONE, false));
+	        }
+	        finally 
+	        { tableMetaResult.setGlobalFilter(oldGlobalFilter); } 
+	    }
 
         return result;
     }

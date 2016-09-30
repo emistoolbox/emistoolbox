@@ -12,7 +12,7 @@ import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfigVisitor;
 import com.emistoolbox.common.renderer.pdfreport.PdfGisContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfPriorityListContentConfig;
-import com.emistoolbox.common.renderer.pdfreport.PdfTableContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.TableStyleConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
 import com.emistoolbox.common.results.MetaResult;
@@ -127,7 +127,7 @@ class GroupNameVisitor implements PdfContentConfigVisitor<String>
 	{ return "Prio Lists"; }
 
 	@Override
-	public String visit(PdfTableContentConfig config) 
+	public String visit(TableStyleConfig config) 
 	{ return "Tables"; } 
 }
 
@@ -232,6 +232,6 @@ class SummaryVisitor implements PdfContentConfigVisitor<String>
 	{ return "Priority Lists"; }
 
 	@Override
-	public String visit(PdfTableContentConfig config) 
+	public String visit(TableStyleConfig config) 
 	{ return "Data Table"; } 
 }

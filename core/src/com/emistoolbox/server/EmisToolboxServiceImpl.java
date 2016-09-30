@@ -783,13 +783,16 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
 
     public String getRenderedReportResult(String dataset, ReportMetaResult metaResult) throws IOException
     { return getRenderedReportResultInternal(dataset, metaResult); }
-    
+
     public static String getRenderedReportResultInternal(String dataset, ReportMetaResult metaResult) 
+            throws IOException
+    { return getRenderedReportResultInternal(dataset, metaResult, getPdfRenderer()); }
+    
+    public static String getRenderedReportResultInternal(String dataset, ReportMetaResult metaResult, PdfReportWriter writer) 
         throws IOException
     {
         File outputFile = ServerUtil.getNewFile("reports", "report", ".pdf");
 
-        PdfReportWriter writer = getPdfRenderer(); 
         writer.setDateInfo(metaResult); 
         try
         { writer.writeReport(PdfUtil.getPdfReport(metaResult, getDataSet(dataset)), outputFile); }

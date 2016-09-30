@@ -4,15 +4,15 @@ import java.io.Serializable;
 
 import com.emistoolbox.common.ChartColor;
 
-public class LayoutBorderConfig implements Serializable
+public class BorderStyle implements Serializable
 {
 	private ChartColor color; 
 	private int width;
 
-	public LayoutBorderConfig()
+	public BorderStyle()
 	{}
 	
-	public LayoutBorderConfig(int width, ChartColor color)
+	public BorderStyle(int width, ChartColor color)
 	{
 		this.color = color; 
 		this.width = width; 

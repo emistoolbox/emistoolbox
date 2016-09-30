@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.emistoolbox.common.ChartColor;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.TextSetImpl;
-import com.emistoolbox.common.renderer.pdfreport.layout.LayoutBorderConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.util.LayoutSides;
 import com.emistoolbox.common.util.Rectangle;
@@ -13,7 +13,7 @@ import com.emistoolbox.common.util.Rectangle;
 public class LayoutFrameConfigImpl extends TextSetImpl implements LayoutFrameConfig, Serializable
 {
 	private Rectangle position = new Rectangle(); 
-	private LayoutSides<LayoutBorderConfig> borders = new LayoutSides<LayoutBorderConfig>(new LayoutBorderConfig(0, null)); 
+	private LayoutSides<BorderStyle> borders = new LayoutSides<BorderStyle>(new BorderStyle(0, null)); 
 	private int borderRadius = 0; 
 	
 	private String backgroundImage; 
@@ -36,11 +36,11 @@ public class LayoutFrameConfigImpl extends TextSetImpl implements LayoutFrameCon
 	{ this.position = position; } 
 
 	@Override
-	public LayoutSides<LayoutBorderConfig> getBorders() 
+	public LayoutSides<BorderStyle> getBorders() 
 	{ return this.borders; } 
 
 	@Override
-	public void setBorders(LayoutSides<LayoutBorderConfig> borders) 
+	public void setBorders(LayoutSides<BorderStyle> borders) 
 	{ this.borders = borders; } 
 
 	@Override

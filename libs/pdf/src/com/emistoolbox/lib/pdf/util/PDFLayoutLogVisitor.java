@@ -1,5 +1,6 @@
 package com.emistoolbox.lib.pdf.util;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -113,8 +114,22 @@ public class PDFLayoutLogVisitor implements PDFLayoutVisitor<Void>
 
 	public Void visit(PDFLayoutFont font)
 	{
-		os.println(indent + "Font: " + font.getFontName() + ", size: " + font.getFontSize() + ", style: " + font.getFontStyle() + ", col: " + font.getColor()); 
+		os.println(indent + "Font: " + font.getFontName() + ", size: " + font.getFontSize() + ", style: " + font.getFontStyle() + ", col: " + getColorName(font.getColor())); 
 		return null; 
+	}
+	
+	private String getColorName(Color color)
+	{
+		if (color == null)
+			return null; 
+		
+		String result = color.toString(); 
+		int start = result.indexOf("["); 
+		int end = result.indexOf("]"); 
+		if (start == -1 || end == -1)
+			return result; 
+		
+		return result.substring(start + 1, end); 
 	}
 
 	@Override
@@ -160,6 +175,7 @@ public class PDFLayoutLogVisitor implements PDFLayoutVisitor<Void>
 
 	public void close()
 	{ 
+		os.flush(); 
 		if (out != null)
 			os.close(); 
 	}

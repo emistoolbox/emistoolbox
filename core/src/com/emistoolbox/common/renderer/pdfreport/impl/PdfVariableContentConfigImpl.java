@@ -8,6 +8,7 @@ import java.util.Set;
 import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
+import com.emistoolbox.common.renderer.pdfreport.EmisTableStyle;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfigVisitor;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
 import com.emistoolbox.common.util.NamedUtil;
@@ -17,6 +18,8 @@ public class PdfVariableContentConfigImpl extends PdfContentConfigImpl implement
     EmisMetaEntity entity; 
     private List<String> titles = new ArrayList<String>(); 
     private List<String> variables = new ArrayList<String>(); 
+    
+    private EmisTableStyle tableStyle; 
 
     public EmisMetaEntity getEntityType()
     { return entity; }
@@ -85,4 +88,10 @@ public class PdfVariableContentConfigImpl extends PdfContentConfigImpl implement
 	@Override
 	public <T> T accept(PdfContentConfigVisitor<T> visitor) 
 	{ return visitor.visit(this); }
+	
+	public EmisTableStyle getTableStyle()
+	{ return tableStyle; } 
+	
+	public void setTableStyle(EmisTableStyle tableStyle) 
+	{ this.tableStyle = tableStyle; }
 }

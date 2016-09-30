@@ -7,5 +7,5 @@ public interface PdfContentConfigVisitor<T>
 	public T visit(PdfChartContentConfig config); 
 	public T visit(PdfGisContentConfig config); 
 	public T visit(PdfPriorityListContentConfig config); 
-	public T visit(PdfTableContentConfig config); 
+	public T visit(TableStyleConfig config); 
 }

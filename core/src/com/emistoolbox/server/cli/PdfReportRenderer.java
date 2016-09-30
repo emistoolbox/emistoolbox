@@ -43,7 +43,12 @@ public class PdfReportRenderer
 	        	return; 	
 	        }
 	        
-	        String filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult); 
+	        String filename = null; 
+	        if (true)
+	        	filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult);
+	        // else
+//        	filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult, HTML_RENDERER_TO_BE);
+
 	        System.out.println("PDF Path: " + filename); 
 		}
 		finally { System.out.flush(); }

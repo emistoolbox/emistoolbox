@@ -1,4 +1,6 @@
 package com.emistoolbox.common.renderer.pdfreport;
 
-public interface PdfTableContentConfig extends PdfContentConfig
+import com.emistoolbox.common.results.TableMetaResult;
+
+public interface PdfTableContentConfig extends PdfMetaResultContentConfig<TableMetaResult>, TableStyleConfig
 {}

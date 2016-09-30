@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 
-public interface PdfVariableContentConfig extends PdfContentConfig
+public interface PdfVariableContentConfig extends PdfContentConfig, TableStyleConfig
 {
     public int getItemCount(); 
     

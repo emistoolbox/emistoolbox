@@ -81,39 +81,4 @@ public class LegacyPdfReportCreator extends BasePdfReportCreator<PdfReportConfig
 
         return page;
     }
-
-
-	protected PdfContent createContent(PdfContentConfig contentConfig) 
-	{
-		PdfContent result = super.createContent(contentConfig); 
-		if (result != null)
-			return result; 
-		
-	    if ((contentConfig instanceof PdfTableContentConfigImpl))
-	    {
-	        PdfTableContentConfigImpl tableContentConfig = (PdfTableContentConfigImpl) contentConfig;
-	        PdfResultTableContentImpl tableResult = new PdfResultTableContentImpl();
-	
-	        TableMetaResult tableMetaResult = (TableMetaResult) tableContentConfig.getMetaResult();
-	        adapt(tableMetaResult);
-	        
-	        EmisContext oldGlobalFilter = tableMetaResult.getGlobalFilter(); 
-	        tableMetaResult.setGlobalFilter(mergeFilters(oldGlobalFilter, metaResult.getGlobalFilter(), metaResult.getHierarchy())); 
-	        try { 
-	            Result[] results = TableResultCollector.getMultiResult(dataSet, tableMetaResult);
-	            tableResult.setResult(results[1]);
-	
-	            result = tableResult;
-	            
-	            if (metaResult.getReportConfig().hasShortTitles())
-	            	result.setTitle(MetaResultDimensionUtil.getSimpleTitle(tableMetaResult, false, null).toString()); 
-	            else
-	            	result.setTitle(MetaResultDimensionUtil.getTitle(tableMetaResult, MetaResultDimensionUtil.ENTITY_DATE_LEVEL.NONE, false));
-	        }
-	        finally 
-	        { tableMetaResult.setGlobalFilter(oldGlobalFilter); } 
-	    }
-	    
-	    return result; 
-	}
 }

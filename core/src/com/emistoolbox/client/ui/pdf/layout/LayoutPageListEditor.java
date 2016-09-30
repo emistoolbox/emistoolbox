@@ -47,7 +47,7 @@ public class LayoutPageListEditor extends VerticalPanel implements EmisEditor<Li
 				if (page == null)
 					return; 
 				
-				PdfContentConfig content = uiContentList.removeContent();
+				PdfContentConfig content = LayoutPageListEditor.this.uiContentList.removeContent();
 				if (content == null)
 					return; 
 				

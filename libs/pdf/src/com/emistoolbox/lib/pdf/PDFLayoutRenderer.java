@@ -662,7 +662,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return getBoundingBox (element,Double.POSITIVE_INFINITY);
 	}
 
-	private Rectangle getBoundingBox (PDFLayoutElement element,double maxWidth) throws IOException {
+	private Rectangle getBoundingBox (PDFLayoutElement element, final double maxWidth) throws IOException {
 		return element.accept (new PDFLayoutVisitor<Rectangle> () {
 			public Rectangle visit(PDFLayout page) throws IOException {
 				return null;

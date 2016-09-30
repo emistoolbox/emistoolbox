@@ -64,4 +64,15 @@ public class LayoutSides<T> implements Serializable
 		
 		return values; 
 	}
+	
+	public LayoutSides<T> clone()
+	{
+		LayoutSides<T> result = new LayoutSides<T>();
+		result.left = left; 
+		result.right = right; 
+		result.top = top; 
+		result.bottom = bottom; 
+		
+		return result; 
+	}
 }

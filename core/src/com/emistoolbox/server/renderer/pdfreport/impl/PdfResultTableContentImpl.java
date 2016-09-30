@@ -4,7 +4,7 @@ import com.emistoolbox.common.results.Result;
 import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
 import com.emistoolbox.server.renderer.pdfreport.PdfContentWithResult;
 
-public class PdfResultTableContentImpl extends PdfTableContentBase implements PdfContentWithResult
+public abstract class PdfResultTableContentImpl extends PdfTableContentBase implements PdfContentWithResult
 {
     private Result result;
 
@@ -16,5 +16,5 @@ public class PdfResultTableContentImpl extends PdfTableContentBase implements Pd
 
 	@Override
 	public <T> T accept(PdfContentVisitor<T> visitor) 
-	{ return visitor.visit(this); } 
+	{ return visitor.visit(this); }
 }
