@@ -4,21 +4,21 @@ import java.awt.Color;
 import java.io.Serializable;
 
 public class PDFLayoutLineStyle implements Serializable {
-	Double width;
+	double width;
 	Color color;
 
 	public PDFLayoutLineStyle()
 	{}
 	
-	public PDFLayoutLineStyle (Double width, Color color) {
+	public PDFLayoutLineStyle (double width, Color color) {
 		this.width = width;
 		this.color = color;
 	}
 
-	public Double getWidth () 
+	public double getWidth () 
 	{ return width; }
 
-	public void setWidth (Double width) 
+	public void setWidth (double width) 
 	{ this.width = width; }
 
 	public Color getColor () 

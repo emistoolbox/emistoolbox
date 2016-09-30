@@ -5,18 +5,18 @@ import java.io.Serializable;
 
 public class PDFLayoutBorderStyle implements Serializable {
 	PDFLayoutSides<PDFLayoutLineStyle> lineStyles;
-	Double borderRadius;
+	double borderRadius;
 
 	public PDFLayoutBorderStyle()
 	{}
 	
-	public PDFLayoutBorderStyle (PDFLayoutSides<PDFLayoutLineStyle> lineStyles,Double borderRadius) {
+	public PDFLayoutBorderStyle (PDFLayoutSides<PDFLayoutLineStyle> lineStyles,double borderRadius) {
 		this.lineStyles = lineStyles;
 		this.borderRadius = borderRadius;
 	}
 
-	public PDFLayoutBorderStyle (Double width) {
-		this (new PDFLayoutSides<PDFLayoutLineStyle> (new PDFLayoutLineStyle (2.,Color.BLACK)),null);
+	public PDFLayoutBorderStyle (double width) {
+		this (new PDFLayoutSides<PDFLayoutLineStyle> (new PDFLayoutLineStyle (width,Color.BLACK)),0);
 	}
 
 	public PDFLayoutSides<PDFLayoutLineStyle> getLineStyles () {
@@ -27,8 +27,8 @@ public class PDFLayoutBorderStyle implements Serializable {
 		this.lineStyles = lineStyles;
 	}
 
-	public Double getBorderRadius () {
-		return borderRadius;
+	public double getBorderRadius () {
+		return borderRadius; 
 	}
 
 	public void setBorderRadius (Double borderRadius) {
