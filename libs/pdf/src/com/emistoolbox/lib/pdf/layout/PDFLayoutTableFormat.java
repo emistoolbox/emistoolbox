@@ -1,8 +1,9 @@
 package com.emistoolbox.lib.pdf.layout;
 
 import java.awt.Color;
+import java.io.Serializable;
 
-public class PDFLayoutTableFormat {
+public class PDFLayoutTableFormat implements Serializable {
 	PDFLayoutFont font;
 	Color backgroundColor;
 	PDFLayoutPlacement placement;
