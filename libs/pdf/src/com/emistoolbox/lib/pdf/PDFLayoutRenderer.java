@@ -101,11 +101,13 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		ps = new PrintStream (baos);
 		resourceRenamer = new ResourceRenamer ("R");
 		PDFLayoutFrameElement outerFrame = layout.getOuterFrame ();
-		flip (getBoundingBox (outerFrame));
+		Rectangle boundingBox = getBoundingBox (outerFrame);
+		flip (boundingBox);
 		outerFrame.accept (this);
 		ps.close ();
 		PDFDictionary page = new PDFDictionary ("Page");
-		page.put ("MediaBox",new PDFArray (getBoundingBox (outerFrame)));
+		applyPadding (boundingBox,outerFrame,1);
+		page.put ("MediaBox",new PDFArray (boundingBox));
 		page.putIndirect ("Contents",new PDFStream (baos.toByteArray ()));
 		PDFDictionary resources = resourceRenamer.getResources ();
 		fontLabeler.addResources (resources);
