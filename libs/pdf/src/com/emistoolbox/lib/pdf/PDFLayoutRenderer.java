@@ -10,6 +10,7 @@ import info.joriki.pdf.PDFArray;
 import info.joriki.pdf.PDFDictionary;
 import info.joriki.pdf.PDFFile;
 import info.joriki.pdf.PDFFont;
+import info.joriki.pdf.PDFReal;
 import info.joriki.pdf.PDFStream;
 import info.joriki.pdf.PDFWriter;
 import info.joriki.pdf.TextState;
@@ -95,9 +96,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		page.put ("MediaBox",new PDFArray (getBoundingBox (outerFrame)));
 		page.putIndirect ("Contents",new PDFStream (baos.toByteArray ()));
 		PDFDictionary resources = resourceRenamer.getResources ();
-		PDFDictionary fonts = resources.getOrCreateDictionary ("Font");
-		for (Entry<PDFLayoutFont,String> entry : fontLabels.entrySet ())
-			fonts.putIndirect (entry.getValue (),getFontDictionary (entry.getKey ()));
+		fontLabeler.addResources (resources);
+		alphaStateLabeler.addResources (resources);
 		page.putIndirect ("Resources",resources);
 		document.addPage (page);
 	}
@@ -109,35 +109,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		standardFontNames.add (PDFLayoutFont.FONT_COURIER);
 	}
 
-	private PDFDictionary getFontDictionary (PDFLayoutFont layoutFont) {
-		if (!standardFontNames.contains (layoutFont.getFontName ()))
-			throw new Error ("only standard fonts implemented");
-
-		PDFDictionary dictionary = new PDFDictionary ("Font");
-		dictionary.put ("Subtype","Type1");
-
-		String baseFont = layoutFont.getFontName ();
-		boolean isBold = layoutFont.getFontStyle ().isBold ();
-		boolean isItalic = layoutFont.getFontStyle ().isItalic ();
-		boolean isTimes = baseFont.equals ("Times");
-		if (isBold || isItalic) {
-			baseFont += '-';
-			if (isBold)
-				baseFont += "Bold";
-			if (isItalic)
-				baseFont += isTimes ? "Italic" : "Oblique";
-		}
-		else if (isTimes)
-			baseFont += "-Roman";
-
-		dictionary.put ("BaseFont",baseFont);
-		// TODO: using standard encoding for now -- do proper encoding
-
-		return dictionary;
-	}
-
 	private PDFFont getPDFFont (PDFLayoutFont layoutFont) {
-		return PDFFont.getInstance (getFontDictionary (layoutFont),null);
+		return PDFFont.getInstance (fontLabeler.getResource (layoutFont),null);
 	}
 
 	private void strokeRectangle (Rectangle r) {
@@ -152,12 +125,21 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		popGraphicsState ();
 	}
 
+	private void setColor (Color color,String rgbCommand) {
+		if (color.getAlpha () != 0xff) {
+			ps.print ('/');
+			ps.print (alphaStateLabeler.getLabel (color.getAlpha () / (double) 0xff));
+			ps.print (" gs\n");
+		}
+		coordinateCommand (rgbCommand,color.getRGBColorComponents (null));
+	}
+
 	private void setStrokeColor (Color color) {
-		coordinateCommand ("RG",color.getRGBColorComponents (null));
+		setColor (color,"RG");
 	}
 
 	private void setFillColor (Color color) {
-		coordinateCommand ("rg",color.getRGBColorComponents (null));
+		setColor (color,"rg");
 	}
 
 	private void outputRectangle (Rectangle r) {
@@ -476,7 +458,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		PDFLayoutFont layoutFont = textElement.getFont ();
 		double fontSize = layoutFont.getFontSize ();
 		double textAlignmentFactor = getTextAlignmentFactor (textElement);
-		ps.print ("BT /" + getFontLabel (layoutFont) + " " + fontSize + " Tf\n");
+		ps.print ("BT /" + fontLabeler.getLabel (layoutFont) + " " + fontSize + " Tf\n");
 		double ty = 0;
 		TextState textState = getTextState (layoutFont);
 		for (String piece : pieceMap.get (textElement)) {
@@ -508,17 +490,77 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		}
 	}
 
-	private int fontIndex;
-	private Map<PDFLayoutFont,String> fontLabels = new HashMap<PDFLayoutFont,String> ();
+	static abstract class ResourceLabeler<T> {
+		private int index;
+		private Map<T,String> labels = new HashMap<T,String> ();
+		private String prefix;
+		private String resourceName;
 
-	private String getFontLabel (PDFLayoutFont layoutFont) {
-		String fontLabel = fontLabels.get (layoutFont);
-		if (fontLabel == null) {
-			fontLabel = "F" + ++fontIndex;
-			fontLabels.put (layoutFont,fontLabel);
+		public ResourceLabeler (String prefix,String resourceName) {
+			this.prefix = prefix;
+			this.resourceName = resourceName;
 		}
-		return fontLabel;
+
+		String getLabel (T t) {
+			String label = labels.get (t);
+			if (label == null) {
+				label = prefix + ++index;
+				labels.put (t,label);
+			}
+			return label;
+		}
+
+		void addResources (PDFDictionary resources) {
+			if (!labels.isEmpty ()) {
+				PDFDictionary dictionary = resources.getOrCreateDictionary (resourceName);
+				for (Entry<T,String> entry : labels.entrySet ()) {
+					if (dictionary.contains (entry.getValue ()))
+						throw new Error ("duplicate key");
+					dictionary.putIndirect (entry.getValue (),getResource (entry.getKey ()));
+				}
+			}
+		}
+
+		abstract PDFDictionary getResource (T t);
 	}
+
+	ResourceLabeler<PDFLayoutFont> fontLabeler = new ResourceLabeler<PDFLayoutFont> ("F","Font") {
+		PDFDictionary getResource (PDFLayoutFont layoutFont) {
+			if (!standardFontNames.contains (layoutFont.getFontName ()))
+				throw new Error ("only standard fonts implemented");
+
+			PDFDictionary dictionary = new PDFDictionary ("Font");
+			dictionary.put ("Subtype","Type1");
+
+			String baseFont = layoutFont.getFontName ();
+			boolean isBold = layoutFont.getFontStyle ().isBold ();
+			boolean isItalic = layoutFont.getFontStyle ().isItalic ();
+			boolean isTimes = baseFont.equals ("Times");
+			if (isBold || isItalic) {
+				baseFont += '-';
+				if (isBold)
+					baseFont += "Bold";
+				if (isItalic)
+					baseFont += isTimes ? "Italic" : "Oblique";
+			}
+			else if (isTimes)
+				baseFont += "-Roman";
+
+			dictionary.put ("BaseFont",baseFont);
+			// TODO: using standard encoding for now -- do proper encoding
+
+			return dictionary;
+		}
+	};
+
+	ResourceLabeler<Double> alphaStateLabeler = new ResourceLabeler<Double> ("AGS","ExtGState") {
+		PDFDictionary getResource (Double alpha) {
+			PDFDictionary dictionary = new PDFDictionary ("ExtGState");
+			dictionary.put ("CA",new PDFReal (alpha));
+			dictionary.put ("ca",new PDFReal (alpha));
+			return dictionary;
+		}
+	};
 
 	private Rectangle getBoundingBox (PDFLayoutElement element) throws IOException {
 		return getBoundingBox (element,Double.POSITIVE_INFINITY);
