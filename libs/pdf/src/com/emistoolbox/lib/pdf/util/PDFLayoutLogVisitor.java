@@ -130,7 +130,10 @@ public class PDFLayoutLogVisitor implements PDFLayoutVisitor<Void>
 			os.println(indent + "padding = " + item.getPadding());  
 		
 		if (item.getPlacement() != null)
-			os.println(indent + "placement = " + item.getPlacement()); 
+			os.println(indent + "placement = " + item.getPlacement());
+
+		if (item.getBackgroundColor() != null)
+			os.println(indent + "background = " + item.getBackgroundColor ());
 	}
 	
 
