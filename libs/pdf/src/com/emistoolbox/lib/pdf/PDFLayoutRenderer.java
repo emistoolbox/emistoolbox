@@ -1,5 +1,6 @@
 package com.emistoolbox.lib.pdf;
 
+import info.joriki.graphics.Point;
 import info.joriki.graphics.Rectangle;
 import info.joriki.graphics.Transformation;
 import info.joriki.io.SeekableByteArray;
@@ -17,6 +18,8 @@ import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,15 +30,17 @@ import java.util.Stack;
 
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutBorderStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutCoordinatePlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHighchartElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutImageElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutLineStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutFileElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
@@ -44,7 +49,10 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 import es.jbauer.lib.io.IOOutput;
 
 public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
-	final static Color debugBoxColor = Color.LIGHT_GRAY;
+	final static Color debugElementBoxColor = Color.LIGHT_GRAY;
+	final static Color debugPaddingBoxColor = Color.CYAN.brighter ();
+	final static Color debugBorderBoxColor = Color.MAGENTA.brighter ();
+
 	final static int ndigits = 6;
 
 	private ResourceRenamer resourceRenamer;
@@ -132,20 +140,24 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return PDFFont.getInstance (getFontDictionary (layoutFont),null);
 	}
 
-	private void drawRectangle (Rectangle r) {
-		outputRectangle ((Rectangle) r.transformedBy (transformStack.peek ()));
+	private void strokeRectangle (Rectangle r) {
+		outputRectangle (r);
 		ps.print ("s\n");
 	}
 
-	private void drawRectangle (Rectangle r,Color color) {
+	private void strokeRectangle (Rectangle r,Color color) {
 		pushGraphicsState ();
-		setStrokingColor (color);
-		drawRectangle (r);
+		setStrokeColor (color);
+		strokeRectangle (r);
 		popGraphicsState ();
 	}
 
-	private void setStrokingColor (Color color) {
+	private void setStrokeColor (Color color) {
 		coordinateCommand ("RG",color.getRGBColorComponents (null));
+	}
+
+	private void setFillColor (Color color) {
+		coordinateCommand ("rg",color.getRGBColorComponents (null));
 	}
 
 	private void outputRectangle (Rectangle r) {
@@ -166,7 +178,11 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private void pushTransform () {
-		transformStack.push (transformStack.peek ());
+		transformStack.push (getCurrentTransform ());
+	}
+
+	public Transformation getCurrentTransform () {
+		return transformStack.peek ();
 	}
 
 	private void popTransform () {
@@ -189,10 +205,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private void coordinateCommand (String command,double ... m) {
-		for (double v : m) {
+		for (double v : m)
 			print (v);
-			ps.print (' ');
-		}
 		ps.print (command);
 		ps.print ('\n');
 	}
@@ -226,6 +240,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				}
 			}
 		}
+		ps.print (' ');
 	}
 
 	public Void visit(PDFLayout page) throws IOException {
@@ -240,12 +255,18 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		for (PDFLayoutElement element : frame.getElements ()) {
 			PDFLayoutPlacement placement = element.getPlacement ();
 			PDFLayoutObjectFit objectFit = element.getObjectFit ();
-			Rectangle elementBox = getBoundingBox (element);
+			Rectangle reducedObjectFitBox = new Rectangle (objectFitBox);
+			reducedObjectFitBox.transformBy (getCurrentTransform ());
+			applyPaddingAndBorder (reducedObjectFitBox,element,-1);
+			Rectangle elementBox = getBoundingBox (element,reducedObjectFitBox.width ());
+			Rectangle transformedElementBox = new Rectangle (elementBox);
+			transformedElementBox.transformBy (getCurrentTransform ());
+			// TODO: This is all not tested properly since the tests so far don't have scaled frames so it doesn't really matter which transforms we apply at this point
 			double width = 0;
 			double height = 0;
 			switch (objectFit) {
 			case CONTAIN:
-				double scale = Math.min (objectFitBox.width () / elementBox.width (),objectFitBox.height () / elementBox.height ());
+				double scale = Math.min (reducedObjectFitBox.width () / transformedElementBox.width (),reducedObjectFitBox.height () / transformedElementBox.height ());
 				width = scale * elementBox.width ();
 				height = scale * elementBox.height ();
 				break;
@@ -254,7 +275,13 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				default:
 					throw new Error ("object fit " + objectFit + " not implemented");
 			}
+			// TODO: Does an object-fitted element cause displacement? Probably not, as it would take up
+			// the remaining space in at least one direction, not leaving any space for further object fitting
 			Rectangle newElementBox = objectFit == PDFLayoutObjectFit.NONE ? new Rectangle (elementBox) : new Rectangle (0,0,width,height);
+			Rectangle augmentedNewElementBox = new Rectangle (newElementBox);
+			augmentedNewElementBox.transformBy (getCurrentTransform ());
+			applyPaddingAndBorder (augmentedNewElementBox,element,1);
+			augmentedNewElementBox.transformBy (getCurrentTransform ().inverse ());
 			double x;
 			double y;
 			if (placement instanceof PDFLayoutCoordinatePlacement) {
@@ -267,7 +294,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				PDFLayoutAlignmentPlacement alignmentPlacement = (PDFLayoutAlignmentPlacement) placement;
 				switch (alignmentPlacement.getHorizontalAlignment ()) {
 				case BEFORE:
-					x = previousElementBox.xmin - newElementBox.width ();
+					x = previousElementBox.xmin - augmentedNewElementBox.width ();
 					alignedWithEdge.setLeft (false);
 					break;
 				case AFTER:
@@ -280,12 +307,12 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					alignedWithEdge.setRight (false);
 					break;
 				case CENTER:
-					x = objectFitBox.xmin + (objectFitBox.width () - newElementBox.width ()) / 2;
+					x = objectFitBox.xmin + (objectFitBox.width () - augmentedNewElementBox.width ()) / 2;
 					alignedWithEdge.setLeft (false);
 					alignedWithEdge.setRight (false);
 					break;
 				case RIGHT:
-					x = frameBox.xmax - newElementBox.width ();
+					x = frameBox.xmax - augmentedNewElementBox.width ();
 					alignedWithEdge.setLeft (false);
 					alignedWithEdge.setRight (true);
 					break;
@@ -295,7 +322,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 
 				switch (alignmentPlacement.getVerticalAlignment ()) {
 				case ABOVE:
-					y = previousElementBox.ymin - newElementBox.height ();
+					y = previousElementBox.ymin - augmentedNewElementBox.height ();
 					alignedWithEdge.setTop (false);
 					break;
 				case BELOW:
@@ -308,12 +335,12 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					alignedWithEdge.setBottom (false);
 					break;
 				case CENTER:
-					y = objectFitBox.ymin + (objectFitBox.height () - newElementBox.height ()) / 2;
+					y = objectFitBox.ymin + (objectFitBox.height () - augmentedNewElementBox.height ()) / 2;
 					alignedWithEdge.setTop (false);
 					alignedWithEdge.setBottom (false);
 					break;
 				case BOTTOM:
-					y = frameBox.ymax - newElementBox.height ();
+					y = frameBox.ymax - augmentedNewElementBox.height ();
 					alignedWithEdge.setTop (false);
 					alignedWithEdge.setBottom (true);
 				default:
@@ -323,20 +350,21 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			else
 				throw new Error ("placement " + placement.getClass () + " not implemented");
 
-			newElementBox.shiftBy (newElementBox.xmin - x,newElementBox.ymin - y);
+			newElementBox.shiftBy (augmentedNewElementBox.xmin - x,augmentedNewElementBox.ymin - y);
+			augmentedNewElementBox.shiftBy (augmentedNewElementBox.xmin - x,augmentedNewElementBox.ymin - y);
 
 			if (element.getDisplacement ().getVertical ()) {
 				if (alignedWithEdge.getTop ())
-					objectFitBox.ymin = newElementBox.ymax;
+					objectFitBox.ymin = augmentedNewElementBox.ymax;
 				if (alignedWithEdge.getBottom ())
-					objectFitBox.ymax = newElementBox.ymin;
+					objectFitBox.ymax = augmentedNewElementBox.ymin;
 			}
 
 			if (element.getDisplacement ().getHorizontal ()) {
 				if (alignedWithEdge.getLeft ())
-					objectFitBox.xmin = newElementBox.xmax;
+					objectFitBox.xmin = augmentedNewElementBox.xmax;
 				if (alignedWithEdge.getRight ())
-					objectFitBox.xmax = newElementBox.xmin;
+					objectFitBox.xmax = augmentedNewElementBox.xmin;
 			}
 
 			pushTransform ();
@@ -345,19 +373,88 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 //				drawRectangle (newElementBox,debugBoxColor);
 			if (!newElementBox.equals (elementBox))
 				transform (elementBox,newElementBox);
+
+			Rectangle paddedElementBox = new Rectangle (elementBox);
+			paddedElementBox.transformBy (getCurrentTransform ());
+
 			if (debugging)
-				drawRectangle (elementBox,debugBoxColor);
+				strokeRectangle (paddedElementBox,debugElementBoxColor);
+
+			applyPadding (paddedElementBox,element,1);
+
+			if (debugging)
+				strokeRectangle (paddedElementBox,debugPaddingBoxColor);
+
+			Rectangle borderElementBox = new Rectangle (paddedElementBox);
+			applyBorder (borderElementBox,element,1);
+
+			if (debugging)
+				strokeRectangle (borderElementBox,debugBorderBoxColor);
+
+			// TODO: borders with different colours
+			PDFLayoutBorderStyle borderStyle = element.getBorderStyle ();
+			if (borderStyle != null) {
+				Color borderColor = null;
+				PDFLayoutLineStyle [] lineStyles = borderStyle.getLineStyles ().getValues (new PDFLayoutLineStyle [4]);
+
+				for (PDFLayoutLineStyle style : lineStyles)
+					if (style.getWidth () != 0) {
+						Color color = style.getColor ();
+						if (borderColor != null && !color.equals (borderColor))
+							throw new Error ("different border colours not implemented");
+						borderColor = color;
+					}
+
+				if (borderColor != null) {
+					pushGraphicsState ();
+					setFillColor (borderColor);
+
+					Point [] [] paddedPoints = getCornerPoints (paddedElementBox,borderStyle.getBorderRadius (),null);
+					Point [] [] borderPoints = getCornerPoints (borderElementBox,borderStyle.getBorderRadius (),lineStyles);
+
+					boolean allSegmentsExist = true;
+					// check for beginnings of sections of contiguous existing segments and draw each such section
+					for (int i = 0;i < 4;i++) {
+						if (lineStyles [i].getWidth () == null && lineStyles [(i + 1) % 4].getWidth () != null) {
+							int j = i + 2;
+							while (lineStyles [j % 4].getWidth () != null)
+								j++;
+							List<Point []> section = new ArrayList<Point []> ();
+							section.addAll (getPointList (paddedPoints,i + 1,j - 1,false));
+							section.addAll (getPointList (borderPoints,i + 1,j - 1,true));
+							draw (section);
+							coordinateCommand ("f*");
+							allSegmentsExist = false;
+						}
+					}
+					// if there was no beginning, all four segments exist; in this case the inner and outer paths are separate
+					if (allSegmentsExist) {
+						draw (getPointList (paddedPoints,0,3,false));
+						draw (getPointList (borderPoints,0,3,true));
+						coordinateCommand ("f*");
+					}
+
+					if (element.getBackgroundColor () != null) {
+						setFillColor (element.getBackgroundColor ());
+						draw (getPointList (paddedPoints,0,3,false));
+						coordinateCommand ("f*");
+					}
+
+					popGraphicsState ();
+				}
+			}
+
 			boolean isLeaf = !(element instanceof PDFLayoutFrameElement);
 			if (isLeaf) {
 				flip (elementBox);
 				pushGraphicsState ();
-				outputTransform (transformStack.peek ());
+				outputTransform (getCurrentTransform ());
 			}
 			element.accept (this);
 			if (isLeaf)
 				popGraphicsState ();
 			popTransform ();
-			previousElementBox = newElementBox;
+			previousElementBox = augmentedNewElementBox;
 		}
 		return null;
 	}
@@ -378,8 +475,37 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	public Void visit (PDFLayoutTextElement textElement) {
 		PDFLayoutFont layoutFont = textElement.getFont ();
 		double fontSize = layoutFont.getFontSize ();
-		ps.print ("BT /" + getFontLabel (layoutFont) + " " + fontSize + " Tf (" + textElement.getText () + ") Tj ET\n");
+		double textAlignmentFactor = getTextAlignmentFactor (textElement);
+		ps.print ("BT /" + getFontLabel (layoutFont) + " " + fontSize + " Tf\n");
+		double ty = 0;
+		TextState textState = getTextState (layoutFont);
+		for (String piece : pieceMap.get (textElement)) {
+			double tx = -textAlignmentFactor * textState.getAdvance (getBytes (piece));
+			coordinateCommand ("Tm",1,0,0,1,tx,ty);
+			ps.print ("(" + piece + ") Tj T*\n");
+			ty -= layoutFont.getLineSpacing () * fontSize;
+		}
+		ps.print ("ET\n");
 		return null;
+	}
+
+	public double getTextAlignmentFactor (PDFLayoutTextElement textElement) {
+		PDFLayoutPlacement placement = textElement.getPlacement ();
+		if (!(placement instanceof PDFLayoutAlignmentPlacement))
+			return 0;
+		PDFLayoutHorizontalAlignment horizontalAlignment = ((PDFLayoutAlignmentPlacement) placement).getHorizontalAlignment ();
+		switch (horizontalAlignment) {
+		case LEFT:
+		case AFTER:
+			return 0;
+		case CENTER:
+			return 0.5;
+		case BEFORE:
+		case RIGHT:
+			return 1;
+		default:
+			throw new Error ("horizontal alignment " + horizontalAlignment + " not implemented");
+		}
 	}
 
 	private int fontIndex;
@@ -395,6 +521,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private Rectangle getBoundingBox (PDFLayoutElement element) throws IOException {
+		return getBoundingBox (element,Double.POSITIVE_INFINITY);
+	}
+
+	private Rectangle getBoundingBox (PDFLayoutElement element,double maxWidth) throws IOException {
 		return element.accept (new PDFLayoutVisitor<Rectangle> () {
 			public Rectangle visit(PDFLayout page) throws IOException {
 				return null;
@@ -415,16 +545,59 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 
 			public Rectangle visit (PDFLayoutTextElement textElement) {
 				PDFLayoutFont layoutFont = textElement.getFont ();
-				PDFFont pdfFont = getPDFFont (layoutFont);
-				TextState textState = new TextState ();
 				double fontSize = layoutFont.getFontSize ();
-				textState.setTextFont (pdfFont,fontSize);
-				double advance = textState.getAdvance (textElement.getText ().getBytes ()); // TODO: proper encoding
+				PDFFont pdfFont = getPDFFont (layoutFont);
 				double descent = fontSize * pdfFont.getDescent ();
 				double ascent = fontSize * pdfFont.getAscent ();
-				return new Rectangle (0,descent,advance,ascent);
+				TextState textState = getTextState (layoutFont);
+				double width = 0;
+				List<String> pieces = wrap (textElement,maxWidth);
+				for (String piece : pieces)
+					width = Math.max (width,textState.getAdvance (getBytes (piece)));
+				double textAlignmentFactor = getTextAlignmentFactor (textElement);
+				return new Rectangle (-textAlignmentFactor * width,descent - fontSize * layoutFont.getLineSpacing () * (pieces.size () - 1),(1 - textAlignmentFactor) * width,ascent);
 			}
 		});
+	}
+
+	private void applyPaddingAndBorder (Rectangle r,PDFLayoutElement element,double sign) {
+		applyPadding (r,element,sign);
+		applyBorder (r,element,sign);
+	}
+
+	private void applyPadding (Rectangle r,PDFLayoutElement element,double sign) {
+		PDFLayoutSides<Double> padding = element.getPadding ();
+		if (padding != null) {
+			// top and bottom are switched because of the sign convention for the y coordinate
+			r.xmin -= sign * padding.getLeft ();
+			r.ymin -= sign * padding.getBottom ();
+			r.xmax += sign * padding.getRight ();
+			r.ymax += sign * padding.getTop ();
+		}
+	}
+
+	private void applyBorder (Rectangle r,PDFLayoutElement element,double sign) {
+		PDFLayoutBorderStyle borderStyle = element.getBorderStyle ();
+		if (borderStyle != null) {
+			PDFLayoutSides<PDFLayoutLineStyle> lineStyles = borderStyle.getLineStyles ();
+			if (lineStyles != null) {
+				// top and bottom are switched because of the sign convention for the y coordinate
+				r.xmin -= lineStyles.getLeft ().getWidth ();
+				r.ymin -= lineStyles.getBottom ().getWidth ();
+				r.xmax += lineStyles.getRight ().getWidth ();
+				r.ymax += lineStyles.getTop ().getWidth ();
+			}
+		}
+	}
+
+	private byte [] getBytes (String string) {  // TODO: proper encoding
+		return string.getBytes ();
+	}
+
+	private TextState getTextState (PDFLayoutFont layoutFont) {
+		TextState textState = new TextState ();
+		textState.setTextFont (getPDFFont (layoutFont),layoutFont.getFontSize ());
+		return textState;
 	}
 
 	private Map<PDFLayoutPDFElement,PDFDictionary> pageMap = new HashMap<PDFLayoutPDFElement,PDFDictionary> ();
@@ -436,5 +609,100 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			pageMap.put (pdfElement,page);
 		}
 		return page;
+	}
+
+	Map<PDFLayoutTextElement,List<String>> pieceMap = new HashMap<PDFLayoutTextElement,List<String>> ();
+
+	// TODO: proper handling of multiple spaces
+	private List<String> wrap (PDFLayoutTextElement element,double maxWidth) {
+		List<String> pieces = new ArrayList<String> ();
+		TextState textState = getTextState (element.getFont ());
+		String text = element.getText ().trim () + ' ';
+		do {
+			int space = -1;
+			do {
+				int nextSpace = text.indexOf (' ',space + 1);
+				if (textState.getAdvance (getBytes (text.substring (0,nextSpace))) > maxWidth) {
+					if (space == -1) // if a single word doesn't fit into the width, use it as a piece anyway
+						space = nextSpace;
+					break;
+				}
+				space = nextSpace;
+			} while (space != text.length () - 1);
+			pieces.add (text.substring (0,space));
+			text = text.substring (space + 1);
+		} while (text.length () > 0);
+
+		pieceMap.put (element,pieces); // for use in rendering
+
+		return pieces;
+	}
+
+//  http://math.stackexchange.com/a/221194
+//  http://en.wikipedia.org/wiki/Composite_B%C3%A9zier_curve#Approximating_circular_arcs
+	final static double k = 1 - 4 * (Math.sqrt (2) - 1) / 3;
+	final static double [] ds = {1,(7 - 4 * Math.sqrt (2)) / 3};
+	private Point [] [] getCornerPoints (Rectangle r,double radius,PDFLayoutLineStyle [] lineStyles) {
+		Point [] dirs = {new Point (0,1),new Point (1,0)};
+		Point [] [] cornerPoints = new Point [4] [4];
+		Point [] corners = r.corners ();
+
+		// Add four spline points for each of the four corners.
+		// For the outer rectangle of the border, line styles are passed in to increase the radius by
+		// the line width, so that inner and outer rectangle start bending at the same point along the edge.
+		for (int i = 0;i < 4 ;i++)
+			for (int j = 0;j < 2;j++) {
+				for (int d = 0;d < 2;d++) {
+					double s = (radius + getWidth (lineStyles,3 + j - i)) * ds [d];
+					cornerPoints [i] [(j << 1) + (j ^ d)] = new Point (corners [i].x + s * dirs [j].x,corners [i].y + s * dirs [j].y);
+				}
+				dirs [j] = new Point (-dirs [j].y,dirs [j].x);
+			}
+		return cornerPoints;
+	}
+
+	private static double getWidth (PDFLayoutLineStyle [] lineStyles,int index) {
+		if (lineStyles == null)
+			return 0;
+		PDFLayoutLineStyle lineStyle = lineStyles [index % 4];
+		if (lineStyle == null)
+			return 0;
+		Double width = lineStyle.getWidth ();
+		return width == null ? 0 : width;
+	}
+
+	private List<Point []> getPointList (Point [] [] corners,int from,int to,boolean reverse) {
+		List<Point []> pointList = new ArrayList<Point []> ();
+		for (int i = from;i <= to;i++)
+			pointList.add (corners [i % 4]);
+		if (reverse) {
+			Collections.reverse (pointList);
+			for (Point [] points : pointList)
+				for (int i = 0;i < 2;i++) {
+					Point p = points [i];
+					points [i] = points [3 - i];
+					points [3 - i] = p;
+				}
+		}
+		return pointList;
+	}
+
+	private void draw (List<Point []> pointList) {
+		boolean first = true;
+		for (Point [] points : pointList) {
+			print (points [0]);
+			ps.print (first ? 'm' : 'l');
+			ps.print (' ');
+			for (int i = 1;i <= 3;i++)
+				print (points [i]);
+			ps.print ("c ");
+			first = false;
+		}
+		ps.print ("h ");
+	}
+
+	private void print (Point p) {
+		print (p.x);
+		print (p.y);
 	}
 }

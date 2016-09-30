@@ -11,6 +11,8 @@ public class PDFLayoutFont implements Serializable
 	
 	private String fontName;
 	private double fontSize;
+
+	private double lineSpacing = 1;
 	private PDFLayoutFontStyle fontStyle;
 	private Color color = Color.BLACK;
 
@@ -54,5 +56,13 @@ public class PDFLayoutFont implements Serializable
 
 	public void setColor (Color color) {
 		this.color = color;
+	}
+
+	public double getLineSpacing () {
+		return lineSpacing;
+	}
+
+	public void setLineSpacing (double lineSpacing) {
+		this.lineSpacing = lineSpacing;
 	}
 }
