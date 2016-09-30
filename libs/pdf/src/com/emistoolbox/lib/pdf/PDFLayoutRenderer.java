@@ -509,19 +509,16 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				debugRectangle (cellBox,debugTableBoxColor);
 			}
 		
-		pushGraphicsState ();
-		
 		// render contiguous sections of border segments with the same line style as a single rectangle
 		PDFLayoutLineStyle [] horizontalLineStyles = new PDFLayoutLineStyle [tableElement.getColCount ()]; 
 		for (int row = 0;row <= tableElement.getRowCount ();row++) {
 			for (int col = 0;col < tableElement.getColCount ();col++)
 				horizontalLineStyles [col] = tableElement.getHorizontalLineStyle (row,col);
 			for (Range range : RangeFinder.findRanges (horizontalLineStyles))
-				if (horizontalLineStyles [range.beg] != null) {
-					setFillColor (horizontalLineStyles [range.beg].getColor ());
+				if (horizontalLineStyles [range.beg] != null)
 					fillRectangle (new Rectangle (tableLayout.horizontalLayout.getBorderCenter (range.beg),tableLayout.verticalLayout.getEnd (row - 1),
-								                  tableLayout.horizontalLayout.getBorderCenter (range.end),tableLayout.verticalLayout.getStart (row)));
-				}
+								                  tableLayout.horizontalLayout.getBorderCenter (range.end),tableLayout.verticalLayout.getStart (row)),
+								                  horizontalLineStyles [range.beg].getColor ());
 		}
 		
 		PDFLayoutLineStyle [] verticalLineStyles = new PDFLayoutLineStyle [tableElement.getRowCount ()]; 
@@ -529,11 +526,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			for (int row = 0;row < tableElement.getRowCount ();row++)
 				verticalLineStyles [row] = tableElement.getVerticalLineStyle (row,col);
 			for (Range range : RangeFinder.findRanges (verticalLineStyles))
-				if (verticalLineStyles [range.beg] != null) {
-					setFillColor (verticalLineStyles [range.beg].getColor ());
+				if (verticalLineStyles [range.beg] != null)
 					fillRectangle (new Rectangle (tableLayout.horizontalLayout.getEnd (col - 1),tableLayout.verticalLayout.getBorderCenter (range.beg),
-								                  tableLayout.horizontalLayout.getStart (col),tableLayout.verticalLayout.getBorderCenter (range.end)));
-				}
+								                  tableLayout.horizontalLayout.getStart (col),tableLayout.verticalLayout.getBorderCenter (range.end)),
+								                  verticalLineStyles [range.beg].getColor ());
 			}
 		
 //		separate rendering of each border segment
@@ -541,25 +537,21 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 //		for (int row = 0;row <= tableElement.getRowCount ();row++)
 //			for (int col = 0;col < tableElement.getColCount ();col++) {
 //				PDFLayoutLineStyle horizontalLineStyle = tableElement.getHorizontalLineStyle (row,col);
-//				if (horizontalLineStyle != null) {
-//					setFillColor (horizontalLineStyle.getColor ());
+//				if (horizontalLineStyle != null)
 //					fillRectangle (new Rectangle (tableLayout.horizontalLayout.getBorderCenter (col),tableLayout.verticalLayout.getEnd (row - 1),
-//								                  tableLayout.horizontalLayout.getBorderCenter (col + 1),tableLayout.verticalLayout.getStart (row)));
-//				}
+//								                  tableLayout.horizontalLayout.getBorderCenter (col + 1),tableLayout.verticalLayout.getStart (row)),
+//												  horizontalLineStyle.getColor ());
 //			}
 //		
 //		for (int row = 0;row < tableElement.getRowCount ();row++)
 //			for (int col = 0;col <= tableElement.getColCount ();col++) {
 //				PDFLayoutLineStyle verticalLineStyle = tableElement.getVerticalLineStyle (row,col);
-//				if (verticalLineStyle != null) {
-//					setFillColor (verticalLineStyle.getColor ());
+//				if (verticalLineStyle != null)
 //					fillRectangle (new Rectangle (tableLayout.horizontalLayout.getEnd (col - 1),tableLayout.verticalLayout.getBorderCenter (row),
-//								                  tableLayout.horizontalLayout.getStart (col),tableLayout.verticalLayout.getBorderCenter (row + 1)));
-//				}
+//								                  tableLayout.horizontalLayout.getStart (col),tableLayout.verticalLayout.getBorderCenter (row + 1)),
+//												  verticalLineStyle.getColor ());
 //			}
 		
-		popGraphicsState ();
-
 		transformStack.pop ();
 		return null;
 	}
