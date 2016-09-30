@@ -13,7 +13,8 @@ public class PDFLayoutFrameElement extends PDFLayoutElement {
 	}
 	
 	public PDFLayoutFrameElement (double width,double height) {
-		this (width,height,null);
+		this.width = width;
+		this.height = height;
 	}
 
 	public PDFLayoutFrameElement (double width,double height,List<PDFLayoutElement> elements) {
