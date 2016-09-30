@@ -3,7 +3,6 @@ package com.emistoolbox.lib.pdf;
 import info.joriki.graphics.Point;
 import info.joriki.graphics.Rectangle;
 import info.joriki.graphics.Transformation;
-import info.joriki.io.SeekableByteArray;
 import info.joriki.io.Util;
 import info.joriki.pdf.ConstructiblePDFDocument;
 import info.joriki.pdf.PDFArray;
@@ -17,6 +16,10 @@ import info.joriki.pdf.TextState;
 import info.joriki.util.Range;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -30,6 +33,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
+
+import javax.imageio.ImageIO;
 
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
@@ -103,6 +108,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		page.putIndirect ("Contents",new PDFStream (baos.toByteArray ()));
 		PDFDictionary resources = resourceRenamer.getResources ();
 		fontLabeler.addResources (resources);
+		imageLabeler.addResources (resources);
 		alphaStateLabeler.addResources (resources);
 		page.putIndirect ("Resources",resources);
 		document.addPage (page);
@@ -474,7 +480,12 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	public Void visit (PDFLayoutImageElement element) throws IOException {
-		throw new Error ("PDF layout image element rendering not implemented");
+		BufferedImage image = getImage (element);
+		pushGraphicsState ();
+		coordinateCommand ("cm",image.getWidth (),0,0,image.getHeight (),0,0);
+		ps.print ("/" + imageLabeler.getLabel (element) + " Do\n");
+		popGraphicsState ();
+		return null;
 	}
 
 	public Void visit (PDFLayoutPDFElement pdfElement) throws IOException {
@@ -658,6 +669,51 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		}
 	};
 
+	ResourceLabeler<PDFLayoutImageElement> imageLabeler = new ResourceLabeler<PDFLayoutImageElement> ("Im","XObject") {
+		PDFDictionary getResource (PDFLayoutImageElement imageElement) {
+			BufferedImage image = getImage (imageElement);
+			ColorModel colorModel = image.getColorModel ();
+			if (colorModel.getNumColorComponents () != 3)
+				throw new Error ("non-RGB color model not implemented");
+
+			PDFStream imageStream = new PDFStream ();
+			imageStream.put ("Type","XObject");
+			imageStream.put ("Subtype","Image");
+			imageStream.put ("Width",image.getWidth ());
+			imageStream.put ("Height",image.getHeight ());
+			imageStream.put ("ColorSpace","DeviceRGB");
+			imageStream.put ("BitsPerComponent",8);
+			byte [] data = ((DataBufferByte) image.getRaster ().getDataBuffer ()).getData ();
+			if ("image/jpeg".equals (imageElement.getInput ().getContentType ())) {
+				imageStream.setData (getImageData (imageElement));
+				imageStream.put ("Filter","DCTDecode");
+			}
+			else {
+				int npixels = image.getWidth () * image.getHeight ();
+				int ncomponents = colorModel.getNumComponents ();
+				if (data.length != ncomponents * npixels)
+					throw new Error ("unexpected image data length");
+				if (ncomponents < 3)
+					throw new Error ("non-RGB data not implemented");
+				byte [] rgb = new byte [3 * npixels];
+				for (int row = 0,j = 0,k = 0;row < image.getHeight ();row++)
+					for (int col = 0;col < image.getWidth ();col++,j += 3,k += ncomponents) {
+						rgb [j + 0] = data [k + ncomponents - 1];
+						rgb [j + 1] = data [k + ncomponents - 2];
+						rgb [j + 2] = data [k + ncomponents - 3];
+					}
+				imageStream.setAndCompressData (rgb);
+//				This would be for using a predictor, but our images aren't likely to be improved by predictors
+//				PDFDictionary decodingParameters = new PDFDictionary ();
+//				decodingParameters.put ("Columns",image.getWidth ());
+//				decodingParameters.put ("Colors",3);
+//				decodingParameters.put ("Predictor",2);
+//				imageStream.put ("DecodeParms",decodingParameters);
+			}
+			return imageStream;
+		}
+	};
+
 	private Rectangle getBoundingBox (PDFLayoutElement element) throws IOException {
 		return getBoundingBox (element,Double.POSITIVE_INFINITY);
 	}
@@ -677,7 +733,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			}
 			
 			public Rectangle visit (PDFLayoutImageElement element) throws IOException {
-				throw new Error ("PDF layout image element bounding box not implemented");
+				BufferedImage image = getImage (element);
+				return new Rectangle (0,0,image.getWidth (),image.getHeight ());
 			}
 			
 			public Rectangle visit (PDFLayoutPDFElement element) throws IOException {
@@ -950,5 +1007,37 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	private void print (Point p) {
 		print (p.x);
 		print (p.y);
+	}
+
+	Map<PDFLayoutImageElement,byte []> imageDataMap = new HashMap<PDFLayoutImageElement,byte[]> ();
+
+	private byte [] getImageData (PDFLayoutImageElement imageElement) {
+		byte [] imageData = imageDataMap.get (imageElement);
+		if (imageData == null) {
+			try {
+				imageData = Util.toByteArray (imageElement.getInput ().getInputStream ());
+			} catch (IOException ioe) {
+				ioe.printStackTrace ();
+				throw new Error ("can't read image");
+			}
+			imageDataMap.put (imageElement,imageData);
+		}
+		return imageData;
+	}
+
+	Map<PDFLayoutImageElement,BufferedImage> imageMap = new HashMap<PDFLayoutImageElement,BufferedImage> ();
+
+	private BufferedImage getImage (PDFLayoutImageElement imageElement) {
+		BufferedImage image = imageMap.get (imageElement);
+		if (image == null) {
+			try {
+				image = ImageIO.read (new ByteArrayInputStream (getImageData (imageElement)));
+			} catch (IOException e) {
+				e.printStackTrace ();
+				throw new Error ("couldn't read image");
+			}
+			imageMap.put (imageElement,image);
+		}
+		return image;
 	}
 }
