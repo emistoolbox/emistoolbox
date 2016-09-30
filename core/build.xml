@@ -139,7 +139,10 @@
   <target name="test" depends="javac,jar">
     <java fork="yes" classname="com.emistoolbox.server.cli.PdfReportRenderer">
       <arg value="default"/>
-      <arg value="report=layoutTest-1"/>
+	  
+      <!-- <arg value="report=layoutTest-1"/> -->
+      <arg value="report=TableTest"/>
+      
       <arg value="hierarchy=default"/>
 	  <arg value="location=School:1856"/>
       <arg value="date=T3 2015"/>

@@ -1257,10 +1257,10 @@ public class XmlWriter
     	if (color == null)
     		return;
     	
-    	if (color.getTransparency() == 0)
+    	if (color.getAlpha() == 255)
         	setAttr(tag, attr, String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue())); 
     	else
-    		setAttr(tag, attr, String.format("#%02X%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue(), color.getTransparency())); 
+    		setAttr(tag, attr, String.format("#%02X%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha())); 
     }
     
     private void addXml(Element parent, ChartFont font, String tagName)
