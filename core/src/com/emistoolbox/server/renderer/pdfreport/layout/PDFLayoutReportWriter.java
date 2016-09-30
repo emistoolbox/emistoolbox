@@ -58,9 +58,8 @@ import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPriorityListContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
-import com.emistoolbox.server.renderer.pdfreport.PdfReportWriter;
 import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
-import com.emistoolbox.server.renderer.pdfreport.impl.PdfBaseReportWriter;
+import com.emistoolbox.server.renderer.pdfreport.impl.PDFAdvancedReportWriter;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfTextContent;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContent;
 
@@ -70,7 +69,7 @@ import es.jbauer.lib.io.impl.IOFileOutput;
 import es.jbauer.lib.io.impl.IOInputStreamInput;
 import es.jbauer.lib.io.impl.IOOutputStreamOutput;
 
-public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfReportWriter 
+public class PDFLayoutReportWriter extends PDFAdvancedReportWriter 
 {
 	@Override
 	public void writeReport(PdfReport report, File out) 
@@ -215,12 +214,6 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 		}
 		
 		return result; 
-	}
-	
-	private void updateFrameTitle(LayoutFrame frame, String title)
-	{
-		if (!StringUtils.isEmpty(title) && StringUtils.isEmpty(frame.getText(PdfText.TEXT_TITLE)))
-			frame.putText(PdfText.TEXT_TITLE, title); 
 	}
 	
 	private void addStyles(PDFLayoutElement content, LayoutFrame frame)

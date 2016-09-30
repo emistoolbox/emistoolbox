@@ -9,6 +9,7 @@ import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.server.EmisToolboxIO;
 import com.emistoolbox.server.EmisToolboxServiceImpl;
 import com.emistoolbox.server.model.EmisDataSet;
+import com.emistoolbox.server.renderer.pdfreport.html.HTMLReportWriter;
 import com.emistoolbox.server.servlet.ApiBaseServlet;
 import com.emistoolbox.server.servlet.ApiPdfServlet;
 import com.emistoolbox.server.servlet.ApiPdfServlet.ObjectRef;
@@ -44,10 +45,10 @@ public class PdfReportRenderer
 	        }
 	        
 	        String filename = null; 
-	        if (true)
+	        if (false)
 	        	filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult);
-	        // else
-//        	filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult, HTML_RENDERER_TO_BE);
+	        else
+	        	filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult,new HTMLReportWriter().setChartRenderer(EmisToolboxServiceImpl.getChartRenderer()));
 
 	        System.out.println("PDF Path: " + filename); 
 		}
