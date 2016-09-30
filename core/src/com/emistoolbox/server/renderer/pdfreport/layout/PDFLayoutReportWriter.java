@@ -150,7 +150,7 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 	{
 		PDFLayout layout = new PDFLayout();  
 		
-		PDFLayoutFrameElement outerFrame = new PDFLayoutFrameElement(size.x, size.y);
+		PDFLayoutFrameElement outerFrame = new PDFLayoutFrameElement(size.x - margins.getLeft() - margins.getRight(), size.y - margins.getTop() - margins.getBottom());
 		outerFrame.setPadding(getSides(margins)); 
 
 		// TODO - handle titles of page (maybe defined in frame already as part of the LayoutPdfReportCreator)

@@ -3,6 +3,7 @@ package com.emistoolbox.server.renderer.pdfreport.layout;
 
 import com.emistoolbox.common.model.EmisEntity;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
@@ -16,8 +17,14 @@ public class LayoutPdfReportCreator extends BasePdfReportCreator<LayoutPdfReport
 	protected void addEntityPages(EmisEntity entity, int[] ids, String[] names, int totalPages) 
 	{
 		init(entity, ids, names);
+		boolean firstPage = true;  
 		for (LayoutPageConfig pageConfig : config.getPages())
-			reportResult.addPage(createPage(pageConfig)); 
+		{
+			LayoutPage page = createPage(pageConfig); 
+			reportResult.addPage(page); 
+			if (firstPage)
+				page.putText(PdfText.TEXT_GROUP, names[names.length -1]); 
+		}
 	}
 	
 	private LayoutPage createPage(LayoutPageConfig pageConfig)
