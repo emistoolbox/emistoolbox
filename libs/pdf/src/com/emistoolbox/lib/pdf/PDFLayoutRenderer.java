@@ -14,12 +14,14 @@ import info.joriki.pdf.PDFReal;
 import info.joriki.pdf.PDFStream;
 import info.joriki.pdf.PDFWriter;
 import info.joriki.pdf.TextState;
+import info.joriki.util.Range;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,8 +46,10 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutTableElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
+import com.emistoolbox.lib.pdf.util.RangeFinder;
 
 import es.jbauer.lib.io.IOOutput;
 
@@ -53,6 +57,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	final static Color debugElementBoxColor = Color.LIGHT_GRAY;
 	final static Color debugPaddingBoxColor = Color.CYAN.brighter ();
 	final static Color debugBorderBoxColor = Color.MAGENTA.brighter ();
+	final static Color debugTableBoxColor = Color.BLUE.brighter ();
 
 	final static int ndigits = 6;
 
@@ -123,6 +128,11 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		setStrokeColor (color);
 		strokeRectangle (r);
 		popGraphicsState ();
+	}
+
+	private void fillRectangle (Rectangle r) {
+		outputRectangle (r);
+		ps.print ("f\n");
 	}
 
 	private void setColor (Color color,String rgbCommand) {
@@ -233,212 +243,225 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		PDFLayoutSides<Boolean> alignedWithEdge = new PDFLayoutSides<Boolean> (true);
 		Rectangle frameBox = getBoundingBox (frame);
 		Rectangle objectFitBox = new Rectangle (frameBox);
-		Rectangle previousElementBox = new Rectangle (frameBox.xmax,frameBox.ymax,frameBox.xmin,frameBox.ymin);
-		for (PDFLayoutElement element : frame.getElements ()) {
-			PDFLayoutPlacement placement = element.getPlacement ();
-			PDFLayoutObjectFit objectFit = element.getObjectFit ();
-			Rectangle reducedObjectFitBox = new Rectangle (objectFitBox);
-			reducedObjectFitBox.transformBy (getCurrentTransform ());
-			applyPaddingAndBorder (reducedObjectFitBox,element,-1);
-			Rectangle elementBox = getBoundingBox (element,reducedObjectFitBox.width ());
-			Rectangle transformedElementBox = new Rectangle (elementBox);
-			transformedElementBox.transformBy (getCurrentTransform ());
-			// TODO: This is all not tested properly since the tests so far don't have scaled frames so it doesn't really matter which transforms we apply at this point
-			double width = 0;
-			double height = 0;
-			switch (objectFit) {
-			case CONTAIN:
-				double scale = Math.min (reducedObjectFitBox.width () / transformedElementBox.width (),reducedObjectFitBox.height () / transformedElementBox.height ());
-				width = scale * elementBox.width ();
-				height = scale * elementBox.height ();
-				break;
-			case NONE:
-				break;
-				default:
-					throw new Error ("object fit " + objectFit + " not implemented");
-			}
-			// TODO: Does an object-fitted element cause displacement? Probably not, as it would take up
-			// the remaining space in at least one direction, not leaving any space for further object fitting
-			Rectangle newElementBox = objectFit == PDFLayoutObjectFit.NONE ? new Rectangle (elementBox) : new Rectangle (0,0,width,height);
-			Rectangle augmentedNewElementBox = new Rectangle (newElementBox);
-			augmentedNewElementBox.transformBy (getCurrentTransform ());
-			applyPaddingAndBorder (augmentedNewElementBox,element,1);
-			augmentedNewElementBox.transformBy (getCurrentTransform ().inverse ());
-			double x;
-			double y;
-			if (placement instanceof PDFLayoutCoordinatePlacement) {
-				PDFLayoutCoordinatePlacement coordinatePlacement = (PDFLayoutCoordinatePlacement) placement;
-				x = coordinatePlacement.getX ();
-				y = coordinatePlacement.getY ();
-				alignedWithEdge = new PDFLayoutSides<Boolean> (false);
-			}
-			else if (placement instanceof PDFLayoutAlignmentPlacement) {
-				PDFLayoutAlignmentPlacement alignmentPlacement = (PDFLayoutAlignmentPlacement) placement;
-				switch (alignmentPlacement.getHorizontalAlignment ()) {
-				case BEFORE:
-					x = previousElementBox.xmin - augmentedNewElementBox.width ();
-					alignedWithEdge.setLeft (false);
-					break;
-				case AFTER:
-					x = previousElementBox.xmax;
-					alignedWithEdge.setRight (false);
-					break;
-				case LEFT:
-					x = frameBox.xmin;
-					alignedWithEdge.setLeft (true);
-					alignedWithEdge.setRight (false);
-					break;
-				case CENTER:
-					x = objectFitBox.xmin + (objectFitBox.width () - augmentedNewElementBox.width ()) / 2;
-					alignedWithEdge.setLeft (false);
-					alignedWithEdge.setRight (false);
-					break;
-				case RIGHT:
-					x = frameBox.xmax - augmentedNewElementBox.width ();
-					alignedWithEdge.setLeft (false);
-					alignedWithEdge.setRight (true);
-					break;
-				default:
-					throw new Error ("horizontal placement " + alignmentPlacement.getHorizontalAlignment () + " not implemented");
-				}
-
-				switch (alignmentPlacement.getVerticalAlignment ()) {
-				case ABOVE:
-					y = previousElementBox.ymin - augmentedNewElementBox.height ();
-					alignedWithEdge.setTop (false);
-					break;
-				case BELOW:
-					y = previousElementBox.ymax;
-					alignedWithEdge.setBottom (false);
-					break;
-				case TOP:
-					y = frameBox.ymin;
-					alignedWithEdge.setTop (true);
-					alignedWithEdge.setBottom (false);
-					break;
-				case CENTER:
-					y = objectFitBox.ymin + (objectFitBox.height () - augmentedNewElementBox.height ()) / 2;
-					alignedWithEdge.setTop (false);
-					alignedWithEdge.setBottom (false);
-					break;
-				case BOTTOM:
-					y = frameBox.ymax - augmentedNewElementBox.height ();
-					alignedWithEdge.setTop (false);
-					alignedWithEdge.setBottom (true);
-				default:
-					throw new Error ("vertical placement " + alignmentPlacement.getVerticalAlignment () + " not implemented");
-				}
-			}
-			else
-				throw new Error ("placement " + placement.getClass () + " not implemented");
-
-			newElementBox.shiftBy (augmentedNewElementBox.xmin - x,augmentedNewElementBox.ymin - y);
-			augmentedNewElementBox.shiftBy (augmentedNewElementBox.xmin - x,augmentedNewElementBox.ymin - y);
-
-			if (element.getDisplacement ().getVertical ()) {
-				if (alignedWithEdge.getTop ())
-					objectFitBox.ymin = augmentedNewElementBox.ymax;
-				if (alignedWithEdge.getBottom ())
-					objectFitBox.ymax = augmentedNewElementBox.ymin;
-			}
-
-			if (element.getDisplacement ().getHorizontal ()) {
-				if (alignedWithEdge.getLeft ())
-					objectFitBox.xmin = augmentedNewElementBox.xmax;
-				if (alignedWithEdge.getRight ())
-					objectFitBox.xmax = augmentedNewElementBox.xmin;
-			}
-
-			pushTransform ();
-//			can either draw new box before transform or old box after transform
-//			if (debugging)
-//				drawRectangle (newElementBox,debugBoxColor);
-			if (!newElementBox.equals (elementBox))
-				transform (elementBox,newElementBox);
-
-			Rectangle paddedElementBox = new Rectangle (elementBox);
-			paddedElementBox.transformBy (getCurrentTransform ());
-
-			if (debugging)
-				strokeRectangle (paddedElementBox,debugElementBoxColor);
-
-			applyPadding (paddedElementBox,element,1);
-
-			if (debugging)
-				strokeRectangle (paddedElementBox,debugPaddingBoxColor);
-
-			Rectangle borderElementBox = new Rectangle (paddedElementBox);
-			applyBorder (borderElementBox,element,1);
-
-			if (debugging)
-				strokeRectangle (borderElementBox,debugBorderBoxColor);
-
-			// TODO: borders with different colours
-			PDFLayoutBorderStyle borderStyle = element.getBorderStyle ();
-			if (borderStyle != null) {
-				Color borderColor = null;
-				PDFLayoutLineStyle [] lineStyles = borderStyle.getLineStyles ().getValues (new PDFLayoutLineStyle [4]);
-
-				for (PDFLayoutLineStyle style : lineStyles)
-					if (style.getWidth () != 0) {
-						Color color = style.getColor ();
-						if (borderColor != null && !color.equals (borderColor))
-							throw new Error ("different border colours not implemented");
-						borderColor = color;
-					}
-
-				if (borderColor != null) {
-					pushGraphicsState ();
-					setFillColor (borderColor);
-
-					Point [] [] paddedPoints = getCornerPoints (paddedElementBox,borderStyle.getBorderRadius (),null);
-					Point [] [] borderPoints = getCornerPoints (borderElementBox,borderStyle.getBorderRadius (),lineStyles);
-
-					boolean allSegmentsExist = true;
-					// check for beginnings of sections of contiguous existing segments and draw each such section
-					for (int i = 0;i < 4;i++) {
-						if (lineStyles [i].getWidth () == null && lineStyles [(i + 1) % 4].getWidth () != null) {
-							int j = i + 2;
-							while (lineStyles [j % 4].getWidth () != null)
-								j++;
-							List<Point []> section = new ArrayList<Point []> ();
-							section.addAll (getPointList (paddedPoints,i + 1,j - 1,false));
-							section.addAll (getPointList (borderPoints,i + 1,j - 1,true));
-							draw (section);
-							coordinateCommand ("f*");
-							allSegmentsExist = false;
-						}
-					}
-					// if there was no beginning, all four segments exist; in this case the inner and outer paths are separate
-					if (allSegmentsExist) {
-						draw (getPointList (paddedPoints,0,3,false));
-						draw (getPointList (borderPoints,0,3,true));
-						coordinateCommand ("f*");
-					}
-
-					if (element.getBackgroundColor () != null) {
-						setFillColor (element.getBackgroundColor ());
-						draw (getPointList (paddedPoints,0,3,false));
-						coordinateCommand ("f*");
-					}
-
-					popGraphicsState ();
-				}
-			}
-
-			boolean isLeaf = !(element instanceof PDFLayoutFrameElement);
-			if (isLeaf) {
-				flip (elementBox);
-				pushGraphicsState ();
-				outputTransform (getCurrentTransform ());
-			}
-			element.accept (this);
-			if (isLeaf)
-				popGraphicsState ();
-			popTransform ();
-			previousElementBox = augmentedNewElementBox;
-		}
+		Rectangle previousElementBox = invert (frameBox);
+		for (PDFLayoutElement element : frame.getElements ())
+			previousElementBox = render (element,objectFitBox,alignedWithEdge,frameBox,previousElementBox);
 		return null;
+	}
+
+	private Rectangle invert (Rectangle r) {
+		return new Rectangle (r.xmax,r.ymax,r.xmin,r.ymin);
+	}
+	
+	private void render (PDFLayoutElement element,Rectangle box) throws IOException {
+		render (element,new Rectangle (box),new PDFLayoutSides<Boolean> (true),box,invert (box));
+	}
+	
+	private Rectangle render (PDFLayoutElement element,Rectangle objectFitBox,PDFLayoutSides<Boolean> alignedWithEdge,Rectangle frameBox,Rectangle previousElementBox) throws IOException {
+		PDFLayoutPlacement placement = element.getPlacement ();
+		PDFLayoutObjectFit objectFit = element.getObjectFit ();
+		Rectangle reducedObjectFitBox = new Rectangle (objectFitBox);
+		reducedObjectFitBox.transformBy (getCurrentTransform ());
+		applyPaddingAndBorder (reducedObjectFitBox,element,-1);
+		Rectangle elementBox = getBoundingBox (element,reducedObjectFitBox.width ());
+		Rectangle transformedElementBox = new Rectangle (elementBox);
+		transformedElementBox.transformBy (getCurrentTransform ());
+		// TODO: This is all not tested properly since the tests so far don't have scaled frames so it doesn't really matter which transforms we apply at this point
+		double width = 0;
+		double height = 0;
+		switch (objectFit) {
+		case CONTAIN:
+			double scale = Math.min (reducedObjectFitBox.width () / transformedElementBox.width (),reducedObjectFitBox.height () / transformedElementBox.height ());
+			width = scale * elementBox.width ();
+			height = scale * elementBox.height ();
+			break;
+		case NONE:
+			break;
+			default:
+				throw new Error ("object fit " + objectFit + " not implemented");
+		}
+		// TODO: Does an object-fitted element cause displacement? Probably not, as it would take up
+		// the remaining space in at least one direction, not leaving any space for further object fitting
+		Rectangle newElementBox = objectFit == PDFLayoutObjectFit.NONE ? new Rectangle (elementBox) : new Rectangle (0,0,width,height);
+		Rectangle augmentedNewElementBox = new Rectangle (newElementBox);
+		augmentedNewElementBox.transformBy (getCurrentTransform ());
+		applyPaddingAndBorder (augmentedNewElementBox,element,1);
+		augmentedNewElementBox.transformBy (getCurrentTransform ().inverse ());
+		double x;
+		double y;
+		if (placement instanceof PDFLayoutCoordinatePlacement) {
+			PDFLayoutCoordinatePlacement coordinatePlacement = (PDFLayoutCoordinatePlacement) placement;
+			x = coordinatePlacement.getX ();
+			y = coordinatePlacement.getY ();
+			alignedWithEdge = new PDFLayoutSides<Boolean> (false);
+		}
+		else if (placement instanceof PDFLayoutAlignmentPlacement) {
+			PDFLayoutAlignmentPlacement alignmentPlacement = (PDFLayoutAlignmentPlacement) placement;
+			switch (alignmentPlacement.getHorizontalAlignment ()) {
+			case BEFORE:
+				x = previousElementBox.xmin - augmentedNewElementBox.width ();
+				alignedWithEdge.setLeft (false);
+				break;
+			case AFTER:
+				x = previousElementBox.xmax;
+				alignedWithEdge.setRight (false);
+				break;
+			case LEFT:
+				x = frameBox.xmin;
+				alignedWithEdge.setLeft (true);
+				alignedWithEdge.setRight (false);
+				break;
+			case CENTER:
+				x = objectFitBox.xmin + (objectFitBox.width () - augmentedNewElementBox.width ()) / 2;
+				alignedWithEdge.setLeft (false);
+				alignedWithEdge.setRight (false);
+				break;
+			case RIGHT:
+				x = frameBox.xmax - augmentedNewElementBox.width ();
+				alignedWithEdge.setLeft (false);
+				alignedWithEdge.setRight (true);
+				break;
+			default:
+				throw new Error ("horizontal placement " + alignmentPlacement.getHorizontalAlignment () + " not implemented");
+			}
+
+			switch (alignmentPlacement.getVerticalAlignment ()) {
+			case ABOVE:
+				y = previousElementBox.ymin - augmentedNewElementBox.height ();
+				alignedWithEdge.setTop (false);
+				break;
+			case BELOW:
+				y = previousElementBox.ymax;
+				alignedWithEdge.setBottom (false);
+				break;
+			case TOP:
+				y = frameBox.ymin;
+				alignedWithEdge.setTop (true);
+				alignedWithEdge.setBottom (false);
+				break;
+			case CENTER:
+				y = objectFitBox.ymin + (objectFitBox.height () - augmentedNewElementBox.height ()) / 2;
+				alignedWithEdge.setTop (false);
+				alignedWithEdge.setBottom (false);
+				break;
+			case BOTTOM:
+				y = frameBox.ymax - augmentedNewElementBox.height ();
+				alignedWithEdge.setTop (false);
+				alignedWithEdge.setBottom (true);
+				break;
+			default:
+				throw new Error ("vertical placement " + alignmentPlacement.getVerticalAlignment () + " not implemented");
+			}
+		}
+		else
+			throw new Error ("placement " + placement.getClass () + " not implemented");
+
+		newElementBox.shiftBy (augmentedNewElementBox.xmin - x,augmentedNewElementBox.ymin - y);
+		augmentedNewElementBox.shiftBy (augmentedNewElementBox.xmin - x,augmentedNewElementBox.ymin - y);
+
+		if (element.getDisplacement ().getVertical ()) {
+			if (alignedWithEdge.getTop ())
+				objectFitBox.ymin = augmentedNewElementBox.ymax;
+			if (alignedWithEdge.getBottom ())
+				objectFitBox.ymax = augmentedNewElementBox.ymin;
+		}
+
+		if (element.getDisplacement ().getHorizontal ()) {
+			if (alignedWithEdge.getLeft ())
+				objectFitBox.xmin = augmentedNewElementBox.xmax;
+			if (alignedWithEdge.getRight ())
+				objectFitBox.xmax = augmentedNewElementBox.xmin;
+		}
+
+		pushTransform ();
+//		can either draw new box before transform or old box after transform
+//		if (debugging)
+//			drawRectangle (newElementBox,debugBoxColor);
+		if (!newElementBox.equals (elementBox))
+			transform (elementBox,newElementBox);
+
+		Rectangle paddedElementBox = new Rectangle (elementBox);
+		paddedElementBox.transformBy (getCurrentTransform ());
+
+		if (debugging)
+			strokeRectangle (paddedElementBox,debugElementBoxColor);
+
+		applyPadding (paddedElementBox,element,1);
+
+		if (debugging)
+			strokeRectangle (paddedElementBox,debugPaddingBoxColor);
+
+		Rectangle borderElementBox = new Rectangle (paddedElementBox);
+		applyBorder (borderElementBox,element,1);
+
+		if (debugging)
+			strokeRectangle (borderElementBox,debugBorderBoxColor);
+
+		// TODO: borders with different colours
+		// TODO: don't use splines if the radius is zero
+		pushGraphicsState ();
+		PDFLayoutBorderStyle borderStyle = element.getBorderStyle ();
+		Point [] [] paddedPoints = getCornerPoints (paddedElementBox,borderStyle == null ? 0 : borderStyle.getBorderRadius (),null);
+		if (borderStyle != null) {
+			Color borderColor = null;
+			PDFLayoutLineStyle [] lineStyles = borderStyle.getLineStyles ().getValues (new PDFLayoutLineStyle [4]);
+
+			for (PDFLayoutLineStyle style : lineStyles)
+				if (style.getWidth () != 0) {
+					Color color = style.getColor ();
+					if (borderColor != null && !color.equals (borderColor))
+						throw new Error ("different border colours not implemented");
+					borderColor = color;
+				}
+
+			if (borderColor != null) {
+				setFillColor (borderColor);
+
+				Point [] [] borderPoints = getCornerPoints (borderElementBox,borderStyle.getBorderRadius (),lineStyles);
+
+				boolean allSegmentsExist = true;
+				// check for beginnings of sections of contiguous existing segments and draw each such section
+				for (int i = 0;i < 4;i++) {
+					if (lineStyles [i] == null && lineStyles [(i + 1) % 4] != null) {
+						int j = i + 2;
+						while (lineStyles [j % 4] != null)
+							j++;
+						List<Point []> section = new ArrayList<Point []> ();
+						section.addAll (getPointList (paddedPoints,i + 1,j - 1,false));
+						section.addAll (getPointList (borderPoints,i + 1,j - 1,true));
+						draw (section);
+						coordinateCommand ("f*");
+						allSegmentsExist = false;
+					}
+				}
+				// if there was no beginning, all four segments exist; in this case the inner and outer paths are separate
+				if (allSegmentsExist) {
+					draw (getPointList (paddedPoints,0,3,false));
+					draw (getPointList (borderPoints,0,3,true));
+					coordinateCommand ("f*");
+				}
+			}
+		}
+		if (element.getBackgroundColor () != null) {
+			setFillColor (element.getBackgroundColor ());
+			draw (getPointList (paddedPoints,0,3,false));
+			coordinateCommand ("f*");
+		}
+		popGraphicsState ();
+
+		boolean isLeaf = !(element instanceof PDFLayoutFrameElement);
+		if (isLeaf) {
+			if (!(element instanceof PDFLayoutTableElement))
+				flip (elementBox);
+			pushGraphicsState ();
+			outputTransform (getCurrentTransform ());
+		}
+		element.accept (this);
+		if (isLeaf)
+			popGraphicsState ();
+		popTransform ();
+		
+		return augmentedNewElementBox;
 	}
 
 	public Void visit (PDFLayoutHighchartElement element) throws IOException {
@@ -451,6 +474,77 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 
 	public Void visit (PDFLayoutPDFElement pdfElement) throws IOException {
 		ps.write (resourceRenamer.rename (getPage (pdfElement)));
+		return null;
+	}
+	
+	public Void visit (PDFLayoutTableElement tableElement) throws IOException {
+		transformStack.push (new Transformation ());
+		TableLayout tableLayout = new TableLayout (tableElement);
+		for (int row = 0;row < tableElement.getRowCount ();row++)
+			for (int col = 0;col < tableElement.getColCount ();col++) {
+				if (debugging) {
+					pushGraphicsState ();
+					coordinateCommand ("0 w");
+					setStrokeColor (debugTableBoxColor);
+					outputRectangle (tableLayout.getCellBox (row,col));
+					coordinateCommand ("s");
+					popGraphicsState ();
+				}
+				render (tableElement.getElement (row,col),tableLayout.getCellBox (row,col));
+			}
+		
+		pushGraphicsState ();
+		
+		// render contiguous sections of border segments with the same line style as a single rectangle
+		PDFLayoutLineStyle [] horizontalLineStyles = new PDFLayoutLineStyle [tableElement.getColCount ()]; 
+		for (int row = 0;row <= tableElement.getRowCount ();row++) {
+			for (int col = 0;col < tableElement.getColCount ();col++)
+				horizontalLineStyles [col] = tableElement.getHorizontalLineStyle (row,col);
+			for (Range range : RangeFinder.findRanges (horizontalLineStyles))
+				if (horizontalLineStyles [range.beg] != null) {
+					setFillColor (horizontalLineStyles [range.beg].getColor ());
+					fillRectangle (new Rectangle (tableLayout.horizontalLayout.getBorderCenter (range.beg),tableLayout.verticalLayout.getEnd (row - 1),
+								                  tableLayout.horizontalLayout.getBorderCenter (range.end),tableLayout.verticalLayout.getStart (row)));
+				}
+		}
+		
+		PDFLayoutLineStyle [] verticalLineStyles = new PDFLayoutLineStyle [tableElement.getRowCount ()]; 
+		for (int col = 0;col <= tableElement.getColCount ();col++) {
+			for (int row = 0;row < tableElement.getRowCount ();row++)
+				verticalLineStyles [row] = tableElement.getVerticalLineStyle (row,col);
+			for (Range range : RangeFinder.findRanges (verticalLineStyles))
+				if (verticalLineStyles [range.beg] != null) {
+					setFillColor (verticalLineStyles [range.beg].getColor ());
+					fillRectangle (new Rectangle (tableLayout.horizontalLayout.getEnd (col - 1),tableLayout.verticalLayout.getBorderCenter (range.beg),
+								                  tableLayout.horizontalLayout.getStart (col),tableLayout.verticalLayout.getBorderCenter (range.end)));
+				}
+			}
+		
+//		separate rendering of each border segment
+//
+//		for (int row = 0;row <= tableElement.getRowCount ();row++)
+//			for (int col = 0;col < tableElement.getColCount ();col++) {
+//				PDFLayoutLineStyle horizontalLineStyle = tableElement.getHorizontalLineStyle (row,col);
+//				if (horizontalLineStyle != null) {
+//					setFillColor (horizontalLineStyle.getColor ());
+//					fillRectangle (new Rectangle (tableLayout.horizontalLayout.getBorderCenter (col),tableLayout.verticalLayout.getEnd (row - 1),
+//								                  tableLayout.horizontalLayout.getBorderCenter (col + 1),tableLayout.verticalLayout.getStart (row)));
+//				}
+//			}
+//		
+//		for (int row = 0;row < tableElement.getRowCount ();row++)
+//			for (int col = 0;col <= tableElement.getColCount ();col++) {
+//				PDFLayoutLineStyle verticalLineStyle = tableElement.getVerticalLineStyle (row,col);
+//				if (verticalLineStyle != null) {
+//					setFillColor (verticalLineStyle.getColor ());
+//					fillRectangle (new Rectangle (tableLayout.horizontalLayout.getEnd (col - 1),tableLayout.verticalLayout.getBorderCenter (row),
+//								                  tableLayout.horizontalLayout.getStart (col),tableLayout.verticalLayout.getBorderCenter (row + 1)));
+//				}
+//			}
+		
+		popGraphicsState ();
+
+		transformStack.pop ();
 		return null;
 	}
 
@@ -571,6 +665,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			public Rectangle visit(PDFLayout page) throws IOException {
 				return null;
 			}
+			
 			public Rectangle visit (PDFLayoutFrameElement frame) throws IOException {
 				return new Rectangle (0,0,frame.getWidth (),frame.getHeight ());
 			}
@@ -578,9 +673,11 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			public Rectangle visit (PDFLayoutHighchartElement element) throws IOException {
 				throw new Error ("PDF layout highchart element bounding box not implemented");
 			}
+			
 			public Rectangle visit (PDFLayoutImageElement element) throws IOException {
 				throw new Error ("PDF layout image element bounding box not implemented");
 			}
+			
 			public Rectangle visit (PDFLayoutPDFElement element) throws IOException {
 				return getPage (element).getMediaBox ().toRectangle ();
 			}
@@ -599,7 +696,112 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				double textAlignmentFactor = getTextAlignmentFactor (textElement);
 				return new Rectangle (-textAlignmentFactor * width,descent - fontSize * layoutFont.getLineSpacing () * (pieces.size () - 1),(1 - textAlignmentFactor) * width,ascent);
 			}
+			
+			public Rectangle visit (PDFLayoutTableElement tableElement) throws IOException {
+				return new TableLayout (tableElement).getBoundingBox ();
+			}
 		});
+	}
+	
+	class TableLayout {
+		LinearLayout horizontalLayout;
+		LinearLayout verticalLayout;
+		
+		TableLayout (PDFLayoutTableElement tableElement) throws IOException {
+			horizontalLayout = new LinearLayout (tableElement.getColCount ());
+			verticalLayout   = new LinearLayout (tableElement.getRowCount ());
+			
+			for (int row = 0;row < tableElement.getRowCount ();row++)
+				for (int col = 0;col < tableElement.getColCount ();col++) {
+					PDFLayoutElement element = tableElement.getElement (row,col);
+					Rectangle boundingBox = PDFLayoutRenderer.this.getBoundingBox (element);
+					applyPaddingAndBorder (boundingBox,element,1);
+					horizontalLayout.addCellDimension (col,boundingBox.width ());
+					verticalLayout.addCellDimension (row,boundingBox.height ());
+				}
+
+			for (int row = 0;row < tableElement.getRowCount ();row++)
+				for (int col = 0;col <= tableElement.getColCount ();col++)
+					horizontalLayout.addBorderDimension (col,getWidth (tableElement.getVerticalLineStyle (row,col)));
+
+			for (int row = 0;row <= tableElement.getRowCount ();row++)
+				for (int col = 0;col < tableElement.getColCount ();col++)
+					verticalLayout.addBorderDimension (row,getWidth (tableElement.getHorizontalLineStyle (row,col)));
+		}	
+		
+		Rectangle getBoundingBox () {
+			return new Rectangle (0,0,horizontalLayout.getDimension (),verticalLayout.getDimension ());
+		}
+		
+		Rectangle getCellBox (int row,int col) {
+			return new Rectangle (horizontalLayout.getStart (col),verticalLayout.getStart (row),horizontalLayout.getEnd (col),verticalLayout.getEnd (row));
+		}
+	}
+	
+	static class LinearLayout {
+		double [] cellDimensions;
+		double [] borderDimensions;
+		
+		LinearLayout (int count) {
+			cellDimensions = new double [count];
+			borderDimensions = new double [count + 1];
+		}
+		
+		public String toString () {
+			return Arrays.toString (cellDimensions) + ", " + Arrays.toString (borderDimensions);
+		}
+		
+		double getDimension () {
+			double dimension = 0;
+			for (double cellDimension : cellDimensions)
+				dimension += cellDimension;
+			for (double borderDimension : borderDimensions)
+				dimension += borderDimension;
+			return dimension;
+		}
+		
+		void addCellDimension (int index,double dimension) {
+			addDimension (cellDimensions,index,dimension);
+		}
+		
+		void addBorderDimension (int index,double dimension) {
+			addDimension (borderDimensions,index,dimension);
+		}
+
+		private void addDimension (double [] dimensions,int index,double dimension) {
+			dimensions [index] = Math.max (dimensions [index],dimension);
+		}
+		
+		double getCellDimension (int index) {
+			return cellDimensions [index];
+		}
+		
+		double getStart (int index) {
+			double position = 0;
+			for (int i = 0;i < index;i++)
+				position += cellDimensions [i];
+			for (int i = 0;i <= index;i++)
+				position += borderDimensions [i];
+			return position;
+		}
+		
+		// index may be -1
+		public double getEnd (int index) {
+			double position = 0;
+			for (int i = 0;i <= index;i++)
+				position += cellDimensions [i];
+			for (int i = 0;i <= index;i++)
+				position += borderDimensions [i];
+			return position;
+		}
+		
+		public double getBorderCenter (int index) {
+			return index == 0 ? 0 : index == cellDimensions.length ? getDimension () : (getEnd (index - 1) + getStart (index)) / 2;
+		}
+	}
+	
+	private double getWidth (PDFLayoutLineStyle lineStyle) {
+		return lineStyle == null ? 0 : lineStyle.getWidth (); 
 	}
 
 	private void applyPaddingAndBorder (Rectangle r,PDFLayoutElement element,double sign) {

@@ -11,6 +11,7 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutHighchartElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutImageElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutTableElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 
@@ -89,6 +90,26 @@ public class PDFLayoutLogVisitor implements PDFLayoutVisitor<Void>
 		output(pdfContent); 
 		return null; 
 	}
+
+	public Void visit(PDFLayoutTableElement tableContent) throws IOException {
+		os.println(indent + "Element - Table: " + tableContent.getRowCount() + " x " + tableContent.getColCount());
+		try {
+			indent();
+			output (tableContent);
+			for (int row = 0;row < tableContent.getRowCount ();row++)
+				for (int col = 0;col < tableContent.getColCount ();col++) {
+					os.println (indent + "Table element in row " + row + ", column " + col + ":");
+					PDFLayoutElement element = tableContent.getElement (row,col);
+					if (element == null)
+						os.println (indent + "  null");
+					else
+						element.accept (this);
+				}
+		}
+		finally { unindent(); }
+		return null;
+	}
+
 
 	public Void visit(PDFLayoutFont font)
 	{

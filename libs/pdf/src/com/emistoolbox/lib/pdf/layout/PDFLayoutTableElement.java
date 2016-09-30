@@ -1,8 +1,9 @@
 package com.emistoolbox.lib.pdf.layout;
 
+import java.io.IOException;
 import java.util.Arrays;
 
-public class PDFLayoutTableElement {
+public class PDFLayoutTableElement extends PDFLayoutElement {
 	private PDFLayoutElement [] [] elements = new PDFLayoutElement [0] [0];
 	private String [] [] texts = new String [0] [0];
 	private PDFLayoutTableFormat defaultFormat;
@@ -14,11 +15,19 @@ public class PDFLayoutTableElement {
 	private int rows;
 	private int cols;
 
-	public void setColCount (int cols) {
-		setDimensions (rows,cols);
+	public int getRowCount () {
+		return rows;
 	}
 
 	public void setRowCount (int rows) {
+		setDimensions (rows,cols);
+	}
+
+	public int getColCount () {
+		return cols;
+	}
+	
+	public void setColCount (int cols) {
 		setDimensions (rows,cols);
 	}
 
@@ -36,6 +45,9 @@ public class PDFLayoutTableElement {
 		cellFormats = copy (cellFormats,new PDFLayoutTableFormat [rows] [cols]);
 		horizontalLines = copy (horizontalLines,new PDFLayoutLineStyle [rows + 1] [cols]);
 		verticalLines = copy (verticalLines,new PDFLayoutLineStyle [rows] [cols + 1]);
+		
+		this.rows = rows;
+		this.cols = cols;
 	}
 
 	// set line style of the external borders of the table
@@ -98,6 +110,7 @@ public class PDFLayoutTableElement {
 			textElement.setBackgroundColor (format.getBackgroundColor ());
 			textElement.setPlacement (format.getPlacement ());
 			textElement.setObjectFit (format.getObjectFit ());
+			textElement.setPadding (format.getPadding ());
 		}
 		return textElement;
 	}
@@ -125,11 +138,23 @@ public class PDFLayoutTableElement {
 				colFormats [col] != null ? colFormats [col] :
 				defaultFormat;
 	}
+	
+	public PDFLayoutLineStyle getHorizontalLineStyle (int row,int col) {
+		return horizontalLines [row] [col];
+	}
+
+	public PDFLayoutLineStyle getVerticalLineStyle (int row,int col) {
+		return verticalLines [row] [col];
+	}
 
 	private <T> T [] [] copy (T [] [] from,T [] [] to) {
 		for (int row = 0;row < from.length && row < to.length;row++)
 			for (int col = 0;col < from [row].length && col < to [row].length;col++)
 				to [row] [col] = from [row] [col];
 		return to;
+	}
+
+	public <T> T accept (PDFLayoutVisitor<T> visitor) throws IOException {
+		return visitor.visit (this);
 	}
 }

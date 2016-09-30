@@ -6,7 +6,8 @@ public class PDFLayoutTableFormat {
 	PDFLayoutFont font;
 	Color backgroundColor;
 	PDFLayoutPlacement placement;
-	PDFLayoutObjectFit objectFit;
+	PDFLayoutSides<Double> padding;
+	PDFLayoutObjectFit objectFit = PDFLayoutObjectFit.NONE;
 
 	public PDFLayoutFont getFont () {
 		return font;
@@ -38,5 +39,13 @@ public class PDFLayoutTableFormat {
 
 	public void setObjectFit (PDFLayoutObjectFit objectFit) {
 		this.objectFit = objectFit;
+	}
+
+	public PDFLayoutSides<Double> getPadding () {
+		return padding;
+	}
+
+	public void setPadding (PDFLayoutSides<Double> padding) {
+		this.padding = padding;
 	}
 }
