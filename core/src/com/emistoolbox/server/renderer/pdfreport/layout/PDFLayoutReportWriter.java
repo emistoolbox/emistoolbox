@@ -435,7 +435,7 @@ public class PDFLayoutReportWriter extends PdfBaseReportWriter implements PdfRep
 		if (color == null)
 			return null; 
 		
-		return new Color(color.getRed(), color.getGreen(), color.getBlue()); 
+		return new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()); 
 	}
 	
 	@Override

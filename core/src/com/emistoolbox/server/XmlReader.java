@@ -169,6 +169,9 @@ public class XmlReader
 {
 	private EmisMeta meta;
 
+	private String COLOR_WHITE = "#fff"; 
+	private String COLOR_BLACK = "#000"; 
+	
 	public synchronized EmisMeta getEmisMeta(Element tag) 
 	{
 		if (tag == null)
@@ -997,7 +1000,9 @@ public class XmlReader
 	
 	private ChartFont getFont(Element tag)
 	{
-		ChartColor col = getAttrAsColour(tag, "fontColor"); 
+		if (tag == null)
+			return null; 
+		ChartColor col = getAttrAsColour(tag, "fontColor", COLOR_BLACK); 
 		ChartFont font = new ChartFont(getAttr(tag, "font", "Helvetica"), getAttrAsInt(tag, "fontSize", 12), getAttrAsInt(tag, "fontStyle", 0));
 		font.setColor(col);
 		
@@ -1048,7 +1053,7 @@ public class XmlReader
 		if (backgroundTag != null)
 		{
 			frame.setBackgroundImagePath(getAttr(backgroundTag, "image"));
-			frame.setBackgroundColour(getAttrAsColour(backgroundTag, "colour"));
+			frame.setBackgroundColour(getAttrAsColour(backgroundTag, "colour", null));
 			frame.setBackgroundTransparency(getAttrAsInt(backgroundTag, "transparency", 0));
 		}
 
@@ -1064,7 +1069,7 @@ public class XmlReader
 			return null; 
 		
 		BorderStyle result = new BorderStyle();
-		result.setColor(getAttrAsColour(borderTag, "colour")); 
+		result.setColor(getAttrAsColour(borderTag, "colour", COLOR_BLACK)); 
 		result.setWidth(getAttrAsInt(borderTag, "width", 1));
 		
 		return result; 
@@ -1163,8 +1168,8 @@ public class XmlReader
 
 			result.setDataFont(getFont(getElement(tag, "dataFont")));
 			result.setHeaderFont(getFont(getElement(tag, "headerFont"))); 
-			result.setDataBackground(getAttrAsColour(tag, "dataBackground")); 
-			result.setHeaderBackground(getAttrAsColour(tag, "headerBackground"));
+			result.setDataBackground(getAttrAsColour(tag, "dataBackground", null)); 
+			result.setHeaderBackground(getAttrAsColour(tag, "headerBackground", null));
 
 			result.setDataBorder(getBorderStyle(tag, "data")); 
 			result.setHeaderBorder(getBorderStyle(tag, "header"));
@@ -1724,10 +1729,10 @@ public class XmlReader
 		
 		return value; 
 	}
-
-	private ChartColor getAttrAsColour(Element tag, String attr)
+	
+	private ChartColor getAttrAsColour(Element tag, String attr, String defaultValue)
 	{
-		String value = getAttr(tag, attr, "#000"); 
+		String value = getAttr(tag, attr, defaultValue); 
 		if (StringUtils.isEmpty(value))
 			return null; 
 		
@@ -1742,20 +1747,26 @@ public class XmlReader
 		else 
 			return null; 
 		
-		int r = Integer.parseInt(value.substring(0, len), 16); 
-		int g = Integer.parseInt(value.substring(len, 2 * len), 16); 
-		int b = Integer.parseInt(value.substring(2 * len, 3 * len), 16); 
-		int a = (value.length() == 6 || value.length() == 3) ? 0 : Integer.parseInt(value.substring(3 * len, 4 * len), 16); 
+		int r = getColorComponent(value, 0, len);  
+		int g = getColorComponent(value, 1, len);  
+		int b = getColorComponent(value, 2, len);  
+		int a = value.length() / len == 3 ? 255 : getColorComponent(value, 3, len);
 		
-		ChartColor result = new ChartColor(r, g, b);
-		result.setTransparency(a);
+		return new ChartColor(r, g, b, a);
+	}
+	
+	private int getColorComponent(String value, int index, int len)
+	{
+		String v = value.substring(index * len, (index + 1) * len);
+		if (len == 1)
+			v = v + v; 
 		
-		return result; 
+		return Integer.parseInt(v, 16); 
 	}
 	
 	private Integer getAttrAsInt(Element tag, String attr) {
 		String value = tag.getAttribute(attr);
-		if (value == null)
+		if (StringUtils.isEmpty(value))
 			return null;
 		try {
 			return Integer.valueOf(Integer.parseInt(value));

@@ -7,7 +7,7 @@ public class ChartColor implements Serializable
     private static final long serialVersionUID = 2L;
 
     private int value = 0;
-    private int transparency = 0; 
+    private int a = 0; 
 
     private String textureId = null;
     
@@ -20,6 +20,12 @@ public class ChartColor implements Serializable
     public ChartColor(int rgb) 
     { this.value = rgb; }
 
+    public ChartColor(int r, int g, int b, int a) 
+    {
+    	this(r, g, b); 
+    	this.a = a;  
+    }
+    
     public ChartColor(int r, int g, int b) 
     { this.value = ((r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF) << 0); }
 
@@ -35,11 +41,12 @@ public class ChartColor implements Serializable
     public int getBlue()
     { return this.value >> 0 & 0xFF; }
 
-    public int getTransparency()
-    { return transparency; } 
+    public int getAlpha()
+    { return a; } 
     
-    public void setTransparency(int transparency)
-    { this.transparency = transparency; } 
+    public void setAlpha(int a)
+    { this.a = a; }
+    
     public String getTextureId()
     { return textureId; }
 
