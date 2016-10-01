@@ -7,7 +7,7 @@ public class ChartColor implements Serializable
     private static final long serialVersionUID = 2L;
 
     private int value = 0;
-    private int a = 0; 
+    private int a = 0xFF;
 
     private String textureId = null;
     
