@@ -33,6 +33,7 @@ import com.emistoolbox.server.renderer.pdfreport.impl.PdfTextContent;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContent;
 import com.emistoolbox.server.renderer.pdfreport.layout.LayoutFrame;
 import com.emistoolbox.server.renderer.pdfreport.layout.LayoutPage;
+import com.emistoolbox.server.util.ZipArchiver;
 
 import es.jbauer.lib.io.IOInput;
 import es.jbauer.lib.io.IOOutput;
@@ -136,6 +137,7 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		renderPageGroup (report.getPageGroup (),indexDocument.body,1,null,true);
 		indexDocument.head.add (new HTMLTag ("style",".smaller{font-size:20px}.hierarchy-lowest{margin:0px}"));
 		indexDocument.print (new File (indexDirectory,"index.html"));
+		ZipArchiver.archive (indexDirectory,out,true);
 	}
 
 //  debugging output
