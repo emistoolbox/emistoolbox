@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.server.EmisToolboxIO;
@@ -20,8 +22,10 @@ public class PdfReportRenderer
 		throws Exception
 	{
 		try { 
-			System.out.println("Usage: [dataset] [key=value]* ");
-	
+			System.out.println("Usage: [dataset] [key=value]* [-html]");
+
+			boolean htmlRenderer = ArrayUtils.contains(args, "-html"); 
+			
 	        EmisDataSet emis = EmisToolboxIO.loadDataset(args[0]); 
 	        if (emis == null)
 	        	throw new IllegalArgumentException("Failed to load dataset '" + args[0] + "'");
@@ -45,16 +49,16 @@ public class PdfReportRenderer
 	        }
 	        
 	        String filename = null; 
-	        if (false)
-	        	filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult);
-	        else
+	        if (htmlRenderer)
 	        	filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult,new HTMLReportWriter().setChartRenderer(EmisToolboxServiceImpl.getChartRenderer()));
+	        else
+	        	filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult);
 
 	        System.out.println("PDF Path: " + filename); 
 		}
 		finally { System.out.flush(); }
 	}
-	
+
 	private static Map<String, String> getParameters(String[] args, int index)
 	{
 		Map<String, String> result = new HashMap<String, String>();

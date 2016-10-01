@@ -484,4 +484,8 @@ public class ItextPdfReportWriter implements PdfReportWriter
         }
         return rotate ? size.rotate() : size;
     }
+
+	@Override
+	public String getExtension() 
+	{ return ".pdf"; } 
 }

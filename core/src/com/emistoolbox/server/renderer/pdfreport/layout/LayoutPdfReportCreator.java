@@ -8,13 +8,14 @@ import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
+import com.emistoolbox.server.renderer.pdfreport.EmisPageGroup;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.impl.BasePdfReportCreator;
 
 public class LayoutPdfReportCreator extends BasePdfReportCreator<LayoutPdfReportConfig>
 {
 	@Override
-	protected void addEntityPages(EmisEntity entity, int[] ids, String[] names, int totalPages) 
+	protected void addEntityPages(EmisEntity entity, int[] ids, String[] names, int totalPages, EmisPageGroup group) 
 	{
 		init(entity, ids, names);
 		boolean firstPage = true;  
@@ -22,6 +23,8 @@ public class LayoutPdfReportCreator extends BasePdfReportCreator<LayoutPdfReport
 		{
 			LayoutPage page = createPage(pageConfig); 
 			reportResult.addPage(page); 
+			group.addPage(page); 
+			
 			if (firstPage)
 				page.putText(PdfText.TEXT_GROUP, names[names.length -1]); 
 		}

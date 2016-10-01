@@ -1003,7 +1003,7 @@ public class XmlReader
 		if (tag == null)
 			return null; 
 		ChartColor col = getAttrAsColour(tag, "fontColor", COLOR_BLACK); 
-		ChartFont font = new ChartFont(getAttr(tag, "font", "Helvetica"), getAttrAsInt(tag, "fontSize", 12), getAttrAsInt(tag, "fontStyle", 0));
+		ChartFont font = new ChartFont(getAttr(tag, "font", "Helvetica"), getAttrAsInt(tag, "fontStyle", 0), getAttrAsInt(tag, "fontSize", 12));
 		font.setColor(col);
 		
 		return font; 

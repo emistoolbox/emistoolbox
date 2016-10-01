@@ -464,4 +464,8 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 		
 		return result; 
 	}
+
+	@Override
+	public String getExtension() 
+	{ return ".pdf"; } 
 }

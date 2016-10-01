@@ -12,4 +12,6 @@ public abstract interface PdfReportWriter
     	throws IOException, PdfReportWriterException;
     
     public abstract void setDateInfo(ReportMetaResult metaInfo); 
+    
+    public String getExtension(); 
 }

@@ -253,4 +253,8 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 
 	public void setDateInfo (ReportMetaResult metaInfo) {
 	}
+
+	@Override
+	public String getExtension() 
+	{ return ""; }
 }

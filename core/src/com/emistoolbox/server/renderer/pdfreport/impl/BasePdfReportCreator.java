@@ -45,11 +45,13 @@ import com.emistoolbox.common.results.Result;
 import com.emistoolbox.common.results.TableMetaResult;
 import com.emistoolbox.common.results.impl.MetaResultDimensionDate;
 import com.emistoolbox.common.results.impl.MetaResultDimensionEntity;
+import com.emistoolbox.common.util.NamedIndexList;
 import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.server.model.EmisDataSet;
 import com.emistoolbox.server.model.EmisEntityDataSet;
 import com.emistoolbox.server.renderer.charts.impl.ChartUtil;
 import com.emistoolbox.server.renderer.gis.GisUtil;
+import com.emistoolbox.server.renderer.pdfreport.EmisPageGroup;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPriorityListContent;
@@ -94,7 +96,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         int[] oldIds = metaResult.getEntityPathIds(); 
         String[] oldNames = metaResult.getEntityPathNames(); 
         
-        addAllPages(metaResult.getEntityPathIds(), metaResult.getEntityPathNames(), indexEntityType, getTotalPageCount(context));
+        addAllPages(metaResult.getEntityPathIds(), metaResult.getEntityPathNames(), indexEntityType, getTotalPageCount(context), getTopPageGroup(reportResult, oldIds, oldNames));
 
         metaResult.getContext().setEntityType(oldEntityType); 
         metaResult.getContext().setEntities(oldEntities); 
@@ -104,7 +106,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         return reportResult;
 	}
 
-	protected abstract void addEntityPages(EmisEntity entity, int[] ids, String[] names, int totalPages); 
+	protected abstract void addEntityPages(EmisEntity entity, int[] ids, String[] names, int totalPages, EmisPageGroup group); 
 	
 	protected void init(EmisEntity entity, int[] ids, String[] names)
 	{
@@ -118,16 +120,15 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         metaResult.setEntityPath(ids, names);
 	}
 	
-    private void addAllPages(int[] ids, String[] names, int indexEntityType, int totalPages)
+    private void addAllPages(int[] ids, String[] names, int indexEntityType, int totalPages, EmisPageGroup group)
     {
+        EmisMetaEntity entityType = metaResult.getHierarchy().getEntityOrder().get(indexEntityType);
         if (indexEntityType + 1 == ids.length)
-        {
-            EmisMetaEntity entityType = metaResult.getHierarchy().getEntityOrder().get(indexEntityType);
-            
+        {           
             EmisEntity entity = new Entity(entityType, ids[ids.length - 1]); 
             entity.setName(names[names.length - 1]); 
             
-            addEntityPages(entity, ids, names, totalPages); 
+            addEntityPages(entity, ids, names, totalPages, group); 
             return; 
         }
 
@@ -157,7 +158,11 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
             newIds[newIds.length - 1] = childIds[i];
             newNames[newNames.length - 1] = childNames.get(childIds[i]);
 
-            addAllPages(newIds, newNames, indexEntityType, totalPages);
+            EmisPageGroup childGroup = new PageGroupImpl(); 
+            childGroup.setInfo(entityType.getName(), newIds[newNames.length - 1], newNames[newNames.length - 1]);
+            group.addPageGroup(childGroup); 
+            
+            addAllPages(newIds, newNames, indexEntityType, totalPages, childGroup);
         }
     }
     
@@ -491,7 +496,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         	
         	PriorityResultCollector collector = new PriorityResultCollector(dataSet, prioMetaResult);
         	prioContent.setResults(collector.getResults());
-        	        	
+
         	result = prioContent; 
         }
         else if (contentConfig instanceof PdfTableContentConfig)
@@ -522,5 +527,27 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 	    }
 
         return result;
+    }
+    
+    private EmisPageGroup getTopPageGroup(PdfReport report, int[] ids, String[] names)
+    {
+    	NamedIndexList<EmisMetaEntity> entityTypes = metaResult.getHierarchy().getEntityOrder(); 
+    	
+    	EmisPageGroup previous = null; 
+    	for (int i = 0; i < ids.length; i++) 
+    	{
+    		EmisPageGroup group = new PageGroupImpl();
+    		group.setInfo(entityTypes.get(i).getName(), ids[i], names[i]);
+    		
+    		if (i == 0)
+    			report.setPageGroup(group);
+    		
+    		if (previous != null)
+    			previous.addPageGroup(group);
+    		
+    		previous = group; 
+    	}
+
+    	return previous; 
     }
 }

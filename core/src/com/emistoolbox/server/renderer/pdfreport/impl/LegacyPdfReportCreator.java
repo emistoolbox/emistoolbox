@@ -18,6 +18,7 @@ import com.emistoolbox.common.results.MetaResultDimensionUtil;
 import com.emistoolbox.common.results.Result;
 import com.emistoolbox.common.results.TableMetaResult;
 import com.emistoolbox.server.renderer.charts.impl.ChartUtil;
+import com.emistoolbox.server.renderer.pdfreport.EmisPageGroup;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPage;
@@ -36,7 +37,7 @@ public class LegacyPdfReportCreator extends BasePdfReportCreator<PdfReportConfig
         return totalPages; 
 	}
 	
-	protected void addEntityPages(EmisEntity entity, int[] ids, String[] names, int totalPages)
+	protected void addEntityPages(EmisEntity entity, int[] ids, String[] names, int totalPages, EmisPageGroup group)
 	{
 		init(entity, ids, names);
 		
@@ -50,6 +51,7 @@ public class LegacyPdfReportCreator extends BasePdfReportCreator<PdfReportConfig
         {
             PdfPage page = getNewPage(subtitle, "Page " + (reportResult.getPages().size() + 1) + "/" + totalPages);
     		reportResult.addPage(page);
+    		group.addPage(page);
 
             for (int row = 0; row < config.getRows(); row++)
             {

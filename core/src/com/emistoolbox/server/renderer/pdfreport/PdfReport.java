@@ -10,4 +10,7 @@ public abstract interface PdfReport
 
     public abstract void addPage(EmisPdfPage page);
     public abstract List<EmisPdfPage> getPages();
+    
+    public EmisPageGroup getPageGroup(); 
+    public void setPageGroup(EmisPageGroup group); 
 }
