@@ -97,6 +97,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private void render (PDFLayout layout,ConstructiblePDFDocument document) throws IOException {
+		transformStack.clear ();
+		transformStack.push (new Transformation ());
 		ByteArrayOutputStream baos = new ByteArrayOutputStream ();
 		ps = new PrintStream (baos);
 		resourceRenamer = new ResourceRenamer ("R");
@@ -182,9 +184,6 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private Stack<Transformation> transformStack = new Stack<Transformation> ();
-	{
-		transformStack.push (new Transformation ());
-	}
 
 	private void pushTransform () {
 		transformStack.push (getCurrentTransform ());
