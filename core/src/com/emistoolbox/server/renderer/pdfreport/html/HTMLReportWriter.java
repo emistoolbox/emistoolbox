@@ -19,6 +19,7 @@ import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.common.util.Rectangle;
+import com.emistoolbox.server.renderer.pdfreport.EmisPageGroup;
 import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
@@ -39,6 +40,8 @@ import es.jbauer.lib.io.impl.IOInputStreamInput;
 import es.jbauer.lib.io.impl.IOOutputStreamOutput;
 
 public class HTMLReportWriter extends PDFAdvancedReportWriter {
+	final static String zipSuffix = ".zip";
+	
 	static interface HTMLNode {
 		void print (PrintStream ps);
 	}
@@ -65,8 +68,12 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		}
 		
 		public HTMLTag (String name,String content) {
+			this (name,new TextNode (content));
+		}
+		
+		public HTMLTag (String name,HTMLNode node) {
 			this (name);
-			add (new TextNode (content));
+			add (node);
 		}
 
 		public void print (PrintStream ps) {
@@ -107,109 +114,171 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		}
 	}
 	
+	HTMLDocument indexDocument;
 	HTMLDocument groupDocument;
+	File indexDirectory;
 	File groupDirectory;
 	int groupCount;
 	int imageCount;
 	int labelCount;
 	
-	List<HTMLTag> groupContents; 
+	List<HTMLNode> groupContents;
 
-	void printGroup () throws FileNotFoundException {
-		if (groupDocument != null) {
-			for (HTMLTag tag : groupContents)
-				groupDocument.add (tag);
-			groupDocument.print (new File (groupDirectory,"index.html"));
-		}
-	}
-	
 	public void writeReport (PdfReport report,File out) throws IOException {
-		out.delete ();
-		out.mkdir ();
-		HTMLDocument indexDocument = new HTMLDocument ();
+		String filename = out.getName ();
+		if (!filename.endsWith (zipSuffix))
+			throw new Error ("trying to write HTML ZIP archive to file without " + zipSuffix + " suffix");
+		indexDirectory = new File (out.getParentFile (),filename.substring (0,filename.length () - zipSuffix.length ()));
+		indexDirectory.mkdir ();
+		indexDocument = new HTMLDocument ();
 		groupDirectory = null;
 		groupDocument = null;
-		for (EmisPdfPage page : report.getPages ()) {
-			if (!(page instanceof LayoutPage))
-				throw new Error ("can only handle layout pages");
-			String groupText = page.getText (PdfText.TEXT_GROUP);
-			if (groupText != null) {
-				printGroup ();
-				String groupDirectoryName = ++groupCount + "-" + groupText;
-				HTMLTag a = new HTMLTag ("a");
+		renderPageGroup (report.getPageGroup (),indexDocument.body,1,null,true);
+		indexDocument.head.add (new HTMLTag ("style",".smaller{font-size:20px}.hierarchy-lowest{margin:0px}"));
+		indexDocument.print (new File (indexDirectory,"index.html"));
+	}
+
+//  debugging output
+//	private void showPageGroup (EmisPageGroup pageGroup,String prefix) {
+//		System.out.println (prefix + "page group: " + pageGroup.getName () + " : " + pageGroup.getLevel () + " / " + pageGroup.getId ());
+//		prefix += "  ";
+//		for (EmisPageGroup childGroup : pageGroup.getPageGroups ())
+//			showPageGroup (childGroup,prefix);
+//		for (EmisPdfPage page : pageGroup.getPages ())
+//			System.out.println (prefix + "page: " + page.getText (PdfText.TEXT_GROUP));
+//	}
+	
+	private <T> int getListSize (List<T> list) {
+		return list == null ? 0 : list.size ();
+	}
+	
+	private void renderPageGroup (EmisPageGroup pageGroup,HTMLTag container,int headingLevel,String titlePrefix,boolean condensing) throws IOException {
+		List<EmisPageGroup> pageGroups = pageGroup.getPageGroups ();
+		List<EmisPdfPage> pages = pageGroup.getPages ();
+		
+		if (getListSize (pageGroups) != 0 && getListSize (pages) != 0)
+			throw new Error ("HTML rendering for page group containing both subgroups and pages not implemented");
+
+		String name = pageGroup.getName ();
+		
+		if (condensing && getListSize (pageGroups) == 1)
+			renderPageGroup (pageGroups.get (0),container,headingLevel,titlePrefix == null ? name : titlePrefix + " / " + name,true);
+		else {
+			HTMLTag heading = new HTMLTag ("h" + Math.min (headingLevel,4));
+			HTMLNode nameNode = new TextNode (name);
+			if (!pages.isEmpty ()) {
+				String groupDirectoryName = ++groupCount + "-" + name.replace ("'","");
+				HTMLTag a = new HTMLTag ("a",nameNode);
 				a.attributes.put ("href",groupDirectoryName + "/index.html");
-				a.add (new TextNode (groupText));
-				indexDocument.add (a);
-				groupDirectory = new File (out,groupDirectoryName);
+				nameNode = a;
+				groupDirectory = new File (indexDirectory,groupDirectoryName);
 				groupDirectory.mkdir ();
 				imageCount = 0;
 				groupDocument = new HTMLDocument ();
-				groupDocument.body.add (new HTMLTag ("h1",groupText));
-				groupContents = new ArrayList<HTMLTag> ();
+				groupDocument.body.add (new HTMLTag ("h1",name));
 			}
-			show (page);
-			LayoutPage layoutPage = (LayoutPage) page;
-			for (final LayoutFrame frame : layoutPage.getFrames ()) {
-				show (frame);
-				frame.getContent ().accept (new PdfContentVisitor<Void> () {
-					public Void visit (PdfChartContent content) {
-						Rectangle position = frame.getFrameConfig ().getPosition ();
-						try {
-							renderImage (renderChart (content, position.getWidth (), position.getHeight ()),frame,content);
-						} catch (IOException e) {
-							e.printStackTrace ();
-							throw new Error ();
-						}
-						return null;
-					}
+			if (titlePrefix == null)
+				heading.add (nameNode);
+			else {
+				HTMLTag div1 = new HTMLTag ("div",titlePrefix);
+				div1.attributes.put ("class","smaller");
+				HTMLTag div2 = new HTMLTag ("div");
+				div2.add (nameNode);
+				heading.add (div1);
+				heading.add (div2);
+			}
+			
+			HTMLTag target;
+			if (container.name.equals ("ul")) {
+				target = new HTMLTag ("li");
+				container.add (target);
+			}
+			else
+				target = container;
 
-					public Void visit (PdfImageContent content) {
-						try {
-							renderImage (content.getFile (),frame,content);
-						} catch (IOException e) {
-							e.printStackTrace ();
-							throw new Error ();
-						}
-						return null;
-					}
+			target.add (heading);
+			
+			if (!pageGroups.isEmpty ()) {
+				HTMLTag ul = new HTMLTag ("ul");
+				for (EmisPageGroup childGroup : pageGroups)
+					renderPageGroup (childGroup,ul,headingLevel + 1,null,false);
+				target.add (ul);
+			}
 
-					public Void visit (PdfPriorityListContent content) {
-						throw new Error ("html rendering for priority list content not implemented");
-					}
+			if (!pages.isEmpty ()) {
+				heading.attributes.put ("class","hierarchy-lowest");
+				groupContents = new ArrayList<HTMLNode> ();
 
-					public Void visit (PdfTableContent content) {
-						int rows = content.getRows ();
-						int cols = content.getColumns ();
-						HTMLTag table = new HTMLTag ("table");
-						for (int row = 0;row < rows;row++) {
-							HTMLTag tableRow = new HTMLTag ("tr");
-							for (int col = 0;col < cols;col++) {
-								HTMLTag tableItem = new HTMLTag ("td");
-								tableItem.add (new TextNode (content.getText (row,col)));
-								tableRow.add (tableItem);
+				for (EmisPdfPage page : pages) {
+					if (!(page instanceof LayoutPage))
+						throw new Error ("can only handle layout pages");
+					show (page);
+					LayoutPage layoutPage = (LayoutPage) page;
+					for (final LayoutFrame frame : layoutPage.getFrames ()) {
+						show (frame);
+						frame.getContent ().accept (new PdfContentVisitor<Void> () {
+							public Void visit (PdfChartContent content) {
+								Rectangle position = frame.getFrameConfig ().getPosition ();
+								try {
+									renderImage (renderChart (content, position.getWidth (), position.getHeight ()),frame,content);
+								} catch (IOException e) {
+									e.printStackTrace ();
+									throw new Error ();
+								}
+								return null;
 							}
-							table.add (tableRow);
-						}
-						groupContents.add (table);
-						return null;
-					}
 
-					public Void visit (PdfTextContent content) {
-						if (content.getTitle () != null)
-							groupContents.add (new HTMLTag ("h3",content.getTitle ()));
-						if (content.getText () != null)
-							groupContents.add (new HTMLTag ("p",content.getText ()));
-						return null;
-					}
+							public Void visit (PdfImageContent content) {
+								try {
+									renderImage (content.getFile (),frame,content);
+								} catch (IOException e) {
+									e.printStackTrace ();
+									throw new Error ();
+								}
+								return null;
+							}
 
-					public Void visit (PdfVariableContent content) {
-						throw new Error ("html rendering for variable content not implemented");
+							public Void visit (PdfPriorityListContent content) {
+								throw new Error ("html rendering for priority list content not implemented");
+							}
+
+							public Void visit (PdfTableContent content) {
+								int rows = content.getRows ();
+								int cols = content.getColumns ();
+								HTMLTag table = new HTMLTag ("table");
+								for (int row = 0;row < rows;row++) {
+									HTMLTag tableRow = new HTMLTag ("tr");
+									for (int col = 0;col < cols;col++) {
+										HTMLTag tableItem = new HTMLTag ("td");
+										tableItem.add (new TextNode (content.getText (row,col)));
+										tableRow.add (tableItem);
+									}
+									table.add (tableRow);
+								}
+								groupContents.add (table);
+								return null;
+							}
+
+							public Void visit (PdfTextContent content) {
+								if (content.getTitle () != null)
+									groupContents.add (new HTMLTag ("h3",content.getTitle ()));
+								if (content.getText () != null)
+									groupContents.add (new HTMLTag ("p",content.getText ()));
+								return null;
+							}
+
+							public Void visit (PdfVariableContent content) {
+								throw new Error ("html rendering for variable content not implemented");
+							}
+						});
 					}
-				});
+				}
+
+				for (HTMLNode node : groupContents)
+					groupDocument.add (node);
+				groupDocument.print (new File (groupDirectory,"index.html"));
 			}
 		}
-		printGroup ();
-		indexDocument.print (new File (out,"index.html"));
 	}
 
 	private IOInput renderChart(PdfChartContent content, double width, double height) throws IOException {
@@ -256,5 +325,5 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 
 	@Override
 	public String getExtension() 
-	{ return ""; }
+	{ return zipSuffix; }
 }
