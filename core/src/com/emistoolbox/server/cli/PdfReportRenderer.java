@@ -54,7 +54,7 @@ public class PdfReportRenderer
 	        else
 	        	filename = EmisToolboxServiceImpl.getRenderedReportResultInternal(args[0], metaResult);
 
-	        System.out.println("PDF Path: " + filename); 
+	        System.out.println(filename.substring (filename.length() - 3).toUpperCase() + " Path: " + filename); 
 		}
 		finally { System.out.flush(); }
 	}
