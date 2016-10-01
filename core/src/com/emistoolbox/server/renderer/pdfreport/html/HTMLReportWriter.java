@@ -21,6 +21,7 @@ import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.common.util.Rectangle;
 import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
+import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
 import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPriorityListContent;
@@ -152,33 +153,24 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 				show (frame);
 				frame.getContent ().accept (new PdfContentVisitor<Void> () {
 					public Void visit (PdfChartContent content) {
-						PdfChartContent chartContent = (PdfChartContent) content; 
-						updateFrameTitle (frame, chartContent.getTitle());
 						Rectangle position = frame.getFrameConfig ().getPosition ();
 						try {
-							IOInput chart = renderChart ((PdfChartContent) content, position.getWidth (), position.getHeight ());
-							String filename = "image-" + ++imageCount + ".png";
-							Util.copy (chart.getInputStream (),new File (groupDirectory,filename));
-							String label = "a" + ++labelCount;
-							String title = content.getTitle ();
-							HTMLTag link = new HTMLTag ("a",title);
-							link.attributes.put ("href",'#' + label);
-							groupDocument.add (link);
-							HTMLTag h2 = new HTMLTag ("h2",title);
-							h2.attributes.put ("id",label);
-							groupContents.add (h2);
-							HTMLTag img = new HTMLTag ("img");
-							img.attributes.put ("src",filename);
-							groupContents.add (img);
-						} catch (IOException ioe) {
-							ioe.printStackTrace ();
+							renderImage (renderChart (content, position.getWidth (), position.getHeight ()),frame,content);
+						} catch (IOException e) {
+							e.printStackTrace ();
 							throw new Error ();
 						}
 						return null;
 					}
 
 					public Void visit (PdfImageContent content) {
-						throw new Error ("html rendering for image content not implemented");
+						try {
+							renderImage (content.getFile (),frame,content);
+						} catch (IOException e) {
+							e.printStackTrace ();
+							throw new Error ();
+						}
+						return null;
 					}
 
 					public Void visit (PdfPriorityListContent content) {
@@ -234,6 +226,23 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 			return in;
 			
 		throw new IllegalArgumentException("Unsupported chart output format"); 
+	}
+
+	private void renderImage (IOInput input,LayoutFrame frame,PdfContent content) throws IOException {
+		String title = content.getTitle ();
+		updateFrameTitle (frame,title);
+		String filename = "image-" + ++imageCount + ".png";
+		Util.copy (input.getInputStream (),new File (groupDirectory,filename));
+		String label = "a" + ++labelCount;
+		HTMLTag link = new HTMLTag ("a",title);
+		link.attributes.put ("href",'#' + label);
+		groupDocument.add (link);
+		HTMLTag h2 = new HTMLTag ("h2",title);
+		h2.attributes.put ("id",label);
+		groupContents.add (h2);
+		HTMLTag img = new HTMLTag ("img");
+		img.attributes.put ("src",filename);
+		groupContents.add (img);
 	}
 
 	void show (TextSet textSet) {
