@@ -11,7 +11,7 @@ public class DirectoryTraversal {
 	private DirectoryTraversal () {}
 
 	public static void traverse (File file,Handler handler) throws IOException {
-		traverse (file,handler,new File (file.getName ()));
+		traverse (file,handler,null);
 	}
 
 	private static void traverse (File file,Handler handler,File relative) throws IOException {
