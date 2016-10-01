@@ -1,5 +1,7 @@
 package com.emistoolbox.common.renderer.pdfreport.impl;
 
+import java.io.Serializable;
+
 import com.emistoolbox.common.ChartColor;
 import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.TableCellFormat;
@@ -7,7 +9,7 @@ import com.emistoolbox.common.renderer.pdfreport.EmisTableStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.util.LayoutSides;
 
-public class SimpleTableStyle extends TableStyleImpl implements EmisTableStyle 
+public class SimpleTableStyle extends TableStyleImpl implements EmisTableStyle, Serializable
 {
 	private ChartFont headerFont; 
 	private ChartFont dataFont; 

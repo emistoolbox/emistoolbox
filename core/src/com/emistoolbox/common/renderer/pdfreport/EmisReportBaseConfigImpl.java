@@ -104,10 +104,9 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
         {
             EmisMetaHierarchy hierarchy = getHierarchy(contentConfig);
             if (hierarchy != null)
-            {
                 return hierarchy;
-            }
         }
+        
         return null;
     }
 

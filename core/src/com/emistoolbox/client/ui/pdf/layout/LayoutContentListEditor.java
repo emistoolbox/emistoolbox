@@ -29,24 +29,25 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class LayoutContentListEditor extends VerticalPanel implements EmisEditor<List<PdfContentConfig>>
 {
 	private ListBoxWithUserObjects<PdfContentConfig> uiConfigs = new ListBoxWithUserObjects<PdfContentConfig>(); 
-	private PushButton btnAddToPage = new PushButton("Add to Page"); 
+	private PushButton btnAddToPage = new PushButton("To Page >"); 
 	private PushButton btnDel = new PushButton("Del"); 
 
 	public LayoutContentListEditor()
 	{
 		setWidth("100%"); 
 		
-		add(new HTML("<div class='section'>Available Content</div>")); 
+		add(new HTML("<div class='section'>New Content</div>")); 
 		add(uiConfigs); 
-		uiConfigs.setVisibleItemCount(10);
+		uiConfigs.setVisibleItemCount(5);
 		uiConfigs.setWidth("100%");
 		
 		// Buttons. 
 		EmisUtils.init(btnAddToPage, 100);
 		EmisUtils.init(btnDel, 60);
 		HorizontalPanel hp = new HorizontalPanel(); 
-		hp.add(btnAddToPage);
+		hp.setSpacing(3);
 		hp.add(btnDel);
+		hp.add(btnAddToPage);
 		setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		add(hp); 
 		

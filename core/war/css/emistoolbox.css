@@ -557,14 +557,18 @@ table.emisResult tbody tr:nth-child(2n) td.selected {
     background-color: #FFC971;
 }
 
-.grid-stack {
-	background: lightgoldenrodyellow;
+.layoutFrame { 
+	background-color: #ccccff; 
+	color: #000099; 
+	border: 2px solid #0000cc; 
 }
 
-.grid-stack-item-content {
-	color: #2c3e50;
-	text-align: center;
-	background-color: #18bc9c;
-	left: 3px; 
-	right: 3px; 
+.layoutFrame.selected {
+	border: 2px solid #ff0000; 
+}
+
+.colorpicker{
+	background-image: url();
+	width: 200px; 
+	height: 100px;
 }

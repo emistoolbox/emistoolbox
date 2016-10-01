@@ -1,5 +1,6 @@
 package com.emistoolbox.common.renderer.pdfreport.impl;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +10,7 @@ import com.emistoolbox.common.TableCellFormat.VerticalAlign;
 import com.emistoolbox.common.renderer.pdfreport.EmisTableStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 
-public class TableStyleImpl implements EmisTableStyle
+public class TableStyleImpl implements EmisTableStyle, Serializable
 {
 	private TableCellFormat topHeaderFormat; 
 	private TableCellFormat leftHeaderFormat; 

@@ -52,4 +52,16 @@ public class ChartColor implements Serializable
 
     public void setTextureId(String texture)
     { this.textureId = texture; }
+
+	@Override
+	public boolean equals(Object obj) 
+	{
+		if (obj == null || !(obj instanceof ChartColor))
+			return false; 
+		
+		ChartColor col = (ChartColor) obj; 
+		return a == col.a && value == col.value;  
+	}
+   
+    
 }

@@ -140,7 +140,11 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         for (int i = 0; i < names.length; i++)
             newNames[i] = names[i];
 
-        EmisHierarchy hierarchy = dataSet.getHierarchy(config.getHierarchy().getName());
+        EmisMetaHierarchy h = config.getHierarchy(); 
+        if (h == null)
+        	h = dataSet.getMetaDataSet().getHierarchies().get(0); 
+        
+        EmisHierarchy hierarchy = dataSet.getHierarchy(h.getName()); 
         int dateTypeIndex = NamedUtil.findIndex((EmisMetaDateEnum) hierarchy.getDateType(), dataSet.getMetaDataSet().getDateEnums());
         int[] childIds = hierarchy.getChildren(dateTypeIndex, hierarchy.getMetaHierarchy().getEntityOrder().get(ids.length - 1), ids[ids.length - 1]);
         childIds = ResultCollector.filter(metaResult.getContextWithGlobalFilter(), hierarchy.getMetaHierarchy().getEntityOrder().get(ids.length), childIds, dataSet); 

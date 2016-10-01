@@ -1002,7 +1002,7 @@ public class XmlReader
 	{
 		if (tag == null)
 			return null; 
-		ChartColor col = getAttrAsColour(tag, "fontColor", COLOR_BLACK); 
+		ChartColor col = getAttrAsColour(tag, "fontColour", COLOR_BLACK); 
 		ChartFont font = new ChartFont(getAttr(tag, "font", "Helvetica"), getAttrAsInt(tag, "fontStyle", 0), getAttrAsInt(tag, "fontSize", 12));
 		font.setColor(col);
 		
@@ -1017,6 +1017,13 @@ public class XmlReader
 		for (Element pageTag : getElements(tag, null, "page"))
 		{
 			LayoutPageConfig page = new LayoutPageConfigImpl(); 
+			Element backgroundTag = getElement(tag, "background");
+			if (backgroundTag != null)
+			{
+				page.setBackgroundImagePath(getAttr(backgroundTag, "image"));
+				page.setBackgroundColour(getAttrAsColour(backgroundTag, "colour", null));
+			}
+
 			for (Element frameTag : getElements(pageTag, null, "frame"))
 				page.addFrame(getLayoutFrame(frameTag, indicators));
 			
@@ -1054,7 +1061,6 @@ public class XmlReader
 		{
 			frame.setBackgroundImagePath(getAttr(backgroundTag, "image"));
 			frame.setBackgroundColour(getAttrAsColour(backgroundTag, "colour", null));
-			frame.setBackgroundTransparency(getAttrAsInt(backgroundTag, "transparency", 0));
 		}
 
 		frame.setContentConfig(getPdfContentConfig(getElement(tag, "pdfContent"), indicators));

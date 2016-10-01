@@ -13,6 +13,7 @@ public class LayoutPageConfigImpl extends TextSetImpl implements LayoutPageConfi
 {
 	private List<LayoutFrameConfig> frames = new ArrayList<LayoutFrameConfig>(); 
 	private ChartColor backgroundColor; 
+	private String imagePath; 
 
 	public LayoutPageConfigImpl()
 	{ super(TEXT_KEYS); }
@@ -30,10 +31,18 @@ public class LayoutPageConfigImpl extends TextSetImpl implements LayoutPageConfi
 	{ frames.add(frame); }
 
 	@Override
-	public ChartColor getBackgroundColor() 
+	public ChartColor getBackgroundColour() 
 	{ return backgroundColor; } 
 
 	@Override
-	public void setBackgroundColor(ChartColor color) 
-	{ this.backgroundColor = color; } 
+	public void setBackgroundColour(ChartColor color) 
+	{ this.backgroundColor = color; }
+
+	@Override
+	public String getBackgroundImagePath() 
+	{ return imagePath; }
+
+	@Override
+	public void setBackgroundImagePath(String path) 
+	{ this.imagePath = path; }
 }

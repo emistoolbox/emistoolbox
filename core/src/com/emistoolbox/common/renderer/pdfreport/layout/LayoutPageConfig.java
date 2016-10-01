@@ -16,6 +16,9 @@ public interface LayoutPageConfig extends TextSet
 	public void setFrames(List<LayoutFrameConfig> frames); 
 	public void addFrame(LayoutFrameConfig frame); 
 	
-	public ChartColor getBackgroundColor(); 
-	public void setBackgroundColor(ChartColor color); 
+	public ChartColor getBackgroundColour(); 
+	public void setBackgroundColour(ChartColor color);
+
+	public String getBackgroundImagePath(); 
+	public void setBackgroundImagePath(String path); 
 }

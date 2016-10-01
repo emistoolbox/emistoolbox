@@ -11,9 +11,6 @@ import com.emistoolbox.common.ChartFont;
 
 public class TextSetImpl implements TextSet, Serializable
 {
-	public final static ChartFont DEFAULT_FONT = new ChartFont("Helvetica", ChartFont.PLAIN, 12);  
-
-	private ChartFont defaultFont = DEFAULT_FONT; 
 	private Set<String> keys = new HashSet<String>(); 
 	private Map<String, String> texts = new HashMap<String, String>(); 
 	private Map<String, ChartFont> fonts= new HashMap<String, ChartFont>(); 
@@ -36,14 +33,6 @@ public class TextSetImpl implements TextSet, Serializable
 	{ return keys; }
 
 	@Override
-	public ChartFont getDefaultFont() 
-	{ return defaultFont; } 
-
-	@Override
-	public void setDefaultFont(ChartFont font) 
-	{ defaultFont = font; } 
-	
-	@Override
 	public void putText(String key, String value, ChartFont font) 
 	{
 		putText(key, value); 
@@ -55,7 +44,7 @@ public class TextSetImpl implements TextSet, Serializable
 	{
 		ChartFont result = fonts.get(key); 
 		if (result == null)
-			return defaultFont; 
+			return null; 
 		
 		return result;
 	} 

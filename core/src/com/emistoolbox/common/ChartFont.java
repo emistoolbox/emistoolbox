@@ -4,7 +4,9 @@ import java.io.Serializable;
 
 public class ChartFont implements Serializable
 {
-    private static final long serialVersionUID = 1L;
+	public final static ChartFont DEFAULT_FONT = new ChartFont("Helvetica", ChartFont.PLAIN, 12);  
+
+	private static final long serialVersionUID = 1L;
     
 	public static final String FONT_TIMES = "Times"; 
 	public static final String FONT_HELVETICA = "Helvetica"; 

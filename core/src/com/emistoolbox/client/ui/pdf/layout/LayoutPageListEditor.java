@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class LayoutPageListEditor extends VerticalPanel implements EmisEditor<List<LayoutPageConfig>>
 {
-	private LayoutPageEditor uiPageEditor; 
+	private LayoutPageEditor uiPageEditor;
 	private LayoutContentListEditor uiContentList; 
 	private ListBoxWithUserObjects<LayoutPageConfig> uiPages = new ListBoxWithUserObjects<LayoutPageConfig>(); 
 	private PushButton btnAddPage = new PushButton("Add Page"); 
@@ -59,7 +59,7 @@ public class LayoutPageListEditor extends VerticalPanel implements EmisEditor<Li
 			}
 		}); 
 
-		uiPages.setVisibleItemCount(10);
+		uiPages.setVisibleItemCount(5);
 		uiPages.setWidth("100%");
 
 		EmisUtils.init(btnAddPage, 60); 
@@ -68,6 +68,7 @@ public class LayoutPageListEditor extends VerticalPanel implements EmisEditor<Li
 		EmisUtils.init(btnDelPage, 60); 
 		
 		HorizontalPanel hp = new HorizontalPanel(); 
+		hp.setSpacing(3);
 		hp.add(btnAddPage);
 		hp.add(btnMoveUp);
 		hp.add(btnMoveDown);

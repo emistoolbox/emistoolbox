@@ -26,9 +26,6 @@ public interface LayoutFrameConfig extends TextSet
 	public String getBackgroundImagePath(); 
 	public void setBackgroundImagePath(String path); 
 	
-	public int getBackgroundTransparency(); 
-	public void setBackgroundTransparency(int transparency); 
-	
 	public PdfContentConfig getContentConfig(); 
 	public void setContentConfig(PdfContentConfig content); 
 	

@@ -1,9 +1,11 @@
 package com.emistoolbox.common;
 
+import java.io.Serializable;
+
 import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.util.LayoutSides;
 
-public class TableCellFormat 
+public class TableCellFormat implements Serializable 
 {
 	public enum VerticalAlign { TOP, CENTER, BOTTOM }; 
 	public enum HorizontalAlign { LEFT, CENTER, RIGHT }; 

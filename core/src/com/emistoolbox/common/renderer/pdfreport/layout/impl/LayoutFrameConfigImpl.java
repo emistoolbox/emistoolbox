@@ -18,7 +18,6 @@ public class LayoutFrameConfigImpl extends TextSetImpl implements LayoutFrameCon
 	
 	private String backgroundImage; 
 	private ChartColor backgroundColour; 
-	private int backgroundTransparency = 0;
 
 	private LayoutSides<Double> padding = new LayoutSides<Double>(0.0); 
 	
@@ -66,14 +65,6 @@ public class LayoutFrameConfigImpl extends TextSetImpl implements LayoutFrameCon
 	@Override
 	public void setBackgroundImagePath(String image) 
 	{ this.backgroundImage = image; } 
-
-	@Override
-	public int getBackgroundTransparency() 
-	{ return backgroundTransparency; } 
-
-	@Override
-	public void setBackgroundTransparency(int transparency) 
-	{ this.backgroundTransparency = transparency; } 
 
 	@Override
 	public PdfContentConfig getContentConfig() 

@@ -800,7 +800,11 @@ public class XmlWriter
     	for (LayoutPageConfig page : config.getPages())
     	{
     		Element pageTag = createElementAndAdd("page", tag);
-    		for (LayoutFrameConfig frame : page.getFrames())
+        	Element backgroundTag = createElementAndAdd("background", tag);
+        	setAttr(backgroundTag, "image", page.getBackgroundImagePath()); 
+        	setAttr(backgroundTag, "colour", page.getBackgroundColour()); 
+
+        	for (LayoutFrameConfig frame : page.getFrames())
     			addXml(pageTag, frame); 
     		
     		addXml(pageTag, (TextSet) page); 
@@ -830,9 +834,6 @@ public class XmlWriter
     	Element backgroundTag = createElementAndAdd("background", tag);
     	setAttr(backgroundTag, "image", frame.getBackgroundImagePath()); 
     	setAttr(backgroundTag, "colour", frame.getBackgroundColour()); 
-    	setAttr(backgroundTag, "transparency", frame.getBackgroundTransparency());  
-    	frame.getBackgroundImagePath(); 
-    	frame.getBackgroundTransparency(); 
     	
     	addXml(tag, frame.getContentConfig());
     }
@@ -1280,7 +1281,7 @@ public class XmlWriter
     	setAttr(tag, "font", font.getName());
     	setAttr(tag, "fontSize", font.getSize()); 
     	setAttr(tag, "fontStyle", font.getStyle());
-    	setAttr(tag, "fontColor", font.getColor()); 
+    	setAttr(tag, "fontColour", font.getColor()); 
     }
     
     
