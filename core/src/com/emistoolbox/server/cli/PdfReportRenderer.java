@@ -62,14 +62,13 @@ public class PdfReportRenderer
 	private static Map<String, String> getParameters(String[] args, int index)
 	{
 		Map<String, String> result = new HashMap<String, String>();
-		while (index < args.length)
+		for (;index < args.length;index++)
 		{
 			int pos = args[index].indexOf("="); 
 			if (pos == -1)
 				continue; 
 			
 			result.put(args[index].substring(0, pos), args[index].substring(pos + 1)); 
-			index++; 
 		}
 		
 		return result; 
