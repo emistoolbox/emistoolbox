@@ -137,7 +137,7 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		renderPageGroup (report.getPageGroup (),indexDocument.body,1,null,true);
 		indexDocument.head.add (new HTMLTag ("style",".smaller{font-size:20px}.hierarchy-lowest{margin:0px}"));
 		indexDocument.print (new File (indexDirectory,"index.html"));
-		ZipArchiver.archive (indexDirectory,out,true);
+		ZipArchiver.archive (indexDirectory,out,false);
 	}
 
 //  debugging output
