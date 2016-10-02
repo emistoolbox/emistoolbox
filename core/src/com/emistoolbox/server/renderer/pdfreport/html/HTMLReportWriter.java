@@ -288,7 +288,7 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		IOOutput out = new IOOutputStreamOutput(buffer, "chart.png", "image/png", null); 
 
 		ChartConfig chartConfig = content.getChartConfig ();
-		chartConfig.setChartSize ((int) Math.round (2 * width),(int) Math.round (2 * height));
+		chartConfig.setChartSize (800,400);
 		getChartRenderer ().render (content.getType (),content.getResult (),chartConfig, out);
 	
 		IOInput in = new IOInputStreamInput (new ByteArrayInputStream (buffer.toByteArray ()),out.getName (),out.getContentType (),null); 
