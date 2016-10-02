@@ -123,14 +123,23 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 	int labelCount;
 	
 	List<HTMLNode> groupContents;
+	String reportName;
+
+	private HTMLTag getReportNameTag () {
+		HTMLTag reportNameTag = new HTMLTag ("div",reportName);
+		reportNameTag.attributes.put ("class","report-name");
+		return reportNameTag;
+	}
 
 	public void writeReport (PdfReport report,File out) throws IOException {
+		reportName = report.getReportConfig ().getName ();
 		String filename = out.getName ();
 		if (!filename.endsWith (zipSuffix))
 			throw new Error ("trying to write HTML ZIP archive to file without " + zipSuffix + " suffix");
 		indexDirectory = new File (out.getParentFile (),filename.substring (0,filename.length () - zipSuffix.length ()));
 		indexDirectory.mkdir ();
 		indexDocument = new HTMLDocument ();
+		indexDocument.add (getReportNameTag ());
 		groupDirectory = null;
 		groupDocument = null;
 		renderPageGroup (report.getPageGroup (),indexDocument.body,1,null,true);
@@ -176,7 +185,8 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 				groupDirectory.mkdir ();
 				imageCount = 0;
 				groupDocument = new HTMLDocument ();
-				groupDocument.body.add (new HTMLTag ("h1",name));
+				groupDocument.add (getReportNameTag ());
+				groupDocument.add (new HTMLTag ("h1",name));
 			}
 			if (titlePrefix == null)
 				heading.add (nameNode);
