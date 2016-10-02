@@ -43,6 +43,16 @@ import es.jbauer.lib.io.impl.IOOutputStreamOutput;
 public class HTMLReportWriter extends PDFAdvancedReportWriter {
 	final static String zipSuffix = ".zip";
 	
+	private boolean showIds = true;
+	
+	public boolean isShowIds () {
+		return showIds;
+	}
+
+	public void setShowIds (boolean showIds) {
+		this.showIds = showIds;
+	}
+
 	static interface HTMLNode {
 		void print (PrintStream ps);
 	}
@@ -129,7 +139,6 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 	}
 	
 	private File indexDirectory;
-	private int groupCount;
 	private int imageCount;
 	private int labelCount;
 	private String reportName;
@@ -164,27 +173,29 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 
 		String level = pageGroup.getLevel ();
 		String name = pageGroup.getName ();
-		String levelAndName = level + " " + name;
+		Integer id = pageGroup.getId ();
+		boolean isLeaf = showIds && pageGroups.isEmpty ();
+		String fullName = isLeaf ? level + " " + name + " (" + id + ")" : name;
 		
-		linkPrefix = newPrefix (linkPrefix,levelAndName);
+		linkPrefix = newPrefix (linkPrefix,fullName);
 		
 		if (condensing && getListSize (pageGroups) == 1)
-			renderPageGroup (pageGroups.get (0),container,headingLevel,linkPrefix,newPrefix (titlePrefix,name),true);
+			renderPageGroup (pageGroups.get (0),container,headingLevel,linkPrefix,newPrefix (titlePrefix,fullName),true);
 		else {
 			HTMLTag heading = new HTMLTag ("h" + Math.min (headingLevel,4));
-			HTMLNode nameNode = new TextNode (name);
+			HTMLNode nameNode = new TextNode (fullName);
 
 			HTMLTag link = new HTMLTag ("a",linkPrefix);
-			String id = getId (level);
-			link.attributes.put ("href","../index.html#" + id);
-			heading.attributes.put ("id",id);
+			String anchor = level + id;
+			link.attributes.put ("href","../index.html#" + anchor);
+			heading.attributes.put ("id",anchor);
 			if (!linkTag.isEmpty ())
 				linkTag.add (new TextNode (" / "));
 			linkTag.add (link);
 			
 			if (!pages.isEmpty ()) {
 				HTMLTag a = new HTMLTag ("a",nameNode);
-				String groupDirectoryName = ++groupCount + "-" + sanitize (name);
+				String groupDirectoryName = id + "-" + sanitize (name);
 				a.attributes.put ("href",groupDirectoryName + "/index.html");
 				nameNode = a;
 
@@ -194,7 +205,7 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 				HTMLDocument groupDocument = new HTMLDocument ();
 				groupDocument.add (linkTag);
 				groupDocument.add (getReportNameTag ());
-				groupDocument.add (new HTMLTag ("h1",name));
+				groupDocument.add (new HTMLTag ("h1",fullName));
 				heading.attributes.put ("class","hierarchy-lowest");
 				final HTMLTag toc = new HTMLTag ("div.emis-toc");
 				groupDocument.add (toc);
@@ -311,7 +322,7 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 
 			target.add (heading);
 			
-			if (!pageGroups.isEmpty ()) {
+			if (!isLeaf) {
 				HTMLTag ul = new HTMLTag ("ul");
 				for (EmisPageGroup childGroup : pageGroups)
 					renderPageGroup (childGroup,ul,headingLevel + 1,null,null,false);
@@ -372,13 +383,6 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 	
 	private static <T> int getListSize (List<T> list) {
 		return list == null ? 0 : list.size ();
-	}
-	
-	Map<String,Integer> indexMap = new HashMap<String,Integer> ();
-	private String getId (String level) {
-		Integer nextIndex = indexMap.getOrDefault (level,0) + 1;
-		indexMap.put (level,nextIndex);
-		return level + nextIndex;
 	}
 	
 	public void setDateInfo (ReportMetaResult metaInfo) {
