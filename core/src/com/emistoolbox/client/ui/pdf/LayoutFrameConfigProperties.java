@@ -16,7 +16,8 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 	private ChartColorEditor uiBgColor = new ChartColorEditor(); 
 	private TextBox uiBorderRadius = new TextBox(); 
 	private BorderEditor uiBorders = new BorderEditor(); 
-
+	private IntPicker uiPadding = new IntPicker(new int[] { 0, 2, 5, 10, 15, 20 }, "", "px");  
+	
 	public LayoutFrameConfigProperties()
 	{
 		int row = getRowCount(); 
@@ -31,6 +32,10 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		setText(row, 0, "Border Radius");
 		setWidget(row++, 1, uiBorderRadius);
 
+		setText(row, 0, "Padding"); 
+		setWidget(row, 1, uiPadding); 
+		row++; 
+		
 		uiTexts = initTexts(LayoutPageConfig.TEXT_KEYS, new String[] { "Title", "Subtitle", "Footer" });
 
 		set(null); 
@@ -48,6 +53,8 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		try { config.setBorderRadius(new Integer(uiBorderRadius.getText())); }
 		catch (Throwable err)
 		{ config.setBorderRadius(0); }
+		
+		config.setPadding(new LayoutSides<Double>((double) uiPadding.get()));
 		
 		updateTextSet(uiTexts, config); 
 	}
@@ -72,6 +79,8 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 			uiBgColor.set(config.getBackgroundColour()); 
 			uiBorderRadius.setText("" + config.getBorderRadius()); 
 			uiBorders.set(config.getBorders()); 
+
+			uiPadding.set((int) Math.round(config.getPadding().getLeft()));
 		}
 	}
 }

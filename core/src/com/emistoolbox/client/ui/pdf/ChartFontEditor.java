@@ -21,7 +21,7 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 	private HTML uiText = new HTML("The quick brown fox");
 
 	private ListBox uiName = new ListBox(); 
-	private ListBox uiSize = new ListBox(); 
+	private IntPicker uiSize = new IntPicker(new int[] { 6, 8, 9, 10, 12, 14, 16, 18, 20, 24, 32 }, "", "px"); 
 	private ListBox uiStyle = new ListBox(); 
 
 	private PopupPanel uiPopup = new PopupPanel();
@@ -31,7 +31,6 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 	public ChartFontEditor()
 	{
 		UIUtils.listBoxInit(uiName, ChartFont.FONTS);
-		UIUtils.listBoxInit(uiSize, new String[] { "6", "8", "9", "10", "12", "14", "16", "18", "20", "24", "32" });
 		UIUtils.listBoxInit(uiStyle, new String[] { "plain", "bold", "italic", "bold+italic" });
 		
 		Grid uiGrid = new Grid(2, 4); 
@@ -59,7 +58,7 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 			@Override
 			public void onClick(ClickEvent event) {
 				font.setName(UIUtils.getListBoxValue(uiName));
-				font.setSize(new Integer(UIUtils.getListBoxValue(uiSize)));
+				font.setSize(uiSize.get());
 				font.setStyle(uiStyle.getSelectedIndex());
 
 				updateUi(); 
@@ -118,31 +117,7 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 	private void updateFontFields()
 	{
 		UIUtils.setListBoxValue(uiName, font.getName());
-		UIUtils.setListBoxValue(uiSize, "" + font.getSize());
+		uiSize.set(font.getSize());
 		uiStyle.setSelectedIndex(font.getStyle());
-	}
-	
-}
-
-class FontStyleEditor extends Grid
-{
-	private ListBox uiName = new ListBox(); 
-	private ListBox uiSize = new ListBox(); 
-	private ListBox uiStyle = new ListBox(); 
-	
-	public FontStyleEditor()
-	{
-		super(2, 3);
-		
-		int row = 0;
-		
-		setText(row, 0, "Font Face:"); 
-		setWidget(row++, 1, uiName); 
-		
-		setText(1, 0, "Size"); 
-		setWidget(row++, 1, uiSize); 
-		
-		setText(2, 0, "Style"); 
-		setWidget(row++, 1, uiStyle); 
 	}
 }

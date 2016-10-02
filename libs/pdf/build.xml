@@ -57,8 +57,7 @@
   </target>
 
   <target name="test" depends="clean,jar">
-    <java fork="yes" classname="com.emistoolbox.lib.pdf.test.LayoutTest">
-      <arg line="C:\work\emistoolbox\source-git\libs\pdf\test\content"/>
+    <java fork="yes" classname="com.emistoolbox.lib.colorpicker.ColorPicker">
       <classpath>
         <path refid="path.test"/>
       </classpath>

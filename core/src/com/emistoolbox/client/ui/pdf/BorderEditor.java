@@ -11,13 +11,13 @@ import com.google.gwt.user.client.ui.ListBox;
 
 public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<BorderStyle>> 
 {
-	private static String[] sizes = new String[] { "0", "1", "2", "3", "4", "5" }; 
-	private static String[] labels = new String[] { "Left", "Top", "Right", "Bottom" }; 
+	private static int[] BORDER_WIDTHS = new int[] { 0, 1, 2, 3, 4, 5 };  
+	private static String[] SIDE_NAMES = new String[] { "Left", "Top", "Right", "Bottom" }; 
 
 	private LayoutSides<BorderStyle> borders; 
 	
 	private ListBox uiMode = new ListBox(); 
-	private ListBox[] uiSizes = new ListBox[4]; 
+	private IntPicker[] uiSizes = new IntPicker[4]; 
 	private ChartColorEditor[] uiColors = new ChartColorEditor[4];
 	
 	private int rowFirstEditor = 0; 
@@ -47,15 +47,13 @@ public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<Bo
 		rowFirstEditor = row; 
 		for (int i = 0; i < 4; i++) 
 		{
-			setText(row, 0, labels[i]); 
+			setText(row, 0, SIDE_NAMES[i]); 
 			
 			uiColors[i] = new ChartColorEditor(); 
 			setWidget(row, 1, uiColors[i]); 
 
-			uiSizes[i] = new ListBox(); 
+			uiSizes[i] = new IntPicker(BORDER_WIDTHS, "", "px"); 
 			setWidget(row, 2, uiSizes[i]); 
-			for (String size : sizes)
-				uiSizes[i].addItem(size); 
 			
 			row++; 
 		}
@@ -76,7 +74,7 @@ public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<Bo
 			int uiIndex = sameSides ? 0 : i; 
 			
 			styles[i].setColor(uiColors[uiIndex].get());
-			try { styles[i].setWidth(new Integer(UIUtils.getListBoxValue(uiSizes[uiIndex]))); }
+			try { styles[i].setWidth(uiSizes[uiIndex].get()); }
 			catch (Throwable err)
 			{  styles[i].setWidth(0); }
 		}
@@ -105,7 +103,7 @@ public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<Bo
 			{
 				if (values[i] != null)
 				{
-					UIUtils.setListBoxValue(uiSizes[i], "" + values[i].getWidth()); 
+					uiSizes[i].set(values[i].getWidth()); 
 					uiColors[i].set(values[i].getColour());
 					sameSides &= same(values[0], values[i]); 
 				}
@@ -122,13 +120,13 @@ public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<Bo
 		for (int row = rowFirstEditor + 1; row < getRowCount(); row++)
 			getRowFormatter().setVisible(row, !sameSides); 
 
-		setText(rowFirstEditor, 0, sameSides ? "All" : labels[0]);
+		setText(rowFirstEditor, 0, sameSides ? "All" : SIDE_NAMES[0]);
 	}
 	
 	private boolean same(BorderStyle bs1, BorderStyle bs2)
 	{
-		if (bs1 == null && bs2 == null)
-			return true; 
+		if (bs1 == null)
+			return bs2 == null; 
 		
 		if (bs1.getWidth() != bs2.getWidth())
 			return false; 
