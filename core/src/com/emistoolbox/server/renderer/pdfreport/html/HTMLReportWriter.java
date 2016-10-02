@@ -285,6 +285,7 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 					}
 				}
 
+				groupDocument.add (new HTMLTag ("hr"));
 				for (HTMLNode node : groupContents)
 					groupDocument.add (node);
 				groupDocument.print (new File (groupDirectory,"index.html"));
