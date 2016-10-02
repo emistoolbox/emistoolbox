@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class LayoutContentListEditor extends VerticalPanel implements EmisEditor<List<PdfContentConfig>>
 {
 	private ListBoxWithUserObjects<PdfContentConfig> uiConfigs = new ListBoxWithUserObjects<PdfContentConfig>(); 
-	private PushButton btnAddToPage = new PushButton("To Page >"); 
+	private PushButton btnAddToPage = new PushButton("Add to Page"); 
 	private PushButton btnDel = new PushButton("Del"); 
 
 	public LayoutContentListEditor()
@@ -50,6 +50,7 @@ public class LayoutContentListEditor extends VerticalPanel implements EmisEditor
 		hp.add(btnAddToPage);
 		setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		add(hp); 
+		add(new HTML("<p>This list shows content not, yet, placed on the page.</p><p>You can add new content by going to the 'Analysis' tab and display a chart, a table or a priority list. Then click <b>[Add to Report]</b>.")); 
 		
 		btnDel.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {

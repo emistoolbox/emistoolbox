@@ -13,6 +13,7 @@ import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.util.LayoutSides;
 import com.emistoolbox.common.util.Rectangle;
+import com.google.gwt.i18n.client.NumberFormat;
 
 public class CSSCreator {
 	private CSSCreator () {}
@@ -78,6 +79,7 @@ public class CSSCreator {
 		if (config.getBorderRadius () != 0)
 			map.put ("border-radius",getDimension (config.getBorderRadius ()));
 		
+		/*
 		if (config.getPosition () != null) {
 			Rectangle position = config.getPosition ();
 			map.put ("position","absolute");
@@ -86,6 +88,7 @@ public class CSSCreator {
 			map.put ("width",getDimension (position.getWidth ()));
 			map.put ("height",getDimension (position.getHeight ()));
 		}
+		*/
 		
 		return map;
 	}
@@ -125,6 +128,7 @@ public class CSSCreator {
 	}
 	
 	private static String toString (double x) {
-		return String.format (Locale.US,"%.3f",x).replaceAll ("\\.?0*$","");
+		NumberFormat format = NumberFormat.getFormat("0.0##"); 
+		return format.format(x).replaceAll("\\.?0*$",""); 
 	}
 }

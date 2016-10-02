@@ -31,29 +31,27 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		uiContentList = new LayoutContentListEditor(); 
 		uiPageList = new LayoutPageListEditor(uiPageEditor, uiContentList);
 
-		getFlexCellFormatter().setColSpan(2, 0, 2); 
-		getFlexCellFormatter().setRowSpan(0, 2, 3); 
-		getCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_TOP);
-		setWidget(0, 0, uiContentList); 
-		setWidget(0, 1, uiPageList);  
-		setHTML(1, 0, "<div class='section'>Page Layout</div>"); 
-		setWidget(2, 0, uiPageEditor); 
-
-		uiTabs.add(uiReportProps, "Report Config"); 
-		uiTabs.add(uiPageEditor.getPageConfigProps(), "Page Config");
-		uiTabs.add(uiPageEditor.getFrameConfigProps(), "Frame Config");
-		setWidget(0, 2, uiTabs); 
+		setText(0, 0, "Page Layout"); 
+		getCellFormatter().addStyleName(0, 0, "section");
+		setWidget(1, 0, uiPageEditor); 
+		
+		uiTabs.add(uiPageList, "Pages");
+		uiTabs.add(uiContentList, "New Content");
+		uiTabs.add(uiReportProps, "Report"); 
+		uiTabs.add(uiPageEditor.getPageConfigProps(), "Page");
+		uiTabs.add(uiPageEditor.getFrameConfigProps(), "Frame");
+		uiTabs.selectTab(0);
+		setWidget(1, 1, uiTabs); 
 				
 		setWidth("100%"); 
 		setHeight("100%"); 
 		
-		getFlexCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
-		getFlexCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
-		getFlexCellFormatter().setVerticalAlignment(2, 0, HasVerticalAlignment.ALIGN_TOP);
+		getCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
+		getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
 
 		setCellSpacing(5);
-		getColumnFormatter().setWidth(0, "50%");
-		getColumnFormatter().setWidth(1, "50%");
+		getColumnFormatter().setWidth(0, "70%");
+		getColumnFormatter().setWidth(1, "30%");
 	}
 	
 	@Override
