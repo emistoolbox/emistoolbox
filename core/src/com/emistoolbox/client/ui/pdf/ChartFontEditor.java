@@ -30,6 +30,9 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 	
 	public ChartFontEditor()
 	{
+		uiPopup.setModal(true);
+		uiPopup.setAutoHideEnabled(true);
+
 		UIUtils.listBoxInit(uiName, ChartFont.FONTS);
 		UIUtils.listBoxInit(uiStyle, new String[] { "plain", "bold", "italic", "bold+italic" });
 		

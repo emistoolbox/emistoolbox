@@ -1,10 +1,27 @@
-== Essential == 
+== Current == 
+- [test] HTML report
+- TextContent added. 
+	* update delete / move	
+	* listbox delete not initialized
 - Priority list - add to report - switch to report. 
+- ChartColour editor  get x, get y
+
+- Frame editor - add delete and move. 
+- PageUI - delete frame, change page and back, frame is back (same with move)
+
+== Next == 
+- TextContent edit
+- VarContent add / edit
+- Frame preview (styling, content)
+- Frame drag / drop. 
+
+== Essential == 
 - Priority list - load saved report - display all settings. 
 
 - Page editor: 
 	- Add Text Frame
 	- Add Variable Frame
+	- Page size even if empty. 
 
 == Important == 
 - Change size / orientation - modify right away

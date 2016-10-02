@@ -77,6 +77,8 @@ public abstract interface EmisToolboxServiceAsync
 
     public abstract void getRenderedReportResult(String datasetName, ReportMetaResult paramReportMetaResult, AsyncCallback<String> paramAsyncCallback);
 
+    public abstract void getRenderedReportAsHtmlResult(String dataset, ReportMetaResult metaResult, AsyncCallback<String> callback);
+
     public abstract void getRenderedExcelReportResult(String datasetName, ExcelReportMetaResult paramReportMetaResult, List<EmisIndicator> indicators, AsyncCallback<String> paramAsyncCallback);
 
     public abstract void getExcelReportTemplates(String datasetName, AsyncCallback<String[]> asyncCallback) throws IOException; 

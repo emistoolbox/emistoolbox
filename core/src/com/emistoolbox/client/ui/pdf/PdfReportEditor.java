@@ -219,25 +219,36 @@ public class PdfReportEditor extends FlexTable implements EmisEditor<PdfReportCo
         updateButtons();
     }
 
-    private void editText(final int index)
+    public void editText(final int index)
     {
         final PdfContentConfig content = uiContents.getUserObject(index);
         if (content instanceof PdfTextContentConfigImpl)
         {
             final PdfTextContentConfigImpl textContent = (PdfTextContentConfigImpl) content; 
-            final TextEditor editor = new TextEditor("Please enter text for report:", textContent.getTitle() == null ? "" : textContent.getTitle(), textContent.getText()); 
-            final BlockingScreen block = new BlockingScreen(editor); 
-            editor.addValueChangeHandler(new ValueChangeHandler<String>() {
-                public void onValueChange(ValueChangeEvent<String> event)
-                {
-                    textContent.setText(event.getValue()); 
-                    textContent.setTitle(editor.getTitle()); 
-                    block.finished();
-                    
-                    uiContents.updateText(index, textContent.getInfo()); 
-                }
-            });
+        	editText(textContent, new ValueChangeHandler<String>() {
+        		@Override
+        		public void onValueChange(ValueChangeEvent<String> event) {
+        			uiContents.updateText(index, textContent.getInfo()); 
+        		}
+        	});
         }
+    }
+
+    public static void editText(final PdfTextContentConfigImpl textContent, final ValueChangeHandler<String> handler)
+    {
+        final TextEditor editor = new TextEditor("Please enter text for report:", textContent.getTitle() == null ? "" : textContent.getTitle(), textContent.getText()); 
+        final BlockingScreen block = new BlockingScreen(editor); 
+        editor.addValueChangeHandler(new ValueChangeHandler<String>() {
+            public void onValueChange(ValueChangeEvent<String> event)
+            {
+                textContent.setText(event.getValue()); 
+                textContent.setTitle(editor.getTitle()); 
+                block.finished();
+                
+                if (handler != null)
+                	handler.onValueChange(event);
+            }
+        });
     }
     
     private void editVariables(final int index)
