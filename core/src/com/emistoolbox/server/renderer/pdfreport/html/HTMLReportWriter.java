@@ -174,8 +174,10 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		String level = pageGroup.getLevel ();
 		String name = pageGroup.getName ();
 		Integer id = pageGroup.getId ();
-		boolean isLeaf = showIds && pageGroups.isEmpty ();
-		String fullName = isLeaf ? level + " " + name + " (" + id + ")" : name;
+		boolean isLeaf = pageGroups.isEmpty ();
+		String fullName = level + " " + name;
+		if (isLeaf && showIds)
+			fullName += " (" + id + ")";
 		
 		linkPrefix = newPrefix (linkPrefix,fullName);
 		
