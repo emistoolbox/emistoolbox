@@ -163,7 +163,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
             newNames[newNames.length - 1] = childNames.get(childIds[i]);
 
             EmisPageGroup childGroup = new PageGroupImpl(); 
-            childGroup.setInfo(entityType.getName(), newIds[newNames.length - 1], newNames[newNames.length - 1]);
+            childGroup.setInfo(hierarchy.getMetaHierarchy().getEntityOrder().get(ids.length).getName(), newIds[newNames.length - 1], newNames[newNames.length - 1]);
             group.addPageGroup(childGroup); 
             
             addAllPages(newIds, newNames, indexEntityType, totalPages, childGroup);

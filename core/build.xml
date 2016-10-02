@@ -147,7 +147,6 @@
 	  <arg value="location=Zone:53"/> <!-- School:1856 -->
 
       <arg value="date=T3 2015"/>
-      <arg value="-html"/>
       <classpath>
         <path refid="testPath"/>
       </classpath>
