@@ -201,11 +201,12 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 				groupDocument.add (new HTMLTag ("hr"));
 
 				for (EmisPdfPage page : pages) {
+					lastTitle = null;
 					HTMLTag pageTag = new HTMLTag ("div.emis-page");
 					groupDocument.add (pageTag);
 					if (!(page instanceof LayoutPage))
 						throw new Error ("can only handle layout pages");
-					renderTitles (page,pageTag);
+					renderTitles (page,pageTag,false);
 					for (final LayoutFrame frame : ((LayoutPage) page).getFrames ()) {
 						final HTMLTag frameTag = new HTMLTag ("div.emis-frame");
 						pageTag.add (frameTag);
@@ -213,7 +214,7 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 						final String title = content.getTitle ();
 						if (content instanceof PdfTextContent || content instanceof PdfChartContent)
 							updateFrameTitle (frame,title);
-						renderTitles (frame,frameTag);
+						renderTitles (frame,frameTag,true);
 						content.accept (new PdfContentVisitor<Void> () {
 							public Void visit (PdfChartContent content) {
 								Rectangle position = frame.getFrameConfig ().getPosition ();
@@ -323,10 +324,13 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		}
 	}
 	
-	private void renderTitles (TextSet textSet,HTMLTag target) {
+	private String lastTitle;
+	private void renderTitles (TextSet textSet,HTMLTag target,boolean dontRepeat) {
 		String title = textSet.getText (PdfText.TEXT_TITLE);
-		if (title != null)
+		if (title != null && !(dontRepeat && title.equals (lastTitle)))
 			target.add (new HTMLTag ("h1.emis-title",title));
+		lastTitle = title;
+		
 		String subtitle = textSet.getText (PdfText.TEXT_SUBTITLE);
 		if (subtitle != null)
 			target.add (new HTMLTag ("h2.emis-subtitle",subtitle));
