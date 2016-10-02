@@ -3,7 +3,6 @@ package com.emistoolbox.common.renderer.pdfreport.layout.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import com.emistoolbox.common.ChartColor;
