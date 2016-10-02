@@ -87,7 +87,6 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	public void render (List<PDFLayout> layouts,IOOutput output) throws IOException {
 		ConstructiblePDFDocument document = new ConstructiblePDFDocument ();
 		
-		// TODO: test document with more than one page
 		for (PDFLayout layout : layouts)
 			render (layout,document);
 		
