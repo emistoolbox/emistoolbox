@@ -96,6 +96,14 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		public void add (HTMLNode child) {
 			children.add (child);
 		}
+		
+		public boolean isEmpty () {
+			return children.isEmpty ();
+		}
+		
+		public void removeLastChild () {
+			children.remove (children.size () - 1);
+		}
 	}
 	
 	static class HTMLDocument {
@@ -125,6 +133,7 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 	private int imageCount;
 	private int labelCount;
 	private String reportName;
+	private HTMLTag linkTag;
 
 	private HTMLTag getReportNameTag () {
 		return new HTMLTag ("div.report-name",reportName);
@@ -139,68 +148,51 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		indexDirectory.mkdir ();
 		HTMLDocument indexDocument = new HTMLDocument ();
 		indexDocument.add (getReportNameTag ());
-		renderPageGroup (report.getPageGroup (),indexDocument.body,1,null,true);
+		linkTag = new HTMLTag ("div.emis-links"); // this gets reused on every page, and is added to each page twice
+		renderPageGroup (report.getPageGroup (),indexDocument.body,1,null,null,true);
 		indexDocument.head.add (new HTMLTag ("style",".smaller{font-size:20px}.hierarchy-lowest{margin:0px}"));
 		indexDocument.print (new File (indexDirectory,"index.html"));
 		ZipArchiver.archive (indexDirectory,out,false);
 	}
 
-	private <T> int getListSize (List<T> list) {
-		return list == null ? 0 : list.size ();
-	}
-	
-	private void renderPageGroup (EmisPageGroup pageGroup,HTMLTag container,int headingLevel,String titlePrefix,boolean condensing) throws IOException {
+	private void renderPageGroup (EmisPageGroup pageGroup,HTMLTag container,int headingLevel,String linkPrefix,String titlePrefix,boolean condensing) throws IOException {
 		List<EmisPageGroup> pageGroups = pageGroup.getPageGroups ();
 		List<EmisPdfPage> pages = pageGroup.getPages ();
-		
+
 		if (getListSize (pageGroups) != 0 && getListSize (pages) != 0)
 			throw new Error ("HTML rendering for page group containing both subgroups and pages not implemented");
 
+		String level = pageGroup.getLevel ();
 		String name = pageGroup.getName ();
+		String levelAndName = level + " " + name;
+		
+		linkPrefix = newPrefix (linkPrefix,levelAndName);
 		
 		if (condensing && getListSize (pageGroups) == 1)
-			renderPageGroup (pageGroups.get (0),container,headingLevel,titlePrefix == null ? name : titlePrefix + " / " + name,true);
+			renderPageGroup (pageGroups.get (0),container,headingLevel,linkPrefix,newPrefix (titlePrefix,name),true);
 		else {
 			HTMLTag heading = new HTMLTag ("h" + Math.min (headingLevel,4));
 			HTMLNode nameNode = new TextNode (name);
-			String groupDirectoryName = ++groupCount + "-" + sanitize (name);
+
+			HTMLTag link = new HTMLTag ("a",linkPrefix);
+			String id = getId (level);
+			link.attributes.put ("href","../index.html#" + id);
+			heading.attributes.put ("id",id);
+			if (!linkTag.isEmpty ())
+				linkTag.add (new TextNode (" / "));
+			linkTag.add (link);
+			
 			if (!pages.isEmpty ()) {
 				HTMLTag a = new HTMLTag ("a",nameNode);
+				String groupDirectoryName = ++groupCount + "-" + sanitize (name);
 				a.attributes.put ("href",groupDirectoryName + "/index.html");
 				nameNode = a;
-			}
-			if (titlePrefix == null)
-				heading.add (nameNode);
-			else {
-				HTMLTag div1 = new HTMLTag ("div.smaller",titlePrefix);
-				HTMLTag div2 = new HTMLTag ("div");
-				div2.add (nameNode);
-				heading.add (div1);
-				heading.add (div2);
-			}
-			
-			HTMLTag target;
-			if (container.name.equals ("ul")) {
-				target = new HTMLTag ("li");
-				container.add (target);
-			}
-			else
-				target = container;
 
-			target.add (heading);
-			
-			if (!pageGroups.isEmpty ()) {
-				HTMLTag ul = new HTMLTag ("ul");
-				for (EmisPageGroup childGroup : pageGroups)
-					renderPageGroup (childGroup,ul,headingLevel + 1,null,false);
-				target.add (ul);
-			}
-
-			if (!pages.isEmpty ()) {
 				final File groupDirectory = new File (indexDirectory,groupDirectoryName);
 				groupDirectory.mkdir ();
 				imageCount = 0;
 				HTMLDocument groupDocument = new HTMLDocument ();
+				groupDocument.add (linkTag);
 				groupDocument.add (getReportNameTag ());
 				groupDocument.add (new HTMLTag ("h1",name));
 				heading.attributes.put ("class","hierarchy-lowest");
@@ -294,8 +286,40 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 					}
 					renderFooter (page,pageTag);
 				}
+				groupDocument.add (linkTag);
 				groupDocument.print (new File (groupDirectory,"index.html"));
 			}
+
+			if (titlePrefix == null)
+				heading.add (nameNode);
+			else {
+				HTMLTag div1 = new HTMLTag ("div.smaller",titlePrefix);
+				HTMLTag div2 = new HTMLTag ("div");
+				div2.add (nameNode);
+				heading.add (div1);
+				heading.add (div2);
+			}
+			
+			HTMLTag target;
+			if (container.name.equals ("ul")) {
+				target = new HTMLTag ("li");
+				container.add (target);
+			}
+			else
+				target = container;
+
+			target.add (heading);
+			
+			if (!pageGroups.isEmpty ()) {
+				HTMLTag ul = new HTMLTag ("ul");
+				for (EmisPageGroup childGroup : pageGroups)
+					renderPageGroup (childGroup,ul,headingLevel + 1,null,null,false);
+				target.add (ul);
+			}
+
+			linkTag.removeLastChild ();
+			if (!linkTag.isEmpty ())
+				linkTag.removeLastChild ();
 		}
 	}
 	
@@ -330,7 +354,7 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		throw new IllegalArgumentException("Unsupported chart output format"); 
 	}
 
-	private String sanitize (String s) {
+	private static String sanitize (String s) {
 		StringBuilder builder = new StringBuilder ();
 		for (char c : s.toCharArray ())
 			if (Character.isLetter (c))
@@ -338,6 +362,21 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		return builder.toString ();
 	}
 
+	private static String newPrefix (String oldPrefix,String newSegment) {
+		return oldPrefix == null ? newSegment : oldPrefix + " / " + newSegment;
+	}
+	
+	private static <T> int getListSize (List<T> list) {
+		return list == null ? 0 : list.size ();
+	}
+	
+	Map<String,Integer> indexMap = new HashMap<String,Integer> ();
+	private String getId (String level) {
+		Integer nextIndex = indexMap.getOrDefault (level,0) + 1;
+		indexMap.put (level,nextIndex);
+		return level + nextIndex;
+	}
+	
 	public void setDateInfo (ReportMetaResult metaInfo) {
 	}
 
