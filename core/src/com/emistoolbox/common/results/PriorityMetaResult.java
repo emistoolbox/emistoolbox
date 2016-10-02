@@ -8,4 +8,6 @@ public abstract interface PriorityMetaResult extends ListEntityMetaResult
     
     public boolean getFilterEmpty(); 
     public void setFilterEmpty(boolean filter); 
+
+    public PriorityMetaResult createCopy(); 
 }

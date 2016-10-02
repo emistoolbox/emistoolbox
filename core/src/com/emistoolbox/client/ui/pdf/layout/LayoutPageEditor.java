@@ -3,6 +3,7 @@ package com.emistoolbox.client.ui.pdf.layout;
 import com.emistoolbox.client.EmisEditor;
 import com.emistoolbox.client.ui.pdf.LayoutFrameConfigProperties;
 import com.emistoolbox.client.ui.pdf.LayoutPageConfigProperties;
+import com.emistoolbox.client.ui.pdf.LayoutPdfReportEditor;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
@@ -32,21 +33,30 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 	private LayoutFrameConfigProperties uiFrameProps = new LayoutFrameConfigProperties(); 
 
 	private LayoutFrameWidget uiFrameCurrent = null; 
-	public LayoutPageEditor()
+	private LayoutPdfReportEditor reportEditor = null; 
+	
+	public LayoutPageEditor(LayoutPdfReportEditor editor)
 	{
 		setWidth("100%"); 
 		setHeight("100%"); 
 		getElement().getStyle().setBackgroundColor("#ccc");
 		add(uiPage); 
+
+		this.reportEditor = editor; 
+		
+		set(null); 
 	}
 
+	public LayoutPdfReportEditor getReportEditor()
+	{ return reportEditor; } 
+	
 	public LayoutPageConfigProperties getPageConfigProps()
 	{ return uiPageProps; } 
 	
 	public LayoutFrameConfigProperties getFrameConfigProps()
 	{ return uiFrameProps; } 
 
-	public void selectFrameConfig(LayoutFrameWidget uiFrame)
+	public void selectFrame(LayoutFrameWidget uiFrame)
 	{
 		if (uiFrameCurrent != null)
 		{
@@ -54,15 +64,25 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 			uiFrameCurrent.removeStyleName("selected");
 		}
 		
-		uiFrameProps.set(uiFrame.get());
-		uiFrameProps.addStyleName("selected");
 		uiFrameCurrent = uiFrame; 
+		if (uiFrame != null)
+		{
+			uiFrameProps.set(uiFrame.get());
+			uiFrameProps.addStyleName("selected");
+		}
+		else
+			uiFrameProps.set(null);
 	}
 	
 	public void moveFrame(LayoutFrameWidget frame, int xOffset, int yOffset)
+	{ uiPage.setWidgetPosition(frame, uiPage.getWidgetLeft(frame) + xOffset, uiPage.getWidgetTop(frame) + yOffset); }
+	
+	public void removeFrame(LayoutFrameWidget frame)
 	{
-		uiPage.setWidgetPosition(frame, uiPage.getWidgetLeft(frame) + xOffset, uiPage.getWidgetTop(frame) + yOffset); 
-	}
+		uiFrameProps.commit();
+		commit(frame);  
+		uiPage.remove(frame); 
+	} 
 	
 	public void setSizes(PageSize pageSize, PageOrientation pageOrientation)
 	{ 
@@ -81,25 +101,32 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 	@Override
 	public void commit() 
 	{
+		uiPageProps.commit(); 
+		uiFrameProps.commit(); 
+		
 		for (int i = 0; i < uiPage.getWidgetCount(); i++)
 		{
 			Widget w = uiPage.getWidget(i); 
 			if (!(w instanceof LayoutFrameWidget))
 				continue; 
-			
-			LayoutFrameWidget uiFrame = (LayoutFrameWidget) w; 
 
-			Rectangle pos = new Rectangle(); 
-			pos.setLeft(getPageX(uiPage.getWidgetLeft(uiFrame) - xOffset));
-			pos.setRight(pos.getLeft() + getPageX(uiFrame.getOffsetWidth()));
-			pos.setTop(getPageY(uiPage.getWidgetTop(uiFrame) - yOffset));
-			pos.setBottom(pos.getTop() + getPageY(uiFrame.getOffsetHeight())); 
-
-			LayoutFrameConfig config = uiFrame.get(); 
-			config.setPosition(pos);
+			commit((LayoutFrameWidget) w); 
 		}
 	}
 
+	private void commit(LayoutFrameWidget uiFrame)
+	{
+
+		Rectangle pos = new Rectangle(); 
+		pos.setLeft(getPageX(uiPage.getWidgetLeft(uiFrame) - xOffset));
+		pos.setRight(pos.getLeft() + getPageX(uiFrame.getOffsetWidth()));
+		pos.setTop(getPageY(uiPage.getWidgetTop(uiFrame) - yOffset));
+		pos.setBottom(pos.getTop() + getPageY(uiFrame.getOffsetHeight())); 
+
+		LayoutFrameConfig config = uiFrame.get(); 
+		config.setPosition(pos);
+	}
+	
 	@Override
 	public LayoutPageConfig get() 
 	{ 
@@ -129,11 +156,13 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 	
 	private void updateUi()
 	{
+		uiPage.clear(); 
+		uiFrameProps.set(null);
 		if (pageConfig == null || pageConfig.getFrames().size() == 0)
-			setWidget(new HTML("No frames - display layout help")); 
+			setWidget(new HTML("<p>This page has no content.</p><p>To add new content, click on the 'New Content' frame.</p>")); 
 		else
 		{
-			uiPage.clear(); 
+			setWidget(uiPage);
 			for (LayoutFrameConfig frame : pageConfig.getFrames())
 				addFrame(frame, false); 
 		}
@@ -149,5 +178,17 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		Rectangle pos = frame.getPosition();
 		uiFrame.setPixelSize(getPanelX(pos.getWidth()), getPanelY(pos.getHeight())); 
 		uiPage.add(uiFrame, xOffset + getPanelX(pos.getLeft()), yOffset + getPanelY(pos.getTop()));
+	}
+	
+	public void updatePageIndex(int index, int total)
+	{
+		for (int i = 0; i < uiPage.getWidgetCount(); i++)
+		{
+			Widget w = uiPage.getWidget(i); 
+			if (w instanceof LayoutFrameWidget)
+				continue; 
+			
+			((LayoutFrameWidget) w).updatePageIndex(index, total);
+		}
 	}
 }

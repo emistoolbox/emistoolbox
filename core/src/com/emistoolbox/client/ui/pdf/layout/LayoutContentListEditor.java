@@ -87,8 +87,16 @@ public class LayoutContentListEditor extends VerticalPanel implements EmisEditor
 	public void set(List<PdfContentConfig> configs)
 	{
 		uiConfigs.clear(); 
+		if (configs == null)
+			return; 
+		
 		for (PdfContentConfig config : configs)
+		{
+			if (config  == null)
+				continue; 
+			
 			uiConfigs.add(getGroup(config), getTitle(config), config); 
+		}
 	}
 	
 	public void commit()

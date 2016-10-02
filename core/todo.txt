@@ -1,83 +1,25 @@
-== MALAWI - next == 
-- Allow up to 5 dimenision
-    - Browse data not working (need to render 4 / 5 dimenions).
-    - Check that collector works.
-    
-- Chart width - seems small. 
+== Essential == 
+- Priority list - add to report - switch to report. 
+- Priority list - load saved report - display all settings. 
 
-- Priority list - doesn't work with phillipines. 
-- Reporting - extra text in reports. 
+- Page editor: 
+	- Add Text Frame
+	- Add Variable Frame
 
-- Can we create enums Aliases - i. e. months grouped into Quaters.
-- Can we only display enum values with data?
-- Define default enum mappings (say month names to number).
+== Important == 
+- Change size / orientation - modify right away
+- UI to edit Text Frame. 
+- UI to edit Variable Frame. 
+- UI to edit tabel styles. 
 
-- Create filters (enum types, single variables of entities)
+- UI for priority table options
 
-= NEXT: 
-- Report Title: Entity name in header and on graph (don't include in graph). 
-
-= TODO =  
-- Allow enum / date enum grouping. 
-    - This can happen on collection level 
-        - For dates, we need to be able to provide context with muliple values. 
-        - For enums, we just need to provide context.
-        - Define groupings in model (in enum definition)
-
-- Allow flat selection (i. e. quater / month selection is only a month selection with names for each combination).
-- How to join multiple month if showing data for the year. 
-- Admin date editor, only allow strict hierarchy? 
-    
-- Group by only for dimensions of data
-  - How to handle two fields (one with enum, the other not)
-  - Only display if there is a possible group by. 
-  - Remove field if changed. 
-
-- Later: Validation picker and run validation against different hierarchy data. 
-- Admin: Validation editor, second / third entry doesn't seem to commit 
-
-== Maybe == 
-- Date handling improvements (where can we specify date range - instead of fixed values)?
-
-== Validation Release == 
-- Sort in Validation UI. 
-
-== Features ==
-- Allow saving of Priority Lists meta result? 
-
-== BUGS ==
-- EmisToolboxAdmin - Better error message for query that does not exist. 
-- EmisToolboxAdmin - Adding locations without dates. 'name' field doesn't have any date type. Maybe update later.
-- data.bin seems to interfere when importing (old fields are not shown)
-
-== Improvements ==
-- Memory handling
-    - clear cache by time.
-    - clear entry before import.
-
-- Data management
-    - allow different data value stores
-
-- Install scripts (use 64bit java if possible)
-
-- Large dataset handling
-    - Different data sources (sql, properties, partitioned memory set)
-    - write logs straight to file (not in memory).
-    
-== GENERAL == 
-- ByColumn with multiple access mappings doesn't work. 
-- Default DB selection if only one. 
-- Add titles / change buttons for classifications and hierarchy to make everything clearer. 
-- Make field selection nicer in Indicator editor. 
-- Excel reading / writing (allow new xlsx format).
-- GIS configuration for background layers / images
-- Improve error messages all round. 
-- Add more help text in UI. 
-- Add validation on leaving model
-    - classification has values
-    - we have a hierarchy
-    - unused locations
-    - date has values
-
-- Improvements in backend UI
+== Nice to Have == 
+- Page 1 of 10 - dropdown for current page with links to all pages. 
+- Text blocks with font editor options. 
+- Style no font better
+	
+== EXTRA WORK == 
+- Documentation (3 days) 
+- Design improvements
 

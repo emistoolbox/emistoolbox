@@ -17,6 +17,9 @@ import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.priolist.PriorityReportConfig;
 import com.emistoolbox.common.model.priolist.impl.PriorityReportConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfPriorityListContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.impl.PdfPriorityListContentConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.impl.SimpleTableStyle;
 import com.emistoolbox.common.results.PriorityMetaResult;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -85,7 +88,13 @@ public class PriorityMetaResultEditor extends MetaResultEditor<PriorityMetaResul
     }
     
     protected PdfContentConfig getContentConfig(int addButton)
-    { return null; }
+    {
+    	PdfPriorityListContentConfig result = new PdfPriorityListContentConfigImpl(); 
+    	result.setMetaResult(get().createCopy()); 
+    	result.setTableStyle(new SimpleTableStyle());
+    	result.setTitle("Priority List for " + result.getMetaResult().getListEntity().getName());
+    	return result; 
+    }
 
     protected EmisEnumTupleValue getDefaultDate()
     { return null; }
@@ -135,7 +144,7 @@ public class PriorityMetaResultEditor extends MetaResultEditor<PriorityMetaResul
         setWidget(row, 0, links);
 
         links.setWidget(0, 0, btnSave); 
-        showAddToReport(links, 2, 1, new String[] { "Add to PDF Report" });
+        showAddToReport(links, 2, 1, new String[] { "Add to Adv Report" });
 
         ValueChangeEvent.fire(this, get());
     }

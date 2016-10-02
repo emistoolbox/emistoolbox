@@ -31,5 +31,18 @@ public class PriorityMetaResultImpl extends MetaResultImpl implements PriorityMe
 
 	@Override
 	public void setFilterEmpty(boolean filter) 
-	{ this.filterEmpty = filter; } 
+	{ this.filterEmpty = filter; }
+
+	@Override
+	public PriorityMetaResult createCopy() 
+	{
+		PriorityMetaResultImpl result = new PriorityMetaResultImpl(); 
+		super.copy(result);
+		result.setListEntity(getListEntity());
+		result.setAdditionalFields(getAdditionalFields());
+		
+		return result;
+	} 
+	
+	
 }

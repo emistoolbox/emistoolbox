@@ -70,16 +70,14 @@ public class NamedUtil
     public static <T extends Named> T find(String name, List<T> items)
     {
         if (name == null)
-        {
             return null;
-        }
+
         for (T item : items)
         {
             if (name.equals(item.getName()))
-            {
                 return item;
-            }
         }
+
         return null;
     }
 

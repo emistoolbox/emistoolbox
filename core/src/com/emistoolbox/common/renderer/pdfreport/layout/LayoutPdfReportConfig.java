@@ -13,8 +13,4 @@ public interface LayoutPdfReportConfig extends EmisPdfReportConfig
 	public List<LayoutPageConfig> getPages();
 	public void setPages(List<LayoutPageConfig> pages);
 	public void addPage(LayoutPageConfig page);
-	
-	public List<PdfContentConfig> getUnusedContentConfigs(); 
-	public void setUnusedContentConfigs(List<PdfContentConfig> contents); 
-	public void addUnusedContentConfig(PdfContentConfig content); 
 }

@@ -590,7 +590,7 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
                     ValueChangeEvent.fire(MetaResultEditor.this.showReportHasHandlers, report);
                 }
             });
-            EmisUtils.init(btnAdd, 80);
+            EmisUtils.init(btnAdd, 100);
             hp.add(btnAdd);
         }
 
