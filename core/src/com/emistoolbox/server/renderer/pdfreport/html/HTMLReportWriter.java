@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.emistoolbox.common.renderer.ChartConfig;
-import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.common.util.Rectangle;
