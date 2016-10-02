@@ -1,6 +1,8 @@
 package com.emistoolbox.common.util;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LayoutSides<T> implements Serializable
 {
@@ -65,6 +67,15 @@ public class LayoutSides<T> implements Serializable
 		return values; 
 	}
 	
+	public List<T> getCSSList () {
+		List<T> list = new ArrayList<T> ();
+		list.add (top);
+		list.add (right);
+		list.add (bottom);
+		list.add (left);
+		return list;
+	}
+
 	public LayoutSides<T> clone()
 	{
 		LayoutSides<T> result = new LayoutSides<T>();
