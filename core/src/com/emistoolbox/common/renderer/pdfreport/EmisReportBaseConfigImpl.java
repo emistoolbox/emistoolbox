@@ -18,17 +18,18 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
     private PdfReportConfig.PageSize pageSize = PdfReportConfig.PageSize.A4;
 
     private boolean shortTitles;
-
+    private String name; 
+    
     public EmisReportBaseConfigImpl()
     { super(TEXT_KEYS); } 
     
     @Override
 	public String getName() 
-    { return getText(PdfText.TEXT_TITLE); }
+    { return name; }
 
 	@Override
-	public void setName(String value) 
-	{ putText(PdfText.TEXT_TITLE, value); }
+	public void setName(String name) 
+	{ this.name = name; }
 
 	public EmisMetaEntity getEntityType()
     { return this.entityType; }

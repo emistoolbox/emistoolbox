@@ -758,6 +758,7 @@ public class XmlWriter
     private Element getEmisPdfReportConfig(Element parent, EmisPdfReportConfig config, String version)
     {
         Element tag = createElementAndAdd("pdfReport", parent);
+        setAttr(tag, "version", version); 
         setAttr(tag, "name", config.getName());
         setAttr(tag, "entityType", config.getEntityType());
         setAttr(tag, "pageSize", "" + config.getPageSize());

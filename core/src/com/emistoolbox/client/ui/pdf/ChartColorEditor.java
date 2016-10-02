@@ -66,7 +66,7 @@ public class ChartColorEditor extends HTML implements EmisEditor<ChartColor>
 	private void updateUi()
 	{
 		if (color == null)
-			setHTML("<div style='border: 1px solid #000; width: 20px; height: 10px;><small>X</small></div>"); 
+			setHTML("<div style='border: 1px solid #000; width: 20px; height: 10px;'><small>X</small></div>"); 
 		else
 			setHTML("<div style='border: 1px solid #000; width: 20px; height: 10px; background-color: rgba(" + color.toString() + ");'></div>"); 
 	}

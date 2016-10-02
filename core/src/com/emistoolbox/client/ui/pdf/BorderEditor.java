@@ -58,7 +58,7 @@ public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<Bo
 			row++; 
 		}
 		
-		
+		updateUi(); 
 	}
 
 	@Override

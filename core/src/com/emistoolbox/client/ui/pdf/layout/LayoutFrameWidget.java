@@ -2,6 +2,8 @@ package com.emistoolbox.client.ui.pdf.layout;
 
 import com.emistoolbox.client.EmisEditor;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseEvent;
@@ -9,22 +11,61 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ListBox;
 
-public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameConfig>
+public class LayoutFrameWidget extends AbsolutePanel implements EmisEditor<LayoutFrameConfig>
 {
 	private LayoutPageEditor pageEditor; 
 	private LayoutFrameConfig frameConfig; 
+	private HTML uiHtml = new HTML(); 
+
+	private ListBox uiMove = new ListBox(); 
 	
-	public LayoutFrameWidget(LayoutPageEditor pageEditor)
+	public LayoutFrameWidget(final LayoutPageEditor pageEditor)
 	{
 		this.pageEditor = pageEditor; 
 		setStyleName("layoutFrame"); 
 		
+		add(uiHtml, 0, 0);
+		setWidth("100%");
+		setHeight("100%");
+
+		add(uiMove, 5, 5); 
+		uiMove.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				int index = uiMove.getSelectedIndex(); 
+				if (index <= 0)
+					return; 
+				
+				String value = uiMove.getValue(index);
+				if (value.equals("del"))
+					pageEditor.getReportEditor().moveFrame(LayoutFrameWidget.this, null);
+				else
+					pageEditor.getReportEditor().moveFrame(LayoutFrameWidget.this, new Integer(value));
+			}
+		}); 
+		
 		MouseHandler mouseHandler = new MouseHandler(); 
-		addMouseDownHandler(mouseHandler); 
-		addMouseUpHandler(mouseHandler); 
-		addMouseMoveHandler(mouseHandler); 
+		uiHtml.addMouseDownHandler(mouseHandler); 
+		uiHtml.addMouseUpHandler(mouseHandler); 
+		uiHtml.addMouseMoveHandler(mouseHandler); 
+	}
+	
+	public void updatePageIndex(int index, int totalPages)
+	{
+		uiMove.clear(); 
+		
+		uiMove.addItem(""); 
+		for (int i = 0; i < totalPages; i++) 
+		{
+			if (i != index)
+				uiMove.addItem("Page " + (i + 1), "" + i);
+		}
+
+		uiMove.addItem("(delete)", "del"); 
 	}
 	
 	@Override
@@ -84,7 +125,7 @@ public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameCon
 			else
 				mode = MouseMode.MOVE; 
 			
-			pageEditor.selectFrameConfig(LayoutFrameWidget.this); 
+			pageEditor.selectFrame(LayoutFrameWidget.this); 
 		}
 		
 		private void updatePosition(MouseEvent event)

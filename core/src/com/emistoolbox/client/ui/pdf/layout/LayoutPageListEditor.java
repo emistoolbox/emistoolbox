@@ -27,19 +27,18 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class LayoutPageListEditor extends VerticalPanel implements EmisEditor<List<LayoutPageConfig>>
 {
 	private LayoutPageEditor uiPageEditor;
-	private LayoutContentListEditor uiContentList; 
 	private ListBoxWithUserObjects<LayoutPageConfig> uiPages = new ListBoxWithUserObjects<LayoutPageConfig>(); 
 	private PushButton btnAddPage = new PushButton("Add Page"); 
 	private PushButton btnMoveUp = new PushButton("Up"); 
 	private PushButton btnMoveDown = new PushButton("Down"); 
 	private PushButton btnDelPage = new PushButton("Del Page");
 	
-	public LayoutPageListEditor(LayoutPageEditor editor, LayoutContentListEditor uiContentList)
+	public LayoutPageListEditor(LayoutPageEditor editor)
 	{
 		this.uiPageEditor = editor; 
-		this.uiContentList = uiContentList; 
 		setWidth("100%"); 
-		
+
+		/*
 		uiContentList.addAddToPageHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -58,7 +57,8 @@ public class LayoutPageListEditor extends VerticalPanel implements EmisEditor<Li
 				page.addFrame(frame);
 			}
 		}); 
-
+		 */ 
+		
 		uiPages.setVisibleItemCount(5);
 		uiPages.setWidth("100%");
 
@@ -136,37 +136,6 @@ public class LayoutPageListEditor extends VerticalPanel implements EmisEditor<Li
 		}); 
 	}
 	
-	private Rectangle getDefaultPosition(List<LayoutFrameConfig> frames)
-	{
-		double xmin = 1000.0; 
-		double xmax = 0.0; 
-		double ymin = 1000.0; 
-		double ymax = 0.0; 
-
-		for (LayoutFrameConfig frame : frames)
-		{
-			Rectangle r = frame.getPosition(); 
-			if (r != null)
-			{
-				xmin = Math.min(xmin, r.getLeft());  
-				xmax = Math.max(xmax, r.getRight());  
-				ymin = Math.min(ymin, r.getTop());  
-				ymax = Math.max(ymax, r.getBottom());  
-			}
-		}
-		
-		if (xmin > 100.0)
-			return new Rectangle(0, 0, 100, 100); 
-		
-		if (ymin > 100.0)
-			return new Rectangle(0, 0, 100, 100); 
-		
-		if (xmax < ymax)
-			return new Rectangle(xmax, 0, xmax + 100, 100); 
-		else
-			return new Rectangle(0, ymax, 100, ymax + 100); 
-	}
-	
 	@Override
 	public void commit() 
 	{ uiPageEditor.commit(); }
@@ -224,8 +193,6 @@ public class LayoutPageListEditor extends VerticalPanel implements EmisEditor<Li
 		btnDelPage.setEnabled(index != -1);
 		btnMoveUp.setEnabled(index > 0); 
 		btnMoveDown.setEnabled(index != -1 && index < count - 1); 
-		
-		uiContentList.enableAddButton(index != -1);
 		
 		if (index != -1)
 			uiPageEditor.set(uiPages.getUserObject());

@@ -6,6 +6,7 @@ import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.util.LayoutSides;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.TextBox;
 
 public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameConfig>
@@ -14,7 +15,7 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 	
 	private Map<String, TextBox> uiTexts; 
 	private ChartColorEditor uiBgColor = new ChartColorEditor(); 
-	private TextBox uiBorderRadius = new TextBox(); 
+	private IntPicker uiBorderRadius = new IntPicker(new int[] { 0, 1, 2, 3, 4, 5, 7, 10}, "", "px");  
 	private BorderEditor uiBorders = new BorderEditor(); 
 	private IntPicker uiPadding = new IntPicker(new int[] { 0, 2, 5, 10, 15, 20 }, "", "px");  
 	
@@ -27,6 +28,7 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		setWidget(row++, 1, uiBgColor);
 
 		setText(row, 0, "Borders");
+		getCellFormatter().setVerticalAlignment(row, 0, HasVerticalAlignment.ALIGN_TOP);
 		setWidget(row++, 1, uiBorders);
 
 		setText(row, 0, "Border Radius");
@@ -50,7 +52,7 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		config.setBackgroundColour(uiBgColor.get());
 		config.setBorders(uiBorders.get());
 
-		try { config.setBorderRadius(new Integer(uiBorderRadius.getText())); }
+		try { config.setBorderRadius(uiBorderRadius.get()); }
 		catch (Throwable err)
 		{ config.setBorderRadius(0); }
 		
@@ -77,7 +79,7 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 			setVisible(true); 
 
 			uiBgColor.set(config.getBackgroundColour()); 
-			uiBorderRadius.setText("" + config.getBorderRadius()); 
+			uiBorderRadius.set(config.getBorderRadius()); 
 			uiBorders.set(config.getBorders()); 
 
 			uiPadding.set((int) Math.round(config.getPadding().getLeft()));
