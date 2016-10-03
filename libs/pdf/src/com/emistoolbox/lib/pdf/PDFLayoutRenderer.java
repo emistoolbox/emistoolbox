@@ -118,7 +118,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		document.addPage (page);
 	}
 
-	final static Set<String> standardFontNames = new HashSet<String> ();
+	final private static Set<String> standardFontNames = new HashSet<String> ();
 	static {
 		standardFontNames.add (PDFLayoutFont.FONT_TIMES);
 		standardFontNames.add (PDFLayoutFont.FONT_HELVETICA);
@@ -590,7 +590,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		}
 	}
 
-	static abstract class ResourceLabeler<T> {
+	private static abstract class ResourceLabeler<T> {
 		private int index;
 		private Map<T,String> labels = new HashMap<T,String> ();
 		private String prefix;
@@ -624,7 +624,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		abstract PDFDictionary getResource (T t);
 	}
 
-	ResourceLabeler<PDFLayoutFont> fontLabeler = new ResourceLabeler<PDFLayoutFont> ("F","Font") {
+	private ResourceLabeler<PDFLayoutFont> fontLabeler = new ResourceLabeler<PDFLayoutFont> ("F","Font") {
 		PDFDictionary getResource (PDFLayoutFont layoutFont) {
 			if (!standardFontNames.contains (layoutFont.getFontName ()))
 				throw new Error ("only standard fonts implemented");
@@ -653,7 +653,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		}
 	};
 
-	ResourceLabeler<Double> alphaStateLabeler = new ResourceLabeler<Double> ("AGS","ExtGState") {
+	private ResourceLabeler<Double> alphaStateLabeler = new ResourceLabeler<Double> ("AGS","ExtGState") {
 		PDFDictionary getResource (Double alpha) {
 			PDFDictionary dictionary = new PDFDictionary ("ExtGState");
 			dictionary.put ("CA",new PDFReal (alpha));
@@ -662,7 +662,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		}
 	};
 
-	ResourceLabeler<PDFLayoutImageElement> imageLabeler = new ResourceLabeler<PDFLayoutImageElement> ("Im","XObject") {
+	private ResourceLabeler<PDFLayoutImageElement> imageLabeler = new ResourceLabeler<PDFLayoutImageElement> ("Im","XObject") {
 		PDFDictionary getResource (PDFLayoutImageElement imageElement) {
 			BufferedImage image = getImage (imageElement);
 			ColorModel colorModel = image.getColorModel ();
@@ -755,7 +755,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		});
 	}
 	
-	class TableLayout {
+	private class TableLayout {
 		LinearLayout horizontalLayout;
 		LinearLayout verticalLayout;
 		
@@ -790,7 +790,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		}
 	}
 	
-	static class LinearLayout {
+	private static class LinearLayout {
 		double [] cellDimensions;
 		double [] borderDimensions;
 		
@@ -907,7 +907,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return page;
 	}
 
-	Map<PDFLayoutTextElement,List<String>> pieceMap = new HashMap<PDFLayoutTextElement,List<String>> ();
+	private Map<PDFLayoutTextElement,List<String>> pieceMap = new HashMap<PDFLayoutTextElement,List<String>> ();
 
 	// TODO: proper handling of multiple spaces
 	private List<String> wrap (PDFLayoutTextElement element,double maxWidth) {
@@ -936,8 +936,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 
 //  http://math.stackexchange.com/a/221194
 //  http://en.wikipedia.org/wiki/Composite_B%C3%A9zier_curve#Approximating_circular_arcs
-	final static double k = 1 - 4 * (Math.sqrt (2) - 1) / 3;
-	final static double [] ds = {1,(7 - 4 * Math.sqrt (2)) / 3};
+//	final static double k = 1 - 4 * (Math.sqrt (2) - 1) / 3;
+	final private static double [] ds = {1,(7 - 4 * Math.sqrt (2)) / 3};
 	private Point [] [] getCornerPoints (Rectangle r,double radius,PDFLayoutLineStyle [] lineStyles) {
 		Point [] dirs = {new Point (0,1),new Point (1,0)};
 		Point [] [] cornerPoints = new Point [4] [4];
@@ -1002,7 +1002,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		print (p.y);
 	}
 
-	Map<PDFLayoutImageElement,byte []> imageDataMap = new HashMap<PDFLayoutImageElement,byte[]> ();
+	private Map<PDFLayoutImageElement,byte []> imageDataMap = new HashMap<PDFLayoutImageElement,byte[]> ();
 
 	private byte [] getImageData (PDFLayoutImageElement imageElement) {
 		byte [] imageData = imageDataMap.get (imageElement);
@@ -1018,7 +1018,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return imageData;
 	}
 
-	Map<PDFLayoutImageElement,BufferedImage> imageMap = new HashMap<PDFLayoutImageElement,BufferedImage> ();
+	private Map<PDFLayoutImageElement,BufferedImage> imageMap = new HashMap<PDFLayoutImageElement,BufferedImage> ();
 
 	private BufferedImage getImage (PDFLayoutImageElement imageElement) {
 		BufferedImage image = imageMap.get (imageElement);
