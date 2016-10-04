@@ -25,7 +25,7 @@ public class LinkPDFLayoutTest {
 		PDFLayoutFont font = new PDFLayoutFont ("Courier",14,PDFLayoutFontStyle.ITALIC);
 		PDFLayoutTextElement pageLinkElement = new PDFLayoutTextElement ("page link",font);
 		PDFLayoutTextElement textLinkElement = new PDFLayoutTextElement ("text link",font);
-		PDFLayoutTextElement zoomLinkElement = new PDFLayoutTextElement ("zoom link",font);
+		PDFLayoutTextElement zoomLinkElement = new PDFLayoutTextElement ("a rather long link text for the zoom link so we can see it wrapped",font);
 		innerFrame.addElement (pageLinkElement.pad (5).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.BELOW));
 		innerFrame.addElement (textLinkElement.pad (5).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.BELOW));
 		innerFrame.addElement (zoomLinkElement.pad (5).align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.BELOW));

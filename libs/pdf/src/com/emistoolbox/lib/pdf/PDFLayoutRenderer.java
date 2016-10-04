@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -144,7 +145,21 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			annotation.put ("Subtype","Link");
 			if (link.getBorderWidth () != 1 || link.getBorderRadius () != 0)
 				annotation.put ("Border",new PDFArray (new double [] {link.getBorderRadius (),link.getBorderRadius (),link.getBorderWidth ()}));
-			annotation.put ("Rect",new PDFArray (position.box));
+			annotation.put ("Rect",new PDFArray (position.getBoundingBox ()));
+			if (position.boxes.size () > 1) {
+				PDFArray quadPoints = new PDFArray ();
+				for (Rectangle box : position.boxes) {
+					quadPoints.add (new PDFReal (box.xmin));
+					quadPoints.add (new PDFReal (box.ymin));
+					quadPoints.add (new PDFReal (box.xmax));
+					quadPoints.add (new PDFReal (box.ymin));
+					quadPoints.add (new PDFReal (box.xmax));
+					quadPoints.add (new PDFReal (box.ymax));
+					quadPoints.add (new PDFReal (box.xmin));
+					quadPoints.add (new PDFReal (box.ymax));
+				}
+				annotation.put ("QuadPoints",quadPoints);
+			}
 			PDFArray destination;
 			if (link instanceof PDFLayoutPageLink)
 				destination = Position.getPageDestination (layoutMap.get (((PDFLayoutPageLink) link).getTargetPage ()));
@@ -530,9 +545,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		if (isLeaf)
 			popGraphicsState ();
 
-		Rectangle linkBox = new Rectangle (elementBox);
-		linkBox.transformBy (getTotalTransform ());
-		positionMap.put (element,new Position (currentPage,linkBox));
+		Collection<Rectangle> linkBoxes = element instanceof PDFLayoutTextElement ? getContentRectangles ((PDFLayoutTextElement) element) : Collections.singleton (elementBox);
+		for (Rectangle linkBox : linkBoxes)
+			linkBox.transformBy (getTotalTransform ());
+		positionMap.put (element,new Position (currentPage,linkBoxes));
 		
 		popTransform ();
 		
@@ -637,6 +653,27 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return null;
 	}
 
+	private List<Rectangle> getContentRectangles (PDFLayoutTextElement textElement) {
+		PDFLayoutFont layoutFont = textElement.getFont ();
+		PDFFont pdfFont = getPDFFont (layoutFont);
+		double fontSize = layoutFont.getFontSize ();
+		double descent = fontSize * pdfFont.getDescent ();
+		double ascent = fontSize * pdfFont.getAscent ();
+		double textAlignmentFactor = getTextAlignmentFactor (textElement);
+		double ty = 0;
+		TextState textState = getTextState (layoutFont);
+		
+		List<Rectangle> contentRectangles = new ArrayList<Rectangle> ();
+		for (String piece : pieceMap.get (textElement)) {
+			double width = textState.getAdvance (getBytes (piece));
+			contentRectangles.add (new Rectangle (-textAlignmentFactor * width,ty + descent,(1 - textAlignmentFactor) * width,ty + ascent));
+			coordinateCommand ("Tm",1,0,0,1,-textAlignmentFactor * width,ty);
+			ty -= layoutFont.getLineSpacing () * fontSize;
+		}
+		return contentRectangles;
+	}
+
+	
 	public double getTextAlignmentFactor (PDFLayoutTextElement textElement) {
 		PDFLayoutPlacement placement = textElement.getPlacement ();
 		if (!(placement instanceof PDFLayoutAlignmentPlacement))
@@ -658,15 +695,23 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	
 	private static class Position {
 		PDFDictionary page;
-		Rectangle box;
+		Collection<Rectangle> boxes;
 
-		public Position (PDFDictionary page,Rectangle box) {
+		public Position (PDFDictionary page,Collection<Rectangle> boxes) {
 			this.page = page;
-			this.box = box;
+			this.boxes = boxes;
+		}
+		
+		Rectangle getBoundingBox () {
+			Rectangle boundingBox = new Rectangle ();
+			for (Rectangle box : boxes)
+				boundingBox.add (box);
+			return boundingBox;
 		}
 		
 		PDFArray getDestination (boolean zooming) {
-			return zooming ? getDestination (page,"FitR",box.toDoubleArray ()) : getXYZDestination (page,box.ymax);
+			Rectangle boundingBox = getBoundingBox ();
+			return zooming ? getDestination (page,"FitR",boundingBox.toDoubleArray ()) : getXYZDestination (page,boundingBox.ymax);
 		}
 		
 		static PDFArray getPageDestination (PDFDictionary page) {
