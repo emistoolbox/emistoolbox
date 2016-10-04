@@ -10,6 +10,11 @@ import info.joriki.pdf.PDFArray;
 import info.joriki.pdf.PDFDictionary;
 import info.joriki.pdf.PDFFile;
 import info.joriki.pdf.PDFFont;
+import info.joriki.pdf.PDFIndirectObject;
+import info.joriki.pdf.PDFName;
+import info.joriki.pdf.PDFNull;
+import info.joriki.pdf.PDFNumber;
+import info.joriki.pdf.PDFObject;
 import info.joriki.pdf.PDFReal;
 import info.joriki.pdf.PDFStream;
 import info.joriki.pdf.PDFWriter;
@@ -42,14 +47,17 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutBorderStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutCoordinatePlacement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutElementLink;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHighchartElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutImageElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutLineStyle;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutLink;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutPageLink;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTableElement;
@@ -71,6 +79,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	private ResourceRenamer resourceRenamer;
 	private PrintStream ps;
 	private boolean debugging;
+	
+	private PDFDictionary currentPage;
 
 	public PDFLayoutRenderer () {
 		this (false);
@@ -90,14 +100,20 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		for (PDFLayout layout : layouts)
 			render (layout,document);
 		
+		for (PDFLayoutElement element : positionMap.keySet ())
+			addLink (element.getLink (),positionMap.get (element));
+		
 		PDFWriter writer = new PDFWriter (output.getOutputStream ());
 		writer.write (document);
 		writer.close ();
 	}
 
 	private void render (PDFLayout layout,ConstructiblePDFDocument document) throws IOException {
+		currentPage = new PDFDictionary ("Page");
 		transformStack.clear ();
+		tableTransformStack.clear ();
 		transformStack.push (new Transformation ());
+		tableTransformStack.push (new Transformation ());
 		ByteArrayOutputStream baos = new ByteArrayOutputStream ();
 		ps = new PrintStream (baos);
 		resourceRenamer = new ResourceRenamer ("R");
@@ -106,16 +122,40 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		flip (boundingBox);
 		outerFrame.accept (this);
 		ps.close ();
-		PDFDictionary page = new PDFDictionary ("Page");
 		applyPadding (boundingBox,outerFrame,1);
-		page.put ("MediaBox",new PDFArray (boundingBox));
-		page.putIndirect ("Contents",new PDFStream (baos.toByteArray ()));
+		currentPage.put ("MediaBox",new PDFArray (boundingBox));
+		currentPage.putIndirect ("Contents",new PDFStream (baos.toByteArray ()));
 		PDFDictionary resources = resourceRenamer.getResources ();
 		fontLabeler.addResources (resources);
 		imageLabeler.addResources (resources);
 		alphaStateLabeler.addResources (resources);
-		page.putIndirect ("Resources",resources);
-		document.addPage (page);
+		currentPage.putIndirect ("Resources",resources);
+		document.addPage (currentPage);
+		layoutMap.put (layout,currentPage);
+	}
+	
+	private void addLink (PDFLayoutLink link,Position position) {
+		if (link != null) {
+			PDFArray annotations = (PDFArray) position.page.get ("Annots");
+			if (annotations == null) {
+				annotations = new PDFArray ();
+				position.page.put ("Annots",annotations);
+			}
+			PDFDictionary annotation = new PDFDictionary ("Annot");
+			annotation.put ("Subtype","Link");
+			if (link.getBorderWidth () != 1 || link.getBorderRadius () != 0)
+				annotation.put ("Border",new PDFArray (new double [] {link.getBorderRadius (),link.getBorderRadius (),link.getBorderWidth ()}));
+			annotation.put ("Rect",new PDFArray (position.box));
+			PDFArray destination;
+			if (link instanceof PDFLayoutPageLink)
+				destination = Position.getPageDestination (layoutMap.get (((PDFLayoutPageLink) link).getTargetPage ()));
+			else {
+				PDFLayoutElementLink elementLink = (PDFLayoutElementLink) link;
+				destination = positionMap.get (elementLink.getTargetElement ()).getDestination (elementLink.isZooming ());
+			}
+			annotation.put ("Dest",destination);
+			annotations.add (new PDFIndirectObject (annotation));
+		}
 	}
 
 	final private static Set<String> standardFontNames = new HashSet<String> ();
@@ -182,7 +222,14 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		transform (Transformation.matchBoxes (from,to));
 	}
 
+	// The transform stack tracks transforms of non-table elements.
+	// On entering a table, the current transform (at the top of the transform stack)
+	// is concatenated to the current table transform (at the top of the table transform stack)
+	// and the identity is pushed onto the table transform stack. Thus the current total transform
+	// (which is needed to calculated link coordinates) is always the product of the current transform
+	// and the current table transform.
 	private Stack<Transformation> transformStack = new Stack<Transformation> ();
+	private Stack<Transformation> tableTransformStack = new Stack<Transformation> ();
 
 	private void pushTransform () {
 		transformStack.push (getCurrentTransform ());
@@ -200,6 +247,18 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		transformStack.push (new Transformation (transform,transformStack.pop ()));
 	}
 
+	private void popTableTransform () {
+		tableTransformStack.pop ();
+	}
+
+	private void pushTableTransform () {
+		tableTransformStack.push (getTotalTransform ());
+	}
+	
+	private Transformation getTotalTransform () {
+		return new Transformation (getCurrentTransform (),tableTransformStack.peek ());
+	}
+	
 	private void outputTransform (Transformation transform) {
 		coordinateCommand ("cm",transform.matrix);
 	}
@@ -471,6 +530,11 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		element.accept (this);
 		if (isLeaf)
 			popGraphicsState ();
+
+		Rectangle linkBox = new Rectangle (elementBox);
+		linkBox.transformBy (getTotalTransform ());
+		positionMap.put (element,new Position (currentPage,linkBox));
+		
 		popTransform ();
 		
 		return augmentedNewElementBox;
@@ -495,6 +559,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 	
 	public Void visit (PDFLayoutTableElement tableElement) throws IOException {
+		pushTableTransform ();
 		transformStack.push (new Transformation ());
 		TableLayout tableLayout = new TableLayout (tableElement);
 		for (int row = 0;row < tableElement.getRowCount ();row++)
@@ -550,7 +615,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 //												  verticalLineStyle.getColor ());
 //			}
 		
-		transformStack.pop ();
+		popTableTransform ();
+		popTransform ();
 		return null;
 	}
 
@@ -589,7 +655,50 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			throw new Error ("horizontal alignment " + horizontalAlignment + " not implemented");
 		}
 	}
+	
+	private static class Position {
+		PDFDictionary page;
+		Rectangle box;
 
+		public Position (PDFDictionary page,Rectangle box) {
+			this.page = page;
+			this.box = box;
+		}
+		
+		PDFArray getDestination (boolean zooming) {
+			return zooming ? getDestination (page,"FitR",box.toDoubleArray ()) : getXYZDestination (page,box.ymax);
+		}
+		
+		static PDFArray getPageDestination (PDFDictionary page) {
+			return getXYZDestination (page,((PDFNumber) page.getMediaBox ().get (3)).doubleValue ());
+		}
+		
+		private static PDFArray getXYZDestination (PDFDictionary page,double top) {
+			return getDestination (page,"XYZ",null,top,null);
+		}
+		
+		private static PDFArray getDestination (PDFDictionary page,String name,double ... parameters) {
+			PDFArray destination = getDestination (page,name);
+			for (double parameter : parameters)
+				destination.add (new PDFReal (parameter));
+			return destination;
+		}
+
+		private static PDFArray getDestination (PDFDictionary page,String name,Double ... parameters) {
+			PDFArray destination = getDestination (page,name);
+			for (Double parameter : parameters)
+				destination.add (parameter == null ? PDFNull.nullObject : new PDFReal (parameter));
+			return destination;
+		}
+
+		private static PDFArray getDestination (PDFDictionary page,String name) {
+			return new PDFArray (new PDFIndirectObject (page),new PDFName (name));
+		}
+	}
+	
+	private Map<PDFLayoutElement,Position> positionMap = new HashMap<PDFLayoutElement,Position> ();
+	private Map<PDFLayout,PDFDictionary> layoutMap = new HashMap<PDFLayout,PDFDictionary> ();
+	
 	private static abstract class ResourceLabeler<T> {
 		private int index;
 		private Map<T,String> labels = new HashMap<T,String> ();

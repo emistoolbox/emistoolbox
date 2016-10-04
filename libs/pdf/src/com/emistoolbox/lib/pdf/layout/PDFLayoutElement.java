@@ -12,6 +12,7 @@ abstract public class PDFLayoutElement implements Serializable {
 	private PDFLayoutBorderStyle borderStyle;
 	private PDFLayoutAxes<Boolean> displacement = new PDFLayoutAxes<Boolean> (false,false);
 	private Color backgroundColor;
+	private PDFLayoutLink link;
 
 	public PDFLayoutObjectFit getObjectFit () {
 		return objectFit;
@@ -51,6 +52,14 @@ abstract public class PDFLayoutElement implements Serializable {
 
 	public void setDisplacement (PDFLayoutAxes<Boolean> displacement) {
 		this.displacement = displacement;
+	}
+
+	public PDFLayoutLink getLink () {
+		return link;
+	}
+
+	public void setLink (PDFLayoutLink link) {
+		this.link = link;
 	}
 
 	public PDFLayoutElement pad (double padding)
