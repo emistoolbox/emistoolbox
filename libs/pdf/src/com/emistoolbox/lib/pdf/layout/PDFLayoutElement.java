@@ -84,6 +84,11 @@ abstract public class PDFLayoutElement implements Serializable {
 		setPlacement (new PDFLayoutCoordinatePlacement (x,y));
 		return this;
 	}
+	
+	public PDFLayoutElement color (Color color) {
+		setBackgroundColor (color);
+		return this;
+	}
 
 	public PDFLayoutElement align (PDFLayoutHorizontalAlignment horizontalAlignment,PDFLayoutVerticalAlignment verticalAlignment) {
 		setPlacement (new PDFLayoutAlignmentPlacement (horizontalAlignment,verticalAlignment));
