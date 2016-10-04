@@ -4,10 +4,16 @@ import com.emistoolbox.client.EmisEditor;
 import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.client.ui.pdf.layout.LayoutFrameWidget;
 import com.emistoolbox.client.ui.pdf.layout.LayoutPageEditor;
+import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutFrameConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutPageConfigImpl;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -24,7 +30,9 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	private LayoutPageEditor uiPageEditor;
 	
 	private TabPanel uiTabs = new TabPanel(); 
-	private Label uiPageIndex = new Label(""); 
+
+	private IntPicker uiPageIndex = new IntPicker(new int[] { 1 }, "Page ", ""); 
+	private Label uiPageIndexPost = new Label(""); 
 
 	private int pageIndex = -1; 
 	
@@ -41,7 +49,12 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	public LayoutPdfReportEditor()
 	{
 		uiPageEditor = new LayoutPageEditor(this); 
-//		uiPageList = new LayoutPageListEditor(uiPageEditor);
+		uiPageIndex.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				updateUi(uiPageIndex.getSelectedIndex()); 
+			}
+		}); 
 
 		Label title = new Label("Page Layout");
 		title.setStyleName("sectionBlue");
@@ -90,6 +103,7 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		buttons.add(new HTML(" | "));
 		buttons.add(btnPrevPage);
 		buttons.add(uiPageIndex);
+		buttons.add(uiPageIndexPost);
 		buttons.add(btnNextPage);
 		
 		hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -98,19 +112,33 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		setWidget(0, 0, hp);
 		setWidget(1, 0, uiPageEditor); 
 
-		EmisUtils.init(btnNewText, 90); 
-		EmisUtils.init(btnNewVars, 90); 
+		EmisUtils.init(btnNewText, 120); 
+		EmisUtils.init(btnNewVars, 120); 
 		VerticalPanel uiNewContent = new VerticalPanel(); 
 		uiNewContent.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
 		uiNewContent.add(new HTML("Add a new text frame with title and body."));
 		uiNewContent.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		uiNewContent.add(btnNewText);
 		uiNewContent.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-		uiNewContent.add(new HTML("Add a new list of variables of your location.")); 
+		uiNewContent.add(new HTML("<hr>Add a new list of variables of your location.")); 
 		uiNewContent.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		uiNewContent.add(btnNewVars);
 		uiNewContent.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-		uiNewContent.add(new HTML("<p>To add charts, tables or priortiy lists, go to the 'Analysis' tab, create a chart, table or priority list and then select <b>[Add to Report]</b>")); 
+		uiNewContent.add(new HTML("<hr><p>To add charts, tables or priortiy lists, go to the 'Analysis' tab, create a chart, table or priority list and then select <b>[Add to Report]</b>")); 
+		
+		btnNewText.addClickHandler(new ClickHandler() {
+		@Override
+			public void onClick(ClickEvent event) {
+				addNewTextContent(); 
+			}
+		}); 
+		
+		btnNewVars.addClickHandler(new ClickHandler() {
+		@Override
+			public void onClick(ClickEvent event) {
+				addNewVariableContent(); 
+			}
+		}); 
 		
 		//		uiTabs.add(uiPageList, "Pages");
 		uiTabs.add(uiReportProps, "Report"); 
@@ -130,6 +158,22 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		getColumnFormatter().setWidth(0, "70%");
 		getColumnFormatter().setWidth(1, "30%");
 	}
+	
+	private void addNewTextContent()
+	{
+		final PdfTextContentConfigImpl textContent = new PdfTextContentConfigImpl(); 
+	    PdfReportEditor.editText(textContent, new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				LayoutFrameConfigImpl frame = new LayoutFrameConfigImpl();
+				frame.setContentConfig(textContent);
+				uiPageEditor.addFrame(frame, true);
+			}
+	    }); 
+	}
+	
+	private void addNewVariableContent()
+	{}
 	
 	@Override
 	public void commit()
@@ -166,10 +210,7 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	{
 		uiPageEditor.removeFrame(frame); 
 		if (newPageIndex != null)
-		{
 			reportConfig.getPages().get(newPageIndex).addFrame(frame.get()); 
-			updateUi(newPageIndex); 
-		}
 	}
 	
 	private void updateUi(int indexOfPage)
@@ -190,7 +231,13 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		uiPageEditor.set(reportConfig.getPages().get(pageIndex));
 		uiPageEditor.updatePageIndex(pageIndex, reportConfig.getPages().size()); 
 
-		uiPageIndex.setText("Page " + (pageIndex + 1) + " of " + reportConfig.getPages().size());
+		int[] values = new int[reportConfig.getPages().size()];
+		for (int i = 0; i < values.length; i++)
+			values[i] = i + 1; 
+		uiPageIndex.init(values, "Page ", "");
+		uiPageIndexPost.setText(" of " + reportConfig.getPages().size());
+		uiPageIndex.setSelectedIndex(indexOfPage);
+		
 		btnDelPage.setEnabled(pageIndex != -1);
 		btnNextPage.setEnabled(pageIndex + 1 < reportConfig.getPages().size());
 		btnPrevPage.setEnabled(pageIndex > 0);

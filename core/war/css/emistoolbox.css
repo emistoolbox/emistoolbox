@@ -558,17 +558,12 @@ table.emisResult tbody tr:nth-child(2n) td.selected {
 }
 
 .layoutFrame { 
-	background-color: #ccccff; 
-	color: #000099; 
-	border: 2px solid #0000cc; 
+	background-color: #fff; 
+	color: #000; 
+	border: 2px dashed #ccc; 
 }
 
 .layoutFrame.selected {
-	border: 2px solid #ff0000; 
-}
-
-.colorpicker{
-	background-image: url();
-	width: 200px; 
-	height: 100px;
+	border: 2px dashed #fcc; 
+	z-order: 10; 
 }

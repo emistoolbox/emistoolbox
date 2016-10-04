@@ -12,6 +12,11 @@
   </servlet>
 
   <servlet>
+    <servlet-name>HtmlServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.HtmlServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
     <servlet-name>EmisChartServlet</servlet-name>
     <servlet-class>com.emistoolbox.server.servlet.EmisChartServlet</servlet-class>
   </servlet>
@@ -108,7 +113,6 @@
     <servlet-name>StopServlet</servlet-name>
     <url-pattern>/stop</url-pattern>
   </servlet-mapping>
-
   
   <servlet-mapping>
     <servlet-name>ApiImportServlet</servlet-name>
@@ -149,6 +153,17 @@
     <servlet-name>RedirectServlet</servlet-name>
     <url-pattern>/show</url-pattern>
   </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>HtmlServlet</servlet-name>
+    <url-pattern>/emistoolbox/html/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>HtmlServlet</servlet-name>
+    <url-pattern>/html/*</url-pattern>
+  </servlet-mapping>
+
   
   <!-- Default page to serve -->
   <welcome-file-list>

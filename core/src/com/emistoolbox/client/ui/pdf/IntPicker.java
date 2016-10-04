@@ -13,14 +13,19 @@ public class IntPicker extends ListBox implements EmisEditor<Integer>
 	{ this(values, "", ""); } 
 	
 	public IntPicker(int[] values, String prefix, String postfix)
+	{ init(values, prefix, postfix); } 
+	
+	public void init(int[] values, String prefix, String postfix)
 	{
+		this.clear(); 
+		
 		Arrays.sort(values);
 		this.values = values; 
 		
 		for (int i : values)
-			addItem(prefix + i + postfix); 
+			addItem(prefix + i + postfix);
 	}
-
+	
 	@Override
 	public void commit() 
 	{}

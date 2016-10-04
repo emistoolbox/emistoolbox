@@ -62,6 +62,4 @@ public class ChartColor implements Serializable
 		ChartColor col = (ChartColor) obj; 
 		return a == col.a && value == col.value;  
 	}
-   
-    
 }

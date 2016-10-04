@@ -1,7 +1,17 @@
 package com.emistoolbox.client.ui.pdf.layout;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.emistoolbox.client.EmisEditor;
+import com.emistoolbox.common.ChartFont;
+import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
+import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.impl.CSSCreator;
+import com.google.gwt.dom.client.Style.ListStyleType;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -15,58 +25,53 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ListBox;
 
-public class LayoutFrameWidget extends AbsolutePanel implements EmisEditor<LayoutFrameConfig>
+public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameConfig>
 {
 	private LayoutPageEditor pageEditor; 
 	private LayoutFrameConfig frameConfig; 
-	private HTML uiHtml = new HTML(); 
 
-	private ListBox uiMove = new ListBox(); 
-	
 	public LayoutFrameWidget(final LayoutPageEditor pageEditor)
 	{
 		this.pageEditor = pageEditor; 
 		setStyleName("layoutFrame"); 
 		
-		add(uiHtml, 0, 0);
 		setWidth("100%");
 		setHeight("100%");
 
-		add(uiMove, 5, 5); 
-		uiMove.addChangeHandler(new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				int index = uiMove.getSelectedIndex(); 
-				if (index <= 0)
-					return; 
-				
-				String value = uiMove.getValue(index);
-				if (value.equals("del"))
-					pageEditor.getReportEditor().moveFrame(LayoutFrameWidget.this, null);
-				else
-					pageEditor.getReportEditor().moveFrame(LayoutFrameWidget.this, new Integer(value));
-			}
-		}); 
+//		uiMove.addChangeHandler(new ChangeHandler() {
+//			@Override
+//			public void onChange(ChangeEvent event) {
+//				int index = uiMove.getSelectedIndex(); 
+//				if (index <= 0)
+//					return; 
+//				
+//				String value = uiMove.getValue(index);
+//				if (value.equals("del"))
+//					pageEditor.getReportEditor().moveFrame(LayoutFrameWidget.this, null);
+//				else
+//					pageEditor.getReportEditor().moveFrame(LayoutFrameWidget.this, new Integer(value));
+//			}
+//		}); 
 		
 		MouseHandler mouseHandler = new MouseHandler(); 
-		uiHtml.addMouseDownHandler(mouseHandler); 
-		uiHtml.addMouseUpHandler(mouseHandler); 
-		uiHtml.addMouseMoveHandler(mouseHandler); 
+		addMouseDownHandler(mouseHandler); 
+		addMouseUpHandler(mouseHandler); 
+		addMouseMoveHandler(mouseHandler); 
 	}
 	
-	public void updatePageIndex(int index, int totalPages)
-	{
-		uiMove.clear(); 
-		
-		uiMove.addItem(""); 
-		for (int i = 0; i < totalPages; i++) 
-		{
-			if (i != index)
-				uiMove.addItem("Page " + (i + 1), "" + i);
-		}
-
-		uiMove.addItem("(delete)", "del"); 
-	}
+//	public void updatePageIndex(int index, int totalPages)
+//	{
+//		clear(); 
+//		
+//		uiMove.addItem(""); 
+//		for (int i = 0; i < totalPages; i++) 
+//		{
+//			if (i != index)
+//				uiMove.addItem("Page " + (i + 1), "" + i);
+//		}
+//
+//		uiMove.addItem("(delete)", "del"); 
+//	}
 	
 	@Override
 	public void commit() 
@@ -119,8 +124,8 @@ public class LayoutFrameWidget extends AbsolutePanel implements EmisEditor<Layou
 		{
 			lastX = event.getScreenX(); 
 			lastY = event.getScreenY(); 
-			
-			if (lastX >= getOffsetWidth() - 15 && lastY >= getOffsetHeight() - 15)
+
+			if (event.isShiftKeyDown())
 				mode = MouseMode.RESIZE; 
 			else
 				mode = MouseMode.MOVE; 
@@ -136,10 +141,33 @@ public class LayoutFrameWidget extends AbsolutePanel implements EmisEditor<Layou
 			lastX = event.getScreenX(); 
 			lastY = event.getScreenY(); 
 			
-			if (mode == MouseMode.RESIZE)
+			if (event.isShiftKeyDown()) // mode == MouseMode.RESIZE)
 				resize(xOffset, yOffset); 
 			else
 				pageEditor.moveFrame(LayoutFrameWidget.this, xOffset, yOffset); 
 		}
 	}
+	
+	public void updateFrameStyle()
+	{ 
+		getElement().setAttribute("style", CSSCreator.getCssAsString(frameConfig));
+
+		setHTML(getHtmlText(frameConfig, PdfText.TEXT_TITLE) + getHtmlText(frameConfig, PdfText.TEXT_SUBTITLE) + getContentHtml(frameConfig));  
+	}
+	
+	private String getHtmlText(TextSet texts, String key)
+	{
+		String text = texts.getText(key); 
+		if (text == null || text.equals(""))
+			return "";
+		
+		ChartFont font = texts.getFont(key); 
+		if (font == null)
+			return "<span>" + text + "</span>"; 
+		
+		return "<span style='" + CSSCreator.getCssAsString(font) + "'>" + text + "</span>"; 
+	}
+	
+	private String getContentHtml(LayoutFrameConfig config)
+	{ return config.getContentConfig().getClass().getName(); }
 }

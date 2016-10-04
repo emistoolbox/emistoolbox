@@ -65,6 +65,7 @@ import com.emistoolbox.server.renderer.charts.impl.ChartUtil;
 import com.emistoolbox.server.renderer.charts.impl.highcharts.HighchartChartRenderer;
 import com.emistoolbox.server.renderer.gis.GisUtil;
 import com.emistoolbox.server.renderer.pdfreport.PdfReportWriter;
+import com.emistoolbox.server.renderer.pdfreport.html.HTMLReportWriter;
 import com.emistoolbox.server.renderer.pdfreport.html.ResultToTableGenerator;
 import com.emistoolbox.server.renderer.pdfreport.html.ResultToTableGeneratorImpl;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfUtil;
@@ -779,6 +780,18 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
         { return GisUtil.getGisResult(metaResult, getDataSet(dataset), mapType); }
         catch (Throwable err)
         { throw handleException(err); }
+    }
+
+    public String getRenderedReportAsHtmlResult(String dataset, ReportMetaResult metaResult) throws IOException
+    {
+    	try { 
+    		return getRenderedReportResultInternal(dataset, metaResult, new HTMLReportWriter().setChartRenderer(EmisToolboxServiceImpl.getChartRenderer())); 
+    	}
+    	catch (Throwable err)
+    	{
+    		err.printStackTrace(); 
+    		return "report8645444822689231495.zip"; 
+    	}
     }
 
     public String getRenderedReportResult(String dataset, ReportMetaResult metaResult) throws IOException

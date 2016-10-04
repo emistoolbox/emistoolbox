@@ -20,6 +20,18 @@ public class CSSCreator {
 	public static String getCss (ChartColor color) {
 		return "rgba(" + color.getRed () + "," + color.getGreen () + "," + color.getBlue () + "," + toString (color.getAlpha () / 255.) + ")";
 	}
+	public static String getCssAsString(Map<String, String> values)
+	{
+		String result = ""; 
+		for (Map.Entry<String, String> entry : values.entrySet())
+			result += entry.getKey() + ": " + entry.getValue() + ";"; 
+
+		return result; 
+	}
+	
+	public static String getCssAsString(ChartFont font) {
+		return getCssAsString(getCss(font)); 
+	}
 	
 	public static Map<String,String> getCss (ChartFont font) {
 		Map<String,String> map = new HashMap<String,String> ();
@@ -41,6 +53,10 @@ public class CSSCreator {
 		return map;
 	}
 
+	public static String getCssAsString(LayoutFrameConfig config) {
+		return getCssAsString(getCss(config)); 
+	}
+	
 	public static Map<String,String> getCss (LayoutFrameConfig config) {
 		Map<String,String> map = new HashMap<String,String> ();
 		
@@ -91,6 +107,11 @@ public class CSSCreator {
 		
 		return map;
 	}
+
+	public static String getCssAsString(LayoutPageConfig config) {
+		return getCssAsString(getCss(config)); 
+	}
+	
 
 	public static Map<String,String> getCss (LayoutPageConfig config) {
 		Map<String,String> map = new HashMap<String,String> ();

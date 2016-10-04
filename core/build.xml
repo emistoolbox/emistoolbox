@@ -144,9 +144,10 @@
       <arg value="report=layoutTest-2"/>
       
       <arg value="hierarchy=default"/>
-	  <arg value="location=Zone:53"/> <!-- School:1856 -->
+	  <arg value="location=Zone:64"/> <!-- School:1856 -->
+	  <arg value="-html"/> <!-- School:1856 -->
 
-      <arg value="date=T3 2015"/>
+      <arg value="date=T3 2013"/>
       <classpath>
         <path refid="testPath"/>
       </classpath>

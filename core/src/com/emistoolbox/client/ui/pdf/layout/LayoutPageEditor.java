@@ -21,6 +21,7 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 	private LayoutPageConfig pageConfig; 
 	
 	private AbsolutePanel uiPage = new AbsolutePanel(); 
+	private HTML uiNoContent= new HTML("<p>This page has no content.</p><p>To add new content, click on the 'New Content' frame.</p>"); 
 
 	private double panelToPageScale = 1.0;
 	private int xOffset; 
@@ -93,6 +94,7 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		Rectangle margins = PdfText.getMargins(pageSize); 
 		
 		uiPage.setPixelSize((int) Math.round(size.x), (int) Math.round(size.y));
+		uiNoContent.setPixelSize((int) Math.round(size.x), (int) Math.round(size.y));
 		
 		xOffset = (int) Math.round(margins.getLeft());
 		yOffset = (int) Math.round(margins.getTop());
@@ -116,7 +118,6 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 
 	private void commit(LayoutFrameWidget uiFrame)
 	{
-
 		Rectangle pos = new Rectangle(); 
 		pos.setLeft(getPageX(uiPage.getWidgetLeft(uiFrame) - xOffset));
 		pos.setRight(pos.getLeft() + getPageX(uiFrame.getOffsetWidth()));
@@ -159,21 +160,28 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		uiPage.clear(); 
 		uiFrameProps.set(null);
 		if (pageConfig == null || pageConfig.getFrames().size() == 0)
-			setWidget(new HTML("<p>This page has no content.</p><p>To add new content, click on the 'New Content' frame.</p>")); 
+			setWidget(uiNoContent); 
 		else
 		{
 			setWidget(uiPage);
 			for (LayoutFrameConfig frame : pageConfig.getFrames())
-				addFrame(frame, false); 
+				addFrameUi(frame); 
 		}
 	}
 
 	public void addFrame(LayoutFrameConfig frame, boolean isNew)
 	{
+		if (isNew)
+			frame.setPosition(new Rectangle(0, 0, 200, 100));
+
+		pageConfig.addFrame(frame);
+		addFrameUi(frame); 
+	}
+	
+	public void addFrameUi(LayoutFrameConfig frame)
+	{
 		LayoutFrameWidget uiFrame = new LayoutFrameWidget(this);
 		uiFrame.set(frame);
-		if (isNew)
-			frame.setPosition(new Rectangle(0, 0, 100, 50));
 	
 		Rectangle pos = frame.getPosition();
 		uiFrame.setPixelSize(getPanelX(pos.getWidth()), getPanelY(pos.getHeight())); 
@@ -185,10 +193,8 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		for (int i = 0; i < uiPage.getWidgetCount(); i++)
 		{
 			Widget w = uiPage.getWidget(i); 
-			if (w instanceof LayoutFrameWidget)
-				continue; 
-			
-			((LayoutFrameWidget) w).updatePageIndex(index, total);
+//			if (w instanceof LayoutFrameWidget)
+//				((LayoutFrameWidget) w).updatePageIndex(index, total);
 		}
 	}
 }

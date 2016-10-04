@@ -2,6 +2,8 @@ package com.emistoolbox.common.results;
 
 import com.emistoolbox.common.model.analysis.EmisIndicator;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
+import com.emistoolbox.common.model.meta.EmisMetaEntity;
+import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -29,5 +31,7 @@ public abstract interface MetaResultValue extends Serializable
     public abstract String getFormat();
     
     public abstract Set<EmisMetaDateEnum> getUsedDateTypes(); 
+    
+	public EmisMetaEntity getSeniorEntity(EmisMetaHierarchy hierarchy); 
 }
 

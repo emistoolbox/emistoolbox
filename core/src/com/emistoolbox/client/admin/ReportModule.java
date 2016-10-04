@@ -32,6 +32,7 @@ import com.emistoolbox.common.model.priolist.PriorityListItem;
 import com.emistoolbox.common.model.validation.EmisValidationResult;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.common.results.ExcelReportMetaResult;
 import com.emistoolbox.common.results.GisMetaResult;
 import com.emistoolbox.common.results.MetaResult;
@@ -880,7 +881,7 @@ public class ReportModule
         });
     }
 
-    private void loadReport(ReportMetaResult reportMetaResult, final SimplePanel uiContainer)
+    private void loadReport(final ReportMetaResult reportMetaResult, final SimplePanel uiContainer)
     {
         uiContainer.setWidget(new HTML(Message.messageReport().reportLoading()));
         reportMetaResult.setGlobalFilter(uiGlobalFilter.createCopy()); 
@@ -888,18 +889,55 @@ public class ReportModule
             public void onSuccess(String result)
             {
                 super.onSuccess(result);
-                String html = null;
                 if (result != null)
-                    html = "<a href='/emistoolbox/content?report=" + result + "' class='pdf' target='_blank'>" + Message.messageReport().download() + "</a>";
-                else
                 {
-                    html = "<b>" + Message.messageReport().errorFailedToRenderReport() + "</b>";
+                	VerticalPanel vp = new VerticalPanel();
+                	vp.setSpacing(5);
+                	vp.add(new HTML("<a href='/emistoolbox/content?report=" + result + "' class='pdf' target='_blank'>" + Message.messageReport().download() + "</a>")); 
+                	
+                	if (reportMetaResult.getReportConfig() instanceof LayoutPdfReportConfig)
+                	{
+                    	vp.add(new HTML("<hr>You can also create an HTML version of this report."));
+                    	PushButton btn = new PushButton("HTML Report"); 
+                    	EmisUtils.init(btn, 120); 
+                    	vp.add(btn);
+                    	vp.add(new HTML("<hr>"));
+
+                    	final SimplePanel uiResult = new SimplePanel(); 
+        				vp.add(uiResult);
+                    	btn.addClickHandler(new ClickHandler() {
+							@Override
+							public void onClick(ClickEvent event) {
+								loadHtmlReport(reportMetaResult, uiResult); 
+							}
+                    	}); 
+                	}
+                	
+                    uiContainer.setWidget(vp);
                 }
-                uiContainer.setWidget(new HTML(html));
+                else
+                    uiContainer.setWidget(new HTML("<b>" + Message.messageReport().errorFailedToRenderReport() + "</b>"));
             }
         });
     }
     
+    private void loadHtmlReport(final ReportMetaResult reportMetaResult, final SimplePanel uiContainer)
+    {
+    	uiContainer.setWidget(new HTML("Loading HTML report..."));
+        this.toolbox.getService().getRenderedReportAsHtmlResult(datasetName, reportMetaResult, new StatusAsyncCallback<String>(Message.messageReport().collectingResult()) {
+            public void onSuccess(String result)
+            {
+                super.onSuccess(result);
+                if (result != null && result.endsWith(".zip"))
+                {
+                	String resultDir = result.substring(0, result.length() - 4); 
+                	uiContainer.setWidget(new HTML("<a href='/emistoolbox/html/reports/" + result + "' class='zip' target='_blank'>ZIP</a> - <a href='/emistoolbox/html/reports/" + resultDir + "/index.html' target='_blank'>Preview</a>")); 
+                }
+                else
+                    uiContainer.setWidget(new HTML("<b>" + Message.messageReport().errorFailedToRenderReport() + "</b>"));
+            }
+        }); 
+    }
     private void loadExcelReport(ExcelReportMetaResult metaResult, final SimplePanel uiContainer)
     {
         uiContainer.setWidget(new HTML(Message.messageReport().reportLoading())); 

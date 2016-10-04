@@ -8,6 +8,7 @@ import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.renderer.pdfreport.PdfMetaResultContentConfig;
 import com.emistoolbox.common.results.MetaResult;
 import com.emistoolbox.common.results.MetaResultDimensionUtil;
+import com.emistoolbox.common.results.MetaResultValue;
 
 import java.io.Serializable;
 
@@ -33,20 +34,23 @@ public abstract class PdfMetaResultContentConfigImpl<T extends MetaResult> exten
         }
         EmisMetaEntity indicatorEntityType = null;
         EmisIndicator indicator = this.metaResult.getIndicator();
-        if (indicator != null)
-        {
-            indicatorEntityType = indicator.getSeniorEntity(this.metaResult.getHierarchy());
-        }
-        EmisMetaEntity contextEntityType = getSeniorEntity(this.metaResult.getContext(), hierarchy);
-        if (indicatorEntityType == null)
-        {
-            return contextEntityType;
-        }
-        if (contextEntityType == null)
-        {
-            return indicatorEntityType;
-        }
-        return indicatorEntityType.isChildOf(contextEntityType, hierarchy) ? contextEntityType : indicatorEntityType;
+
+        EmisMetaEntity result = null; 
+        for (MetaResultValue mrValue : metaResult.getMetaResultValues())
+        	result = getSeniorEntity(result, mrValue.getSeniorEntity(hierarchy), hierarchy);  
+                
+        return getSeniorEntity(result, getSeniorEntity(this.metaResult.getContext(), hierarchy), hierarchy); 
+    }
+    
+    private EmisMetaEntity getSeniorEntity(EmisMetaEntity entity1, EmisMetaEntity entity2, EmisMetaHierarchy hierarchy)
+    {
+    	if (entity1 == null)
+    		return entity2; 
+    	
+    	if (entity2 == null)
+    		return entity1; 
+
+    	return entity1.isChildOf(entity2, hierarchy) ? entity2 : entity1;
     }
 
     private EmisMetaEntity getSeniorEntity(EmisContext context, EmisMetaHierarchy hierarchy)

@@ -89,6 +89,8 @@ public abstract interface EmisToolboxService extends RemoteService
 
     public abstract String getRenderedReportResult(String dataset, ReportMetaResult paramReportMetaResult) throws IOException;
 
+    public abstract String getRenderedReportAsHtmlResult(String dataset, ReportMetaResult metaResult) throws IOException;
+
     public abstract String getRenderedExcelReportResult(String dataset, ExcelReportMetaResult paramReportMetaResult, List<EmisIndicator> indicators) throws IOException;
 
     public abstract String[] getExcelReportTemplates(String dataset) throws IOException; 

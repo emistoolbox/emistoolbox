@@ -8,6 +8,8 @@ import com.emistoolbox.common.model.analysis.EmisIndicator;
 import com.emistoolbox.common.model.analysis.impl.IndicatorRatio;
 import com.emistoolbox.common.model.analysis.impl.IndicatorSimple;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
+import com.emistoolbox.common.model.meta.EmisMetaEntity;
+import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.results.MetaResultValue;
 
 public class MetaResultValueImpl implements MetaResultValue
@@ -28,7 +30,16 @@ public class MetaResultValueImpl implements MetaResultValue
         this.aggregatorKey = name;
     }
 
-    public String getName(boolean fullName)
+    @Override
+	public EmisMetaEntity getSeniorEntity(EmisMetaHierarchy hierarchy) 
+    {
+    	if (aggregatorKey != null)
+    		return indicator.getAggregator(aggregatorKey).getSeniorEntity(hierarchy); 
+
+		return indicator.getSeniorEntity(hierarchy);
+	}
+
+	public String getName(boolean fullName)
     {
         if (this.aggregatorKey == null)
         {
