@@ -13,7 +13,7 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 {
 	private LayoutFrameConfig config; 
 	
-	private Map<String, TextBox> uiTexts; 
+	private Map<String, TextSetEntryUi> uiTextSet; 
 	private ChartColorEditor uiBgColor = new ChartColorEditor(); 
 	private IntPicker uiBorderRadius = new IntPicker(new int[] { 0, 1, 2, 3, 4, 5, 7, 10}, "", "px");  
 	private BorderEditor uiBorders = new BorderEditor(); 
@@ -22,8 +22,6 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 	public LayoutFrameConfigProperties()
 	{
 		int row = getRowCount(); 
-		uiBgColor.addChangeHandler(getChangeHandler());
-		
 		setText(row, 0, "Background");
 		setWidget(row++, 1, uiBgColor);
 
@@ -38,8 +36,13 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		setWidget(row, 1, uiPadding); 
 		row++; 
 		
-		uiTexts = initTexts(LayoutPageConfig.TEXT_KEYS, new String[] { "Title", "Subtitle", "Footer" });
+		uiTextSet = initTexts(LayoutPageConfig.TEXT_KEYS, new String[] { "Title", "Subtitle", "Footer" });
 
+		uiBgColor.addValueChangeHandler(getValueChangeHandler());
+		uiBorderRadius.addChangeHandler(getChangeHandler()); 
+		uiPadding.addChangeHandler(getChangeHandler()); 
+		uiBorders.addValueChangeHandler(getValueChangeHandler()); 
+		
 		set(null); 
 	}
 	
@@ -58,7 +61,7 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		
 		config.setPadding(new LayoutSides<Double>((double) uiPadding.get()));
 		
-		updateTextSet(uiTexts, config); 
+		updateTextSet(uiTextSet, config); 
 	}
 
 	@Override

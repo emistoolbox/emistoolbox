@@ -19,24 +19,27 @@ import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.results.ReportMetaResult;
 import com.emistoolbox.common.util.Rectangle;
+import com.emistoolbox.server.renderer.gis.GisUtil;
 import com.emistoolbox.server.renderer.pdfreport.EmisPageGroup;
 import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
+import com.emistoolbox.server.renderer.pdfreport.PdfGisContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPriorityListContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
 import com.emistoolbox.server.renderer.pdfreport.impl.PDFAdvancedReportWriter;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfTextContent;
-import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContent;
+import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContentImpl;
 import com.emistoolbox.server.renderer.pdfreport.layout.LayoutFrame;
 import com.emistoolbox.server.renderer.pdfreport.layout.LayoutPage;
 import com.emistoolbox.server.util.ZipArchiver;
 
 import es.jbauer.lib.io.IOInput;
 import es.jbauer.lib.io.IOOutput;
+import es.jbauer.lib.io.impl.IOFileInput;
 import es.jbauer.lib.io.impl.IOInputStreamInput;
 import es.jbauer.lib.io.impl.IOOutputStreamOutput;
 
@@ -249,9 +252,21 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 								}
 								return null;
 							}
+							
+							public Void visit (PdfGisContent content) {
+								try { 
+									String[] result = GisUtil.renderGisResult(content); 
+									renderImage(new IOFileInput(new File(result[0]), "image/png", null));
+								} catch (IOException e) {
+									e.printStackTrace(); 
+									throw new Error (); 
+								}
+								
+								return null; 
+							}
 
 							public Void visit (PdfPriorityListContent content) {
-								throw new Error ("html rendering for priority list content not implemented");
+								return visit((PdfTableContent) content);
 							}
 
 							public Void visit (PdfTableContent content) {
@@ -275,10 +290,6 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 								if (content.getText () != null)
 									frameTag.add (new HTMLTag ("p",content.getText ()));
 								return null;
-							}
-
-							public Void visit (PdfVariableContent content) {
-								throw new Error ("html rendering for variable content not implemented");
 							}
 							
 							private void renderImage (IOInput input) throws IOException {

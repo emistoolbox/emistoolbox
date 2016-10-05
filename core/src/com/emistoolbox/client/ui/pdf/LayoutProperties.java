@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.emistoolbox.client.EmisEditor;
+import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -13,6 +14,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public abstract class LayoutProperties<T> extends FlexTable implements EmisEditor<T>, HasValueChangeHandlers<T> 
 {
@@ -28,43 +30,100 @@ public abstract class LayoutProperties<T> extends FlexTable implements EmisEdito
 	{ 
 		if (handler == null)
 			handler = new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				fireValueChangeEvent(); 
-			}
-		};
+				@Override
+				public void onChange(ChangeEvent event) {
+					fireValueChangeEvent(); 
+				}
+			};
 		
 		return handler; 
 	}
 	
-	protected Map<String, TextBox> initTexts(String[] keys, String[] labels)
+	private ValueChangeHandler valueHandler = null; 
+	protected ValueChangeHandler getValueChangeHandler()
 	{
-		Map<String, TextBox> uiTexts = new HashMap<String, TextBox>(); 
+		if (valueHandler == null)
+			valueHandler = new ValueChangeHandler() {
+				@Override
+				public void onValueChange(ValueChangeEvent event) {
+					fireValueChangeEvent(); 
+				}
+			};
+			
+		return valueHandler; 
+	}
+	
+	protected Map<String, TextSetEntryUi> initTexts(String[] keys, String[] labels)
+	{
+		Map<String, TextSetEntryUi> result = new HashMap<String, TextSetEntryUi>(); 
+
+		int row = getRowCount();
 		for (int i = 0; i < keys.length; i++)
 		{
-			int row = getRowCount();
-			setText(row, 0, labels == null || labels.length <= i ? keys[i] : labels[i]);
+			TextSetEntryUi ui = new TextSetEntryUi(); 
+			ui.addValueChangeHandlers(getValueChangeHandler()); 
+			result.put(keys[i], ui); 
 
-			TextBox uiText = new TextBox(); 
-			setWidget(row, 1, uiText);
-			uiTexts.put(keys[i], uiText); 
+			setWidget(row, 1, ui); 
+			setText(row, 0, labels == null || labels.length <= i ? keys[i] : labels[i]);
+			
+			row++; 
 		}
 		
-		return uiTexts; 
+		return result; 
 	}
 	
-	protected void setTextSet(Map<String, TextBox> uiTexts, TextSet texts)
+	protected void setTextSet(Map<String, TextSetEntryUi> ui, TextSet texts)
 	{
-		for (Map.Entry<String, TextBox> entry : uiTexts.entrySet())
+		for (Map.Entry<String, TextSetEntryUi> entry : ui.entrySet())
 		{
-			String value = texts.getText(entry.getKey()); 
-			entry.getValue().setText(value == null ? ""  : value);
+			String text = texts.getText(entry.getKey()); 
+			ChartFont font = texts.getFont(entry.getKey()); 
+			
+			entry.getValue().setText(text);
+			entry.getValue().setFont(font); 
 		}
 	}
 	
-	protected void updateTextSet(Map<String, TextBox> uiTexts, TextSet texts)
+	protected void updateTextSet(Map<String, TextSetEntryUi> ui, TextSet texts)
 	{
-		for (Map.Entry<String, TextBox> entry : uiTexts.entrySet())
-			texts.putText(entry.getKey(), entry.getValue().getText());  
+		for (Map.Entry<String, TextSetEntryUi> entry : ui.entrySet())
+			texts.putText(entry.getKey(), entry.getValue().getText(), entry.getValue().getFont());  
+	}
+	
+	public static class TextSetEntryUi extends VerticalPanel
+	{
+		private TextBox uiText = new TextBox(); 
+		private ChartFontEditor uiFont = new ChartFontEditor(); 
+	
+		public TextSetEntryUi()
+		{
+			add(uiText); 
+			add(uiFont);
+		}
+		
+		public void addValueChangeHandlers(ValueChangeHandler handler)
+		{
+			uiText.addValueChangeHandler(handler); 
+			uiFont.addValueChangeHandler(handler); 
+		}
+		
+		public void setText(String text)
+		{ uiText.setText(text); }
+		
+		public void setFont(ChartFont font)
+		{ uiFont.set(font); }
+		
+		public String getText()
+		{ return uiText.getText(); } 
+		
+		public ChartFont getFont()
+		{ return uiFont.get(); } 
+		
+		public TextBox getTextUi()
+		{ return uiText; } 
+		
+		public ChartFontEditor getFontUi()
+		{ return uiFont; } 
 	}
 }

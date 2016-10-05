@@ -6,10 +6,14 @@ import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.util.LayoutSides;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
 
-public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<BorderStyle>> 
+public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<BorderStyle>>, HasValueChangeHandlers<LayoutSides<BorderStyle>>
 {
 	private static int[] BORDER_WIDTHS = new int[] { 0, 1, 2, 3, 4, 5 };  
 	private static String[] SIDE_NAMES = new String[] { "Left", "Top", "Right", "Bottom" }; 
@@ -29,9 +33,24 @@ public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<Bo
 		uiMode.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				updateUi(); 
+				updateUi();
+				fireValueChangeEvent();
 			}
 		}); 
+		
+		ValueChangeHandler valueChangeHandler = new ValueChangeHandler() {
+			@Override
+			public void onValueChange(ValueChangeEvent event) {
+				fireValueChangeEvent();
+			}
+		}; 
+		
+		ChangeHandler changeHandler = new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				fireValueChangeEvent(); 
+			}
+		};
 		
 		int row = 0; 
 //		if (title != null)
@@ -51,9 +70,11 @@ public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<Bo
 			
 			uiColors[i] = new ChartColorEditor(); 
 			setWidget(row, 1, uiColors[i]); 
+			uiColors[i].addValueChangeHandler(valueChangeHandler); 
 
 			uiSizes[i] = new IntPicker(BORDER_WIDTHS, "", "px"); 
 			setWidget(row, 2, uiSizes[i]); 
+			uiSizes[i].addChangeHandler(changeHandler); 
 			
 			row++; 
 		}
@@ -136,4 +157,11 @@ public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<Bo
 		else
 			return bs1.getColour().equals(bs2.getColour()); 
 	}
+
+	protected void fireValueChangeEvent()
+	{ ValueChangeEvent.fire(this, get()); }
+	
+	@Override
+	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<LayoutSides<BorderStyle>> handler) 
+	{ return super.addHandler(handler, ValueChangeEvent.getType()); }
 }

@@ -469,7 +469,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 	    else if ((contentConfig instanceof PdfVariableContentConfigImpl))
         {
             PdfVariableContentConfig variableConfig = (PdfVariableContentConfig) contentConfig;
-            PdfVariableContent tmp = new PdfVariableContent(contentConfig.getTitle(), variableConfig.getSeniorEntity(), variableConfig.getTitles(), variableConfig.getVariables());  
+            PdfVariableContentImpl tmp = new PdfVariableContentImpl(contentConfig.getTitle(), variableConfig.getSeniorEntity(), variableConfig.getTitles(), variableConfig.getVariables());  
             if (tmp.setContext(dataSet, metaResult.getContext()))
                 result = tmp; 
         }

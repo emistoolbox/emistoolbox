@@ -8,7 +8,6 @@ import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrienta
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
 
 public class LayoutReportConfigProperties extends LayoutProperties<EmisPdfReportConfig> 
 {
@@ -16,7 +15,7 @@ public class LayoutReportConfigProperties extends LayoutProperties<EmisPdfReport
 	private ListBox uiPageSize = new ListBox();  
 	private ListBox uiPageOrientation = new ListBox(); 
 	
-	private Map<String, TextBox> uiTexts; 
+	private Map<String, TextSetEntryUi> uiTexts; 
 	
 	public LayoutReportConfigProperties()
 	{	

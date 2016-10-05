@@ -52,19 +52,22 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutTableFormat;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
 import com.emistoolbox.lib.pdf.util.PDFLayoutLogVisitor;
+import com.emistoolbox.server.renderer.gis.GisUtil;
 import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
+import com.emistoolbox.server.renderer.pdfreport.PdfGisContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfPriorityListContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
 import com.emistoolbox.server.renderer.pdfreport.impl.PDFAdvancedReportWriter;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfTextContent;
-import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContent;
+import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContentImpl;
 
 import es.jbauer.lib.io.IOInput;
 import es.jbauer.lib.io.IOOutput;
+import es.jbauer.lib.io.impl.IOFileInput;
 import es.jbauer.lib.io.impl.IOFileOutput;
 import es.jbauer.lib.io.impl.IOInputStreamInput;
 import es.jbauer.lib.io.impl.IOOutputStreamOutput;
@@ -190,16 +193,17 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 			item = renderChart((PdfChartContent) content, config.getPosition().getWidth(), config.getPosition().getHeight());   
 			item.fit(PDFLayoutObjectFit.COVER); 
 		}
+		else if (content instanceof PdfGisContent)
+		{
+			String[] values = GisUtil.renderGisResult((PdfGisContent) content); 
+			return new PDFLayoutImageElement(new IOFileInput(new File(values[0]), "image/png", null));
+		}
 		else if (content instanceof PdfTextContent)
 		{
 			PdfTextContent textContent = (PdfTextContent) content;
 			updateFrameTitle(frame, textContent.getTitle()); 
 			item = new PDFLayoutTextElement(textContent.getText(), getFont(textContent.getTextFont()));  
 		}
-		else if (content instanceof PdfVariableContent)
-			item = new PDFLayoutTextElement("VARIABLES - to be implemented", null);  
-		else if (content instanceof PdfPriorityListContent)
-			item = new PDFLayoutTextElement("PRIORITY LIST - to be implemented", null);  
 		else if (content instanceof PdfTableContent)
 			item = renderTable((PdfTableContent) content); 
 
@@ -260,17 +264,11 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 			{
 				table.setText(row, col, content.getText(row, col));
 				if (col == 0 && style.getTopHeaderFormat() != null)
-				{
 					table.setCellFormat(row, col, getTableFormat(style.getTopHeaderFormat()));
-				}
 				else if (row == 0 && style.getLeftHeaderFormat() != null)
-				{
 					table.setCellFormat(row, col, getTableFormat(style.getLeftHeaderFormat()));
-				}
 				else 
-				{
 					table.setCellFormat(row, col, getTableFormat(style.getDataCellFormat(col)));
-				}
 			}
 
 		table.setTableBorderStyle(getLineStyle(style.getBorder(BorderType.TABLE_HORIZONTAL))); 

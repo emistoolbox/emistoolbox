@@ -1183,6 +1183,7 @@ public class XmlReader
 
 			result.setPadding(getAttrAsDouble(tag, "padding"));
 
+			result.setHeaders(getAttrAsBoolean(tag, "topHeaders", true), getAttrAsBoolean(tag, "leftHeaders", true));  
 			result.init(); 
 			
 			return result; 

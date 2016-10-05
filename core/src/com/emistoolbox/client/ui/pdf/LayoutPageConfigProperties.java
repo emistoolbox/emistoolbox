@@ -10,18 +10,19 @@ public class LayoutPageConfigProperties extends LayoutProperties<LayoutPageConfi
 	private LayoutPageConfig config; 
 
 	private ChartColorEditor uiBgColor = new ChartColorEditor(); 
-	private Map<String, TextBox> uiTexts; 
+	private Map<String, TextSetEntryUi> uiTexts; 
 
 	public LayoutPageConfigProperties()
 	{
 		int row = getRowCount(); 
-		uiBgColor.addChangeHandler(getChangeHandler());
 		
 		setText(row, 0, "Background");
 		setWidget(row++, 1, uiBgColor);
 		
 		uiTexts = initTexts(LayoutPageConfig.TEXT_KEYS, new String[] { "Title", "Subtitle", "Footer" });
 		set(null); 
+		
+		uiBgColor.addValueChangeHandler(getValueChangeHandler());
 	}
 	
 	@Override

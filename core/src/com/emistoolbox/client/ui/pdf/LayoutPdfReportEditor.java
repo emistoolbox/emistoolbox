@@ -159,6 +159,9 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		getColumnFormatter().setWidth(1, "30%");
 	}
 	
+	public void showFrameProperties()
+	{ uiTabs.selectTab(2); }
+	
 	private void addNewTextContent()
 	{
 		final PdfTextContentConfigImpl textContent = new PdfTextContentConfigImpl(); 

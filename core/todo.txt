@@ -1,12 +1,22 @@
+== NEED TO IMPLEMENT == 
+- [test] Priority list content renderer - PDF 
+- [test] Variable list content renderer - PDF
+- [test] GIS content renderer - PDF
+- [test] Priority list content renderer - HTML 
+- [test] Variable list content renderer - HTML
+
+- Add GIS to report. 
+- Configure Priorty List in UI
+- Configure Variable List in UI
+- Configure GIS in UI
+
 == Current == 
 - [test] HTML report
 - TextContent added. 
 	* update delete / move	
 	* listbox delete not initialized
 - Priority list - add to report - switch to report. 
-- ChartColour editor  get x, get y
-
-- Frame editor - add delete and move. 
+- Frame editor - add delete and move as context menu. 
 - PageUI - delete frame, change page and back, frame is back (same with move)
 
 == Next == 
@@ -16,12 +26,13 @@
 - Frame drag / drop. 
 
 == Essential == 
-- Priority list - load saved report - display all settings. 
+- Priority list - load saved report - display all settings (ok to not show location) 
 
 - Page editor: 
 	- Add Text Frame
 	- Add Variable Frame
 	- Page size even if empty. 
+	- Page margins.
 
 == Important == 
 - Change size / orientation - modify right away

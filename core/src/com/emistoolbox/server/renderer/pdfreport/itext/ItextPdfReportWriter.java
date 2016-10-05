@@ -27,7 +27,7 @@ import com.emistoolbox.server.renderer.pdfreport.fonts.FontUtils;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfNullContent;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfResultTableContentImpl;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfTextContent;
-import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContent;
+import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContentImpl;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -89,7 +89,7 @@ public class ItextPdfReportWriter implements PdfReportWriter
                 PdfContent content = page.getContent(row, col); 
                 if (content instanceof PdfChartContent || content instanceof PdfTableContent || content instanceof PdfImageContent)
                     result[row] = 2; 
-                else if (content instanceof PdfVariableContent && ((PdfVariableContent) content).getSize() > 4)
+                else if (content instanceof PdfVariableContentImpl && ((PdfVariableContentImpl) content).getSize() > 4)
                     result[row] = 2; 
                 else if (content instanceof PdfTextContent && ((PdfTextContent) content).getText().length() > 150)
                 	result[row] = 2; 
@@ -191,8 +191,8 @@ public class ItextPdfReportWriter implements PdfReportWriter
                                 p.setFont(new Font(FontFamily.HELVETICA, 9)); 
                                 contentTable.addCell(p);
                             }
-                            else if ((content instanceof PdfVariableContent))
-                                contentTable.addCell(((PdfVariableContent) content).getTable()); 
+                            else if ((content instanceof PdfVariableContentImpl))
+                                contentTable.addCell(((PdfVariableContentImpl) content).getTable()); 
                             else if (content instanceof PdfImageContent)
                                 contentTable.addCell(getSizedImage((PdfImageContent) content, maxCellWidth * content.getSpanCols(), (int) (maxCellHeight[row] - contentTable.getHeaderHeight() - tablePageLayout.getHeaderHeight())));
 

@@ -11,6 +11,9 @@ import com.emistoolbox.common.util.LayoutSides;
 
 public class SimpleTableStyle extends TableStyleImpl implements EmisTableStyle, Serializable
 {
+	private boolean topHeaders = true; 
+	private boolean leftHeaders = true; 
+	
 	private ChartFont headerFont; 
 	private ChartFont dataFont; 
 	
@@ -35,9 +38,24 @@ public class SimpleTableStyle extends TableStyleImpl implements EmisTableStyle, 
 		setBorder(BorderType.DATA_VERTICAL, dataBorder); 
 		
 		setDataCellFormat(getFormat(dataFont, dataBackground));
-		setLeftHeaderFormat(getFormat(headerFont, headerBackground));
-		setTopHeaderFormat(getFormat(headerFont, headerBackground)); 
+		if (leftHeaders)
+			setLeftHeaderFormat(getFormat(headerFont, headerBackground));
+		
+		if (topHeaders)
+			setTopHeaderFormat(getFormat(headerFont, headerBackground)); 
 	}
+	
+	public void setHeaders(boolean top, boolean left)
+	{ 
+		topHeaders = top; 
+		leftHeaders = left; 
+	}
+	
+	public boolean getTopHeaders()
+	{ return topHeaders; } 
+	
+	public boolean getLeftHeaders()
+	{ return leftHeaders; } 
 	
 	TableCellFormat getFormat(ChartFont font, ChartColor bgColor)
 	{
@@ -112,6 +130,4 @@ public class SimpleTableStyle extends TableStyleImpl implements EmisTableStyle, 
 	public void setPadding(double padding) {
 		this.padding = padding;
 	}
-	
-	
 }

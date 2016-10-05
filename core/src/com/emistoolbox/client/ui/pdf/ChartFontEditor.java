@@ -4,8 +4,13 @@ import com.emistoolbox.client.EmisEditor;
 import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.client.util.ui.UIUtils;
 import com.emistoolbox.common.ChartFont;
+import com.emistoolbox.common.renderer.pdfreport.layout.impl.CSSCreator;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -13,12 +18,12 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 
-public class ChartFontEditor extends HorizontalPanel implements EmisEditor<ChartFont>
+public class ChartFontEditor extends HorizontalPanel implements EmisEditor<ChartFont>, HasValueChangeHandlers<ChartFont>
 {
 	private ChartFont font;
 	
 	private ChartColorEditor uiColor; 
-	private HTML uiText = new HTML("The quick brown fox");
+	private HTML uiText = new HTML("");
 
 	private ListBox uiName = new ListBox(); 
 	private IntPicker uiSize = new IntPicker(new int[] { 6, 8, 9, 10, 12, 14, 16, 18, 20, 24, 32 }, "", "px"); 
@@ -65,6 +70,8 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 				font.setStyle(uiStyle.getSelectedIndex());
 
 				updateUi(); 
+				
+				ValueChangeEvent.fire(ChartFontEditor.this, font); 
 			}
 		}); 
 		
@@ -110,11 +117,16 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 		updateUi(); 
 	}
 	
-	
-	
 	private void updateUi()
 	{
-		// TODO - update uiText from font CSS. 
+		if (font == null)
+		{
+			uiText.setText("(none)");
+			return; 
+		}
+		
+		uiText.setText(font.getName() + " " + font.getSize() + "pt"); 
+		uiText.getElement().setAttribute("style", CSSCreator.getCssAsString(font)); 
 	}
 	
 	private void updateFontFields()
@@ -123,4 +135,8 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 		uiSize.set(font.getSize());
 		uiStyle.setSelectedIndex(font.getStyle());
 	}
+
+	@Override
+	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<ChartFont> handler) 
+	{ return super.addHandler(handler, ValueChangeEvent.getType()); }
 }

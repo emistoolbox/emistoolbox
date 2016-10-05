@@ -62,4 +62,7 @@ public class ChartColor implements Serializable
 		ChartColor col = (ChartColor) obj; 
 		return a == col.a && value == col.value;  
 	}
+	
+	public ChartColor darker()
+	{ return new ChartColor(getRed() >> 1, getGreen() >> 1, getBlue() >> 1, getAlpha()); }
 }

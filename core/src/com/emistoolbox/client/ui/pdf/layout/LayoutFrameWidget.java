@@ -11,9 +11,7 @@ import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.CSSCreator;
-import com.google.gwt.dom.client.Style.ListStyleType;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseEvent;
@@ -21,9 +19,7 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.ListBox;
 
 public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameConfig>
 {
@@ -38,21 +34,6 @@ public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameCon
 		setWidth("100%");
 		setHeight("100%");
 
-//		uiMove.addChangeHandler(new ChangeHandler() {
-//			@Override
-//			public void onChange(ChangeEvent event) {
-//				int index = uiMove.getSelectedIndex(); 
-//				if (index <= 0)
-//					return; 
-//				
-//				String value = uiMove.getValue(index);
-//				if (value.equals("del"))
-//					pageEditor.getReportEditor().moveFrame(LayoutFrameWidget.this, null);
-//				else
-//					pageEditor.getReportEditor().moveFrame(LayoutFrameWidget.this, new Integer(value));
-//			}
-//		}); 
-		
 		MouseHandler mouseHandler = new MouseHandler(); 
 		addMouseDownHandler(mouseHandler); 
 		addMouseUpHandler(mouseHandler); 
@@ -90,9 +71,6 @@ public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameCon
 		this.frameConfig = frameConfig; 
 	}
 	
-	private void resize(int xOffset, int yOffset)
-	{ setPixelSize(getElement().getClientWidth() + xOffset, getElement().getClientHeight() + yOffset); }
-	
 	private enum MouseMode { MOVE, RESIZE };
 
 	public class MouseHandler implements MouseDownHandler, MouseUpHandler, MouseMoveHandler
@@ -106,6 +84,9 @@ public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameCon
 		@Override
 		public void onMouseMove(MouseMoveEvent event) 
 		{
+			if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT)
+				return;
+			
 			if (lastX != null && lastY != null)
 				updatePosition(event); 
 		}
@@ -113,6 +94,9 @@ public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameCon
 		@Override
 		public void onMouseUp(MouseUpEvent event) 
 		{
+			if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT)
+				return; 
+			
 			updatePosition(event); 
 			lastX = null; 
 			lastY = null;
@@ -122,6 +106,16 @@ public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameCon
 		@Override
 		public void onMouseDown(MouseDownEvent event) 
 		{
+			pageEditor.selectFrame(LayoutFrameWidget.this); 
+
+			if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT)
+			{
+				lastX = null; 
+				lastY = null; 
+				
+				showContextMenu(); 
+			}
+					
 			lastX = event.getScreenX(); 
 			lastY = event.getScreenY(); 
 
@@ -130,7 +124,6 @@ public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameCon
 			else
 				mode = MouseMode.MOVE; 
 			
-			pageEditor.selectFrame(LayoutFrameWidget.this); 
 		}
 		
 		private void updatePosition(MouseEvent event)
@@ -142,7 +135,7 @@ public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameCon
 			lastY = event.getScreenY(); 
 			
 			if (event.isShiftKeyDown()) // mode == MouseMode.RESIZE)
-				resize(xOffset, yOffset); 
+				pageEditor.resizeFrame(LayoutFrameWidget.this, xOffset, yOffset); 
 			else
 				pageEditor.moveFrame(LayoutFrameWidget.this, xOffset, yOffset); 
 		}
@@ -151,7 +144,6 @@ public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameCon
 	public void updateFrameStyle()
 	{ 
 		getElement().setAttribute("style", CSSCreator.getCssAsString(frameConfig));
-
 		setHTML(getHtmlText(frameConfig, PdfText.TEXT_TITLE) + getHtmlText(frameConfig, PdfText.TEXT_SUBTITLE) + getContentHtml(frameConfig));  
 	}
 	
@@ -167,6 +159,9 @@ public class LayoutFrameWidget extends HTML implements EmisEditor<LayoutFrameCon
 		
 		return "<span style='" + CSSCreator.getCssAsString(font) + "'>" + text + "</span>"; 
 	}
+	
+	private void showContextMenu()
+	{}
 	
 	private String getContentHtml(LayoutFrameConfig config)
 	{ return config.getContentConfig().getClass().getName(); }

@@ -928,6 +928,9 @@ public class XmlWriter
     		
     		setAttr(tag, "style", "simple"); 
     		
+    		setAttr(tag, "topHeaders", style.getTopHeaders());  
+    		setAttr(tag, "leftHeaders", style.getLeftHeaders());  
+    		
     		addXml(tag, style.getDataFont(), "dataFont"); 
     		addXml(tag, style.getHeaderFont(), "headerFont");
     		setAttr(tag, "dataBackground", style.getDataBackground()); 
