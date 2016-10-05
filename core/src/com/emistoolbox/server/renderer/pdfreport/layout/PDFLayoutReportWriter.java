@@ -73,18 +73,9 @@ import es.jbauer.lib.io.impl.IOOutputStreamOutput;
 
 public class PDFLayoutReportWriter extends PDFAdvancedReportWriter 
 {
-	private boolean showIds = true;
 	private double indentation = 20; // in points
 	private double lineSpacing = 18; // in points
 	private PDFLayoutFont font = new PDFLayoutFont ("Courier",12,PDFLayoutFontStyle.PLAIN);
-	
-	public boolean isShowIds () {
-		return showIds;
-	}
-
-	public void setShowIds (boolean showIds) {
-		this.showIds = showIds;
-	}
 	
 	public double getIndentation () {
 		return indentation;
@@ -226,7 +217,7 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 		Integer id = pageGroup.getId ();
 		boolean isLeaf = pageGroups.isEmpty ();
 		String fullName = level + " " + name;
-		if (isLeaf && showIds)
+		if (isLeaf && isShowIds ())
 			fullName += " (" + id + ")";
 		
 		linkPrefix = newPrefix (linkPrefix,fullName);

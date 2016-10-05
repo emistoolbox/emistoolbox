@@ -8,6 +8,16 @@ import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.server.renderer.pdfreport.layout.LayoutFrame;
 
 public abstract class PDFAdvancedReportWriter extends PdfBaseReportWriter {
+	private boolean showIds = true;
+	
+	public boolean isShowIds () {
+		return showIds;
+	}
+
+	public void setShowIds (boolean showIds) {
+		this.showIds = showIds;
+	}
+
 	protected static void updateFrameTitle (LayoutFrame frame,String title) {
 		if (!StringUtils.isEmpty(title) && StringUtils.isEmpty(frame.getText(PdfText.TEXT_TITLE)))
 			frame.putText(PdfText.TEXT_TITLE, title); 
