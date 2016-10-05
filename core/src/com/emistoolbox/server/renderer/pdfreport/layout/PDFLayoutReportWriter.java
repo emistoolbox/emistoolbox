@@ -45,6 +45,7 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutImageElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutLineStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutPageLink;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTableElement;
@@ -52,6 +53,7 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutTableFormat;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
 import com.emistoolbox.lib.pdf.util.PDFLayoutLogVisitor;
+import com.emistoolbox.server.renderer.pdfreport.EmisPageGroup;
 import com.emistoolbox.server.renderer.pdfreport.EmisPdfPage;
 import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
@@ -71,6 +73,54 @@ import es.jbauer.lib.io.impl.IOOutputStreamOutput;
 
 public class PDFLayoutReportWriter extends PDFAdvancedReportWriter 
 {
+	private boolean showIds = true;
+	private double indentation = 20; // in points
+	private double lineSpacing = 18; // in points
+	private PDFLayoutFont font = new PDFLayoutFont ("Courier",12,PDFLayoutFontStyle.PLAIN);
+	
+	public boolean isShowIds () {
+		return showIds;
+	}
+
+	public void setShowIds (boolean showIds) {
+		this.showIds = showIds;
+	}
+	
+	public double getIndentation () {
+		return indentation;
+	}
+
+	public void setIndentation (double indentation) {
+		this.indentation = indentation;
+	}
+
+	public PDFLayoutFont getFont () {
+		return font;
+	}
+
+	public void setFont (PDFLayoutFont font) {
+		this.font = font;
+	}
+
+	public double getLineSpacing () {
+		return lineSpacing;
+	}
+
+	public void setLineSpacing (double lineSpacing) {
+		this.lineSpacing = lineSpacing;
+	}
+
+	private static class Heading {
+		String title;
+		int level;
+		PDFLayout page;
+
+		public Heading (String title,int level) {
+			this.title = title;
+			this.level = level;
+		}
+	}
+	
 	@Override
 	public void writeReport(PdfReport report, File out) 
 		throws IOException, PdfReportWriterException 
@@ -83,12 +133,32 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 		Point pageSize = PdfText.getPageSize(config.getPageSize(), config.getOrientation());
 		Rectangle margins = PdfText.getMargins(config.getPageSize()); 
 
-		List<PDFLayout> pages = new ArrayList<PDFLayout>(); 
-		for (EmisPdfPage page : report.getPages())
-		{
-			if (page instanceof LayoutPage)
-				pages.add(renderPage((LayoutPage) page, pageSize, margins)); 
+		List<Heading> headings = new ArrayList<Heading> ();
+		List<PDFLayout> contentPages = new ArrayList<PDFLayout>();
+		List<PDFLayout> pages = new ArrayList<PDFLayout>();
+		
+		renderPageGroup(headings, contentPages, report.getPageGroup(), pageSize, margins, 0, null, null, true);
+		
+		PDFLayout tocPage = null;
+		
+		double y = Double.POSITIVE_INFINITY;
+		for (Heading heading: headings) {
+			if (tocPage == null || y + lineSpacing > tocPage.getOuterFrame ().getHeight ()) {
+				if (tocPage != null)
+					pages.add (tocPage);
+				tocPage = createPage (pageSize, margins);
+				y = 0;
+			}
+			PDFLayoutPageLink link = new PDFLayoutPageLink (heading.page);
+			link.setBorderWidth (0);
+			tocPage.getOuterFrame ().addElement (new PDFLayoutTextElement (heading.title,font).position (heading.level * indentation,y).link (link));
+			y += lineSpacing;
 		}
+		
+		if (tocPage != null)
+			pages.add (tocPage);
+		
+		pages.addAll (contentPages);
 
 		if (isDebug())
 		{
@@ -143,22 +213,79 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 		
 		return result; 
 	}
-	
-	private PDFLayout renderPage(LayoutPage page, Point size, Rectangle margins)
-		throws IOException
+
+	private PDFLayout renderPageGroup (List<Heading> headings, List<PDFLayout> contentPages, EmisPageGroup pageGroup, Point pageSize, Rectangle margins, int headingLevel, String linkPrefix, String titlePrefix, boolean condensing) throws IOException {
+		List<EmisPageGroup> pageGroups = pageGroup.getPageGroups ();
+		List<EmisPdfPage> pages = pageGroup.getPages ();
+
+		if (getListSize (pageGroups) != 0 && getListSize (pages) != 0)
+			throw new Error ("PDF rendering for page group containing both subgroups and pages not implemented");
+
+		String level = pageGroup.getLevel ();
+		String name = pageGroup.getName ();
+		Integer id = pageGroup.getId ();
+		boolean isLeaf = pageGroups.isEmpty ();
+		String fullName = level + " " + name;
+		if (isLeaf && showIds)
+			fullName += " (" + id + ")";
+		
+		linkPrefix = newPrefix (linkPrefix,fullName);
+		
+		if (condensing && getListSize (pageGroups) == 1)
+			return renderPageGroup (headings, contentPages, pageGroups.get (0), pageSize, margins, headingLevel,linkPrefix,newPrefix (titlePrefix,fullName),true);
+		else {
+			PDFLayout firstPage = null;
+			
+			Heading heading = new Heading (linkPrefix,headingLevel); 
+			headings.add (heading);
+			
+			if (pageGroups != null)
+				for (EmisPageGroup subgroup : pageGroups) {
+					PDFLayout page = renderPageGroup (headings, contentPages, subgroup, pageSize, margins, headingLevel + 1, null, null, false);
+					if (firstPage == null)
+						firstPage = page;
+				}
+			
+			if (pages != null)
+				for (EmisPdfPage page : pages)
+					if (page instanceof LayoutPage) {
+						PDFLayout pdfPage = renderPage ((LayoutPage) page, pageSize, margins);
+						contentPages.add (pdfPage);
+						if (firstPage == null)
+							firstPage = pdfPage;
+					}
+
+			if (firstPage != null)
+				heading.page = firstPage;
+			else
+				headings.remove (headings.size () - 1);
+			
+			return firstPage;
+		}
+	}
+
+	private PDFLayout createPage (Point size, Rectangle margins)
 	{
 		PDFLayout layout = new PDFLayout();  
 		
 		PDFLayoutFrameElement outerFrame = new PDFLayoutFrameElement(size.x - margins.getLeft() - margins.getRight(), size.y - margins.getTop() - margins.getBottom());
 		outerFrame.setPadding(getSides(margins)); 
+		layout.setOuterFrame(outerFrame); 
 
+		return layout;
+	}
+	
+	private PDFLayout renderPage(LayoutPage page, Point size, Rectangle margins)
+		throws IOException
+	{
+		PDFLayout layout = createPage(size, margins);  
+		
 		// TODO - handle titles of page (maybe defined in frame already as part of the LayoutPdfReportCreator)
 		for (LayoutFrame frame : page.getFrames())
-			outerFrame.addElement(createFrame(frame)); 
+			layout.getOuterFrame ().addElement(createFrame(frame)); 
 		
-		outerFrame.addElement(createAlignedText(page.getText(PdfText.TEXT_FOOTER), page.getFont(PdfText.TEXT_FOOTER), PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BOTTOM));
+		layout.getOuterFrame ().addElement(createAlignedText(page.getText(PdfText.TEXT_FOOTER), page.getFont(PdfText.TEXT_FOOTER), PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BOTTOM));
 		
-		layout.setOuterFrame(outerFrame); 
 		return layout; 
 	}
 

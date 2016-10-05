@@ -104,6 +104,11 @@ abstract public class PDFLayoutElement implements Serializable {
 		setObjectFit (objectFit);
 		return this;
 	}
+	
+	public PDFLayoutElement link (PDFLayoutLink link) {
+		setLink (link);
+		return this;
+	}
 
 	public Color getBackgroundColor () {
 		return backgroundColor;

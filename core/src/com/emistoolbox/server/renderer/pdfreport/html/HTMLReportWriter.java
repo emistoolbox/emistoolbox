@@ -379,14 +379,6 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		return builder.toString ();
 	}
 
-	private static String newPrefix (String oldPrefix,String newSegment) {
-		return oldPrefix == null ? newSegment : oldPrefix + " / " + newSegment;
-	}
-	
-	private static <T> int getListSize (List<T> list) {
-		return list == null ? 0 : list.size ();
-	}
-	
 	public void setDateInfo (ReportMetaResult metaInfo) {
 	}
 
