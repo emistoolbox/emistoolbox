@@ -351,7 +351,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		Rectangle reducedObjectFitBox = new Rectangle (objectFitBox);
 		reducedObjectFitBox.transformBy (getCurrentTransform ());
 		applyPaddingAndBorder (reducedObjectFitBox,element,-1);
-		Rectangle elementBox = getBoundingBox (element,reducedObjectFitBox.width ());
+		double maxWidth = reducedObjectFitBox.width ();
+		if (placement instanceof PDFLayoutCoordinatePlacement)
+			maxWidth -= ((PDFLayoutCoordinatePlacement) placement).getX () - reducedObjectFitBox.xmin;
+		Rectangle elementBox = getBoundingBox (element,maxWidth);
 		Rectangle transformedElementBox = new Rectangle (elementBox);
 		transformedElementBox.transformBy (getCurrentTransform ());
 		// TODO: This is all not tested properly since the tests so far don't have scaled frames so it doesn't really matter which transforms we apply at this point
