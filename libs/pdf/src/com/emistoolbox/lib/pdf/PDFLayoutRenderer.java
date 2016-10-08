@@ -331,18 +331,14 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		PDFLayoutSides<Boolean> alignedWithEdge = new PDFLayoutSides<Boolean> (true);
 		Rectangle frameBox = getBoundingBox (frame);
 		Rectangle objectFitBox = new Rectangle (frameBox);
-		Rectangle previousElementBox = invert (frameBox);
+		Rectangle previousElementBox = null;
 		for (PDFLayoutElement element : frame.getElements ())
 			previousElementBox = render (element,objectFitBox,alignedWithEdge,frameBox,previousElementBox);
 		return null;
 	}
 
-	private Rectangle invert (Rectangle r) {
-		return new Rectangle (r.xmax,r.ymax,r.xmin,r.ymin);
-	}
-	
 	private void render (PDFLayoutElement element,Rectangle box) throws IOException {
-		render (element,new Rectangle (box),new PDFLayoutSides<Boolean> (true),box,invert (box));
+		render (element,new Rectangle (box),new PDFLayoutSides<Boolean> (true),box,null);
 	}
 	
 	private Rectangle render (PDFLayoutElement element,Rectangle objectFitBox,PDFLayoutSides<Boolean> alignedWithEdge,Rectangle frameBox,Rectangle previousElementBox) throws IOException {
@@ -390,12 +386,18 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			PDFLayoutAlignmentPlacement alignmentPlacement = (PDFLayoutAlignmentPlacement) placement;
 			switch (alignmentPlacement.getHorizontalAlignment ()) {
 			case BEFORE:
-				x = previousElementBox.xmin - augmentedNewElementBox.width ();
+				x = (previousElementBox != null ? previousElementBox.xmin : frameBox.xmax) - augmentedNewElementBox.width ();
 				alignedWithEdge.setLeft (false);
 				break;
 			case AFTER:
-				x = previousElementBox.xmax;
+				x = previousElementBox != null ? previousElementBox.xmax : frameBox.xmin;
 				alignedWithEdge.setRight (false);
+				break;
+			case PREVIOUS_LEFT:
+				x = (previousElementBox != null ? previousElementBox : frameBox).xmin;
+				break;
+			case PREVIOUS_RIGHT:
+				x = (previousElementBox != null ? previousElementBox : frameBox).xmax  - augmentedNewElementBox.width ();
 				break;
 			case LEFT:
 				x = frameBox.xmin;
@@ -418,12 +420,18 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 
 			switch (alignmentPlacement.getVerticalAlignment ()) {
 			case ABOVE:
-				y = previousElementBox.ymin - augmentedNewElementBox.height ();
+				y = (previousElementBox != null ? previousElementBox.ymin : frameBox.ymax) - augmentedNewElementBox.height ();
 				alignedWithEdge.setTop (false);
 				break;
 			case BELOW:
-				y = previousElementBox.ymax;
+				y = previousElementBox != null ? previousElementBox.ymax : frameBox.ymin;
 				alignedWithEdge.setBottom (false);
+				break;
+			case PREVIOUS_TOP:
+				y = (previousElementBox != null ? previousElementBox : frameBox).ymin;
+				break;
+			case PREVIOUS_BOTTOM:
+				y = (previousElementBox != null ? previousElementBox : frameBox).ymax  - augmentedNewElementBox.height ();
 				break;
 			case TOP:
 				y = frameBox.ymin;
@@ -823,8 +831,13 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		PDFDictionary getResource (PDFLayoutImageElement imageElement) {
 			BufferedImage image = getImage (imageElement);
 			ColorModel colorModel = image.getColorModel ();
-			if (colorModel.getNumColorComponents () != 3)
+			int numColorComponents = colorModel.getNumColorComponents ();
+			int numComponents = colorModel.getNumComponents ();
+			if (numColorComponents != 3)
 				throw new Error ("non-RGB color model not implemented");
+			if (numComponents != numColorComponents && numComponents != numColorComponents + 1)
+				throw new Error ("can only handle 0 or 1 alpha components");
+			boolean hasAlpha = numComponents > numColorComponents;
 
 			PDFStream imageStream = new PDFStream ();
 			imageStream.put ("Type","XObject");
@@ -835,24 +848,43 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			imageStream.put ("BitsPerComponent",8);
 			byte [] data = ((DataBufferByte) image.getRaster ().getDataBuffer ()).getData ();
 			if ("image/jpeg".equals (imageElement.getInput ().getContentType ())) {
+				if (hasAlpha)
+					throw new Error ("can't handle JPEG alpha"); // might be easy to handle; PDF allows JPEG data to contain alpha
 				imageStream.setData (getImageData (imageElement));
 				imageStream.put ("Filter","DCTDecode");
 			}
 			else {
 				int npixels = image.getWidth () * image.getHeight ();
-				int ncomponents = colorModel.getNumComponents ();
-				if (data.length != ncomponents * npixels)
+				if (data.length != numComponents * npixels)
 					throw new Error ("unexpected image data length");
-				if (ncomponents < 3)
+				if (numComponents < 3)
 					throw new Error ("non-RGB data not implemented");
 				byte [] rgb = new byte [3 * npixels];
-				for (int row = 0,j = 0,k = 0;row < image.getHeight ();row++)
-					for (int col = 0;col < image.getWidth ();col++,j += 3,k += ncomponents) {
-						rgb [j + 0] = data [k + ncomponents - 1];
-						rgb [j + 1] = data [k + ncomponents - 2];
-						rgb [j + 2] = data [k + ncomponents - 3];
+				byte [] alpha = hasAlpha ? new byte [npixels] : null;
+				boolean actuallyHasAlpha = false;
+
+				for (int row = 0,j = 0,k = 0,l = 0;row < image.getHeight ();row++)
+					for (int col = 0;col < image.getWidth ();col++,j += numColorComponents,k += numComponents,l++) {
+						rgb [j + 0] = data [k + numComponents - 1];
+						rgb [j + 1] = data [k + numComponents - 2];
+						rgb [j + 2] = data [k + numComponents - 3];
+						if (hasAlpha) {
+							alpha [l] = data [k];
+							actuallyHasAlpha |= alpha [l] != -1;
+						}
 					}
 				imageStream.setAndCompressData (rgb);
+				if (actuallyHasAlpha) {
+					PDFStream maskStream = new PDFStream ();
+					maskStream.put ("Type","XObject");
+					maskStream.put ("Subtype","Image");
+					maskStream.put ("Width",image.getWidth ());
+					maskStream.put ("Height",image.getHeight ());
+					maskStream.put ("ColorSpace","DeviceGray");
+					maskStream.put ("BitsPerComponent",8);
+					maskStream.setAndCompressData (alpha);
+					imageStream.putIndirect ("SMask",maskStream);
+				}
 //				This would be for using a predictor, but our images aren't likely to be improved by predictors
 //				PDFDictionary decodingParameters = new PDFDictionary ();
 //				decodingParameters.put ("Columns",image.getWidth ());

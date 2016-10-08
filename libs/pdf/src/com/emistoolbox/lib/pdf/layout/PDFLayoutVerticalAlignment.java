@@ -4,6 +4,8 @@ public enum PDFLayoutVerticalAlignment {
 	TOP,
 	CENTER,
 	BOTTOM,
-	ABOVE, // above the previous component
-	BELOW  // below the previous component
+	PREVIOUS_TOP,    //    top-aligned with the previous element
+	PREVIOUS_BOTTOM, // bottom-aligned with the previous element
+	ABOVE,                         // above the previous element
+	BELOW  						   // below the previous element
 }
