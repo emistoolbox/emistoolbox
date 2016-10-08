@@ -1,6 +1,7 @@
 package com.emistoolbox.common.renderer.pdfreport.layout.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class CSSCreator {
 			return null; 
 		return "rgba(" + color.getRed () + "," + color.getGreen () + "," + color.getBlue () + "," + toString (color.getAlpha () / 255.) + ")";
 	}
+
 	public static String getCssAsString(Map<String, String> values)
 	{
 		String result = ""; 
@@ -64,8 +66,9 @@ public class CSSCreator {
 	public static String getCssAsString(BorderStyle border)
 	{ return getCssAsString(getCss(border)); }
 	
-	public static Map<String, String> getCss(BorderStyle border)
-	{ return new HashMap<String, String>(); }
+	public static Map<String,String> getCss (BorderStyle border) {
+		return Collections.singletonMap ("border",getSolidBorder (border));
+	}
 	
 	public static String getCssAsString(ChartFont font, ChartColor bgColor, BorderStyle border)
 	{ return getCssAsString(getCss(font, bgColor, border)); }
@@ -99,7 +102,7 @@ public class CSSCreator {
 				}
 			});
 			if (borderWidths.size () == 1 && borderColors.size () == 1)
-				map.put ("border",borderWidths.get (0) + " solid " + borderColors.get (0));
+				map.put ("border",getSolidBorder (borderWidths.get (0),borderColors.get (0)));
 			else {
 				map.put ("border-width",reduce (borderWidths));
 				map.put ("border-style","solid");
@@ -145,6 +148,14 @@ public class CSSCreator {
 		return map;
 	}
 	
+	private static String getSolidBorder (String width,String color) {
+		return  width + " solid " + color;
+	}
+
+	private static String getSolidBorder (BorderStyle border) {
+		return getSolidBorder (getDimension (border.getWidth ()),getCss (border.getColour ()));
+	}
+
 	private static interface Extractor<T> {
 		String extract (T t);
 	}
