@@ -18,4 +18,6 @@ public abstract interface PriorityListItem extends Serializable
     
     public abstract String[] getEntityValues();
     public abstract void setEntityValues(String[] values); 
+    
+    public boolean isEmpty(); 
 }

@@ -12,4 +12,10 @@ public class Point implements Serializable
 		this.x = x; 
 		this.y = y; 
 	} 
+	
+	public int getIntX()
+	{ return (int) Math.round(x); } 
+	
+	public int getIntY()
+	{ return (int) Math.round(y); }
 }

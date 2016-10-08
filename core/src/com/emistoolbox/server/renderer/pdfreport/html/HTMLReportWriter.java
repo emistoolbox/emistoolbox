@@ -46,16 +46,6 @@ import es.jbauer.lib.io.impl.IOOutputStreamOutput;
 public class HTMLReportWriter extends PDFAdvancedReportWriter {
 	final static String zipSuffix = ".zip";
 	
-	private boolean showIds = true;
-	
-	public boolean isShowIds () {
-		return showIds;
-	}
-
-	public void setShowIds (boolean showIds) {
-		this.showIds = showIds;
-	}
-
 	static interface HTMLNode {
 		void print (PrintStream ps);
 	}
@@ -179,7 +169,7 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		Integer id = pageGroup.getId ();
 		boolean isLeaf = pageGroups.isEmpty ();
 		String fullName = level + " " + name;
-		if (isLeaf && showIds)
+		if (isLeaf && isShowIds ())
 			fullName += " (" + id + ")";
 		
 		linkPrefix = newPrefix (linkPrefix,fullName);
@@ -390,14 +380,6 @@ public class HTMLReportWriter extends PDFAdvancedReportWriter {
 		return builder.toString ();
 	}
 
-	private static String newPrefix (String oldPrefix,String newSegment) {
-		return oldPrefix == null ? newSegment : oldPrefix + " / " + newSegment;
-	}
-	
-	private static <T> int getListSize (List<T> list) {
-		return list == null ? 0 : list.size ();
-	}
-	
 	public void setDateInfo (ReportMetaResult metaInfo) {
 	}
 

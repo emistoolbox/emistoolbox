@@ -32,4 +32,15 @@ public class PriorityListItemImpl implements PriorityListItem
     
     public void setEntityValues(String[] values)
     { this.entityValues = values; }
+    
+    public boolean isEmpty()
+    {
+    	for (double value : values)
+    	{
+    		if (!Double.isNaN(value) && value >= 0.0)
+    			return false; 
+    	}
+    	
+    	return true; 
+    }
 }

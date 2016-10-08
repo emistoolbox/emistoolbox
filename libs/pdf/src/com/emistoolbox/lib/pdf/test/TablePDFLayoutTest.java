@@ -19,6 +19,8 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
 public class TablePDFLayoutTest {
 	public List<PDFLayout> getLayout () {
 		List<PDFLayout> layouts = new ArrayList<PDFLayout> ();
+
+		// test formats and borders
 		PDFLayout layout = new PDFLayout ();
 		PDFLayoutFrameElement outerFrame = new PDFLayoutFrameElement (500,500);
 		PDFLayoutTableElement table = new PDFLayoutTableElement ();
@@ -72,6 +74,59 @@ public class TablePDFLayoutTest {
 		
 		layout.setOuterFrame (outerFrame);
 		layouts.add (layout);
+		
+		// test row and column spanning
+		layout = new PDFLayout ();
+		outerFrame = new PDFLayoutFrameElement (500,500);
+		outerFrame.pad (50);
+		PDFLayoutTableElement [] tables = new PDFLayoutTableElement [2];
+		
+		PDFLayoutLineStyle borderStyle = new PDFLayoutLineStyle (1.,Color.BLACK);
+
+		defaultFormat = new PDFLayoutTableFormat ();
+		defaultFormat.setFont (cellFont);
+		defaultFormat.setPadding (new PDFLayoutSides<Double> (3.));
+		defaultFormat.setPlacement (PDFLayoutAlignmentPlacement.CENTER);
+		
+		for (int i = 0;i < 2;i++) {
+			tables [i] = new PDFLayoutTableElement ();
+			tables [i].setDefaultFormat (defaultFormat);
+			tables [i].setDimensions (5,5);
+		
+			row = 0;
+			for (String stanza : "We hold these truths to;be self-evident, that all cells;are not created equal, that;they are endowed by their;Creator with certain unalienable sizes".split (";")) {
+				int col = 0;
+				for (String word : stanza.split (" ")) {
+					tables [i].setText (row,col,word);
+					col++;
+				}
+				row++;
+			}
+
+			for (int j = 0;j <= 5;j++) {
+				tables [i].setHorizontalBorderStyle (j,borderStyle);
+				tables [i].setVerticalBorderStyle (j,borderStyle);
+			}
+		}
+
+		tables [1].setCellSpan (1,1,3,1);
+		tables [1].setCellSpan (2,3,2,1);
+		
+		PDFLayoutTableFormat spanFormat = new PDFLayoutTableFormat (defaultFormat);
+		spanFormat.setBackgroundColor (Color.red);
+
+		tables [1].setElement (1,1,new PDFLayoutFrameElement (100,100).color (Color.LIGHT_GRAY));
+		tables [1].setCellFormat (1,1,spanFormat);
+
+		tables [1].setElement (2,3,new PDFLayoutFrameElement (100,100).color (Color.LIGHT_GRAY));
+		tables [1].setCellFormat (2,3,spanFormat);
+
+		outerFrame.addElement (tables [0].align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.TOP));
+		outerFrame.addElement (tables [1].align (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.BOTTOM));
+		
+		layout.setOuterFrame (outerFrame);
+		layouts.add (layout);
+		
 		return layouts;
 	}
 }

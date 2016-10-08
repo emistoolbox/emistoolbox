@@ -31,8 +31,14 @@ public class Rectangle implements Serializable
 		return result; 
 	}
 
+	private int asInt(double value)
+	{ return (int) Math.round(value); }
+	
 	public double getLeft() 
 	{ return left; }
+	
+	public int getIntLeft()
+	{ return asInt(left); } 
 
 	public void setLeft(double left) 
 	{ this.left = left; }
@@ -40,11 +46,17 @@ public class Rectangle implements Serializable
 	public double getTop() 
 	{ return top; }
 
+	public int getIntTop()
+	{ return asInt(top); } 
+
 	public void setTop(double top) 
 	{ this.top = top; }
 
 	public double getRight() 
 	{ return right; }
+
+	public int getIntRight()
+	{ return asInt(right); } 
 
 	public void setRight(double right) 
 	{ this.right = right; }
@@ -52,12 +64,21 @@ public class Rectangle implements Serializable
 	public double getBottom() 
 	{ return bottom; }
 
+	public int getIntBottom()
+	{ return asInt(bottom); } 
+
 	public void setBottom(double bottom) 
 	{ this.bottom = bottom; }
 	
 	public double getWidth()
 	{ return right - left; } 
 	
+	public int getIntWidth()
+	{ return asInt(getWidth()); } 
+	
 	public double getHeight()
-	{ return bottom - top; } 
+	{ return bottom - top; }
+	
+	public int getIntHeight()
+	{ return asInt(getHeight()); } 
 }

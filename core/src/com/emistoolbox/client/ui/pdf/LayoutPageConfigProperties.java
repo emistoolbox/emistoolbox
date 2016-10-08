@@ -16,8 +16,8 @@ public class LayoutPageConfigProperties extends LayoutProperties<LayoutPageConfi
 	{
 		int row = getRowCount(); 
 		
-		setText(row, 0, "Background");
-		setWidget(row++, 1, uiBgColor);
+//		setText(row, 0, "Background");
+//		setWidget(row++, 1, uiBgColor);
 		
 		uiTexts = initTexts(LayoutPageConfig.TEXT_KEYS, new String[] { "Title", "Subtitle", "Footer" });
 		set(null); 

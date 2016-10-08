@@ -34,6 +34,8 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	private IntPicker uiPageIndex = new IntPicker(new int[] { 1 }, "Page ", ""); 
 	private Label uiPageIndexPost = new Label(""); 
 
+	private IntPicker uiMoveToPage = new IntPicker(new int[0]); 
+	
 	private int pageIndex = -1; 
 	
 	private PushButton btnPrevPage = new PushButton("<"); 
@@ -157,6 +159,14 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		setCellSpacing(5);
 		getColumnFormatter().setWidth(0, "70%");
 		getColumnFormatter().setWidth(1, "30%");
+		
+		uiMoveToPage.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				moveFrame(uiPageEditor.getCurrentFrame(), uiMoveToPage.get());
+				uiPageEditor.selectFrame(null);
+			}
+		}); 
 	}
 	
 	public void showFrameProperties()
@@ -232,7 +242,7 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		
 		pageIndex = indexOfPage; 
 		uiPageEditor.set(reportConfig.getPages().get(pageIndex));
-		uiPageEditor.updatePageIndex(pageIndex, reportConfig.getPages().size()); 
+		updatePageIndex(pageIndex, reportConfig.getPages().size()); 
 
 		int[] values = new int[reportConfig.getPages().size()];
 		for (int i = 0; i < values.length; i++)
@@ -245,5 +255,15 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		btnNextPage.setEnabled(pageIndex + 1 < reportConfig.getPages().size());
 		btnPrevPage.setEnabled(pageIndex > 0);
 	}
+	
+	private void updatePageIndex(int index, int total)
+	{
+		int[] pages = new int[total - 1]; 
+		for (int i = 0; i < pages.length; i++)
+			pages[i] = i  < index ? i : i - 1; 
+		
+		uiMoveToPage.init(pages, "Page ", "");
+		
+		uiPageEditor.updatePageIndex(index, total); 
+	}
 }
-			

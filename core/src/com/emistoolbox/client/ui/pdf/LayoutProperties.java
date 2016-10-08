@@ -13,6 +13,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -66,6 +67,7 @@ public abstract class LayoutProperties<T> extends FlexTable implements EmisEdito
 
 			setWidget(row, 1, ui); 
 			setText(row, 0, labels == null || labels.length <= i ? keys[i] : labels[i]);
+			getRowFormatter().setVerticalAlign(row, HasVerticalAlignment.ALIGN_TOP);
 			
 			row++; 
 		}

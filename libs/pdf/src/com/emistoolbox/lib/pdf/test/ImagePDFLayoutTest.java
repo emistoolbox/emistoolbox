@@ -12,8 +12,20 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import es.jbauer.lib.io.impl.IOFileInput;
 
 public class ImagePDFLayoutTest {
-	public List<PDFLayout> getLayout (File file) {
+	private String testDir; 
+	
+	public ImagePDFLayoutTest(String testDir)
+	{ this.testDir = testDir; } 
+	
+	public List<PDFLayout> getLayout () {
 		List<PDFLayout> layouts = new ArrayList<PDFLayout> ();
+		layouts.add (getLayout ("toolbox.png"));
+		layouts.add (getLayout ("toolbox.jpg"));
+		return layouts;
+	}
+	
+	private PDFLayout getLayout (String filename) {
+		File file = new File (testDir,filename);
 		PDFLayout layout = new PDFLayout ();
 		PDFLayoutFrameElement outerFrame = new PDFLayoutFrameElement (500,500);
 
@@ -27,7 +39,6 @@ public class ImagePDFLayoutTest {
 		outerFrame.addElement (image);
 
 		layout.setOuterFrame (outerFrame);
-		layouts.add (layout);
-		return layouts;
+		return layout;
 	}
 }

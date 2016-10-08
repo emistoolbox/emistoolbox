@@ -1137,6 +1137,8 @@ public class XmlReader
 		else if (type.equals("prio")) 
 		{
 			PdfPriorityListContentConfigImpl tmp = new PdfPriorityListContentConfigImpl(); 
+			tmp.setMaxRowCount(getAttrAsInt(tag, "maxRows"));
+			tmp.setFilterEmpty(getAttrAsBoolean(tag, "filterEmpty"));
 			tmp.setTableStyle(getTableStyle(getElement(tag, "tableStyle")));
 			tmp.setMetaResult(getPriorityMetaResult(getElement(tag, "prioMetaResult"), indicators)); 
 		}

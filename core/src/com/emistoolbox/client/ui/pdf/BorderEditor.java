@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.ListBox;
 
 public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<BorderStyle>>, HasValueChangeHandlers<LayoutSides<BorderStyle>>
 {
-	private static int[] BORDER_WIDTHS = new int[] { 0, 1, 2, 3, 4, 5 };  
+	public static int[] BORDER_WIDTHS = new int[] { 0, 1, 2, 3, 4, 5 };  
 	private static String[] SIDE_NAMES = new String[] { "Left", "Top", "Right", "Bottom" }; 
 
 	private LayoutSides<BorderStyle> borders; 
@@ -93,11 +93,18 @@ public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<Bo
 		for (int i = 0; i < 4; i++)
 		{
 			int uiIndex = sameSides ? 0 : i; 
+
+			int size = uiSizes[uiIndex].get();  
+			if (size == 0)
+				styles[i] = null; 
+			else
+			{
+				if (styles[i] == null)
+					styles[i] = new BorderStyle(); 
 			
-			styles[i].setColor(uiColors[uiIndex].get());
-			try { styles[i].setWidth(uiSizes[uiIndex].get()); }
-			catch (Throwable err)
-			{  styles[i].setWidth(0); }
+				styles[i].setColor(uiColors[uiIndex].get());
+				styles[i].setWidth(size); 
+			}
 		}
 	}
 

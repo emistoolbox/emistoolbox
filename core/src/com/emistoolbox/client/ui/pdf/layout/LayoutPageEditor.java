@@ -1,5 +1,5 @@
 package com.emistoolbox.client.ui.pdf.layout;
-
+			
 import com.emistoolbox.client.EmisEditor;
 import com.emistoolbox.client.ui.pdf.LayoutFrameConfigProperties;
 import com.emistoolbox.client.ui.pdf.LayoutPageConfigProperties;
@@ -8,11 +8,14 @@ import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.ChartColor;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
+import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.CSSCreator;
 import com.emistoolbox.common.util.Point;
 import com.emistoolbox.common.util.Rectangle;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -35,7 +38,7 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 	private PageOrientation pageOrientation; 
 
 	private LayoutPageConfigProperties uiPageProps = new LayoutPageConfigProperties(); 
-	private LayoutFrameConfigProperties uiFrameProps = new LayoutFrameConfigProperties(); 
+	private LayoutFrameConfigProperties uiFrameProps= new LayoutFrameConfigProperties(); 
 
 	private LayoutFrameWidget uiFrameCurrent = null; 
 	private LayoutPdfReportEditor reportEditor = null; 
@@ -47,8 +50,19 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 
 		add(uiOuterPage); 
 		uiOuterPage.add(uiPage);
+		uiOuterPage.addStyleName("layout-outer-page");
+		uiPage.addStyleName("layout-inner-page");
 
 		this.reportEditor = editor; 
+		
+		uiFrameProps.addValueChangeHandler(new ValueChangeHandler<LayoutFrameConfig>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<LayoutFrameConfig> event) 
+			{
+				if (uiFrameCurrent != null)
+					uiFrameCurrent.updateFrameStyle(); 
+			}
+		}); 
 		
 		set(null);
 	}
@@ -62,6 +76,9 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 	public LayoutFrameConfigProperties getFrameConfigProps()
 	{ return uiFrameProps; } 
 
+	public LayoutFrameWidget getCurrentFrame()
+	{ return uiFrameCurrent; }
+	
 	public void selectFrame(LayoutFrameWidget uiFrame)
 	{
 		if (uiFrameCurrent != null)
@@ -82,13 +99,19 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		reportEditor.showFrameProperties(); 
 	}
 	
-	public void resizeFrame(LayoutFrameWidget frame, int widthDelta, int heightDelta)
+	private int getWidth(Widget w)
+	{ return w.getElement().getClientWidth(); } 
+
+	private int getHeight(Widget w)
+	{ return w.getElement().getClientHeight(); } 
+
+	public Point resizeFrame(LayoutFrameWidget frame, int widthDelta, int heightDelta)
 	{
 		int left = uiPage.getWidgetLeft(frame); 
 		int top = uiPage.getWidgetTop(frame); 
 
-		int width = frame.getElement().getClientWidth() + widthDelta; 
-		int height = frame.getElement().getClientHeight() + heightDelta;
+		int width = getWidth(frame) + widthDelta; 
+		int height = getHeight(frame) + heightDelta;
 		
 		if  (width < MIN_FRAME_SIZE)
 			width = MIN_FRAME_SIZE; 
@@ -96,12 +119,21 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		if (height < MIN_FRAME_SIZE)
 			height = MIN_FRAME_SIZE; 
 		
+		if (left + width > getWidth(uiPage))
+			width = getWidth(uiPage) - left; 
 		
+		if (top + height > getHeight(uiPage))
+			height = getHeight(uiPage) - top; 
 		
 		frame.setPixelSize(width, height);  
+		
+		return new Point(0, 0); 
 	}
 	
-	public void moveFrame(LayoutFrameWidget frame, int xOffset, int yOffset)
+	public void positionFrame(LayoutFrameWidget frame, int x, int y)
+	{ uiPage.setWidgetPosition(frame, x, y); }
+	
+	public Point moveFrame(LayoutFrameWidget frame, int xOffset, int yOffset)
 	{
 		int x = uiPage.getWidgetLeft(frame) + xOffset; 
 		int y = uiPage.getWidgetTop(frame) + yOffset; 
@@ -112,13 +144,18 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		if (y < 0)
 			y = 0; 
 		
-		if (x >= uiPage.getOffsetWidth() - MIN_FRAME_SIZE)
-			x = uiPage.getOffsetWidth() - MIN_FRAME_SIZE; 
+		if (x >= uiPage.getOffsetWidth() - frame.getOffsetWidth())
+			x = uiPage.getOffsetWidth() - frame.getOffsetWidth(); 
 		
-		if (y >= uiPage.getOffsetHeight() - MIN_FRAME_SIZE)
-			y = uiPage.getOffsetHeight() - MIN_FRAME_SIZE; 
+		if (y >= uiPage.getOffsetHeight() - frame.getOffsetHeight())
+			y = uiPage.getOffsetHeight() - frame.getOffsetHeight(); 
 
-		uiPage.setWidgetPosition(frame, x, y); 
+		// Round x and y to next 10. 
+		Point gridAdjustment = new Point(0, 0); // new Point(x % 10, y % 10); 
+
+		positionFrame(frame, x - gridAdjustment.getIntX(), y - gridAdjustment.getIntY());
+		
+		return gridAdjustment; 
 	}
 	
 	public void removeFrame(LayoutFrameWidget frame)
@@ -136,9 +173,9 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		Point size = PdfText.getPageSize(pageSize, pageOrientation);
 		Rectangle margins = PdfText.getMargins(pageSize); 
 
-		uiOuterPage.setPixelSize((int) Math.round(size.x), (int) Math.round(size.y));
-		uiOuterPage.setWidgetPosition(uiPage, (int) Math.round(margins.getLeft()), (int) Math.round(margins.getTop())); 
-		uiPage.setPixelSize((int) Math.round(size.x - margins.getWidth()), (int) Math.round(size.y - margins.getHeight()));
+		uiOuterPage.setPixelSize(size.getIntX(), size.getIntY());
+		uiOuterPage.setWidgetPosition(uiPage, margins.getIntLeft(), margins.getIntTop()); 
+		uiPage.setPixelSize(size.getIntX() - margins.getIntLeft() - margins.getIntRight(), size.getIntY() - margins.getIntTop() - margins.getIntBottom());
 		
 		xOffset = (int) Math.round(margins.getLeft());
 		yOffset = (int) Math.round(margins.getTop());
@@ -229,10 +266,11 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		Rectangle pos = frame.getPosition();
 		uiFrame.setPixelSize(getPanelX(pos.getWidth()), getPanelY(pos.getHeight())); 
 		uiPage.add(uiFrame, xOffset + getPanelX(pos.getLeft()), yOffset + getPanelY(pos.getTop()));
+		uiFrame.updateFrameStyle();
 	}
-	
+
 	public void updatePageIndex(int index, int total)
-	{}
+	{ uiFrameProps.updatePageIndex(index, total); }
 	
 	public void updatePageStyle(LayoutPageConfig config)
 	{

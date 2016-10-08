@@ -1,10 +1,14 @@
 package com.emistoolbox.client.ui.pdf;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.emistoolbox.client.EmisEditor;
 import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.client.util.ui.UIUtils;
+import com.emistoolbox.common.ChartColor;
 import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.CSSCreator;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
@@ -13,6 +17,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -22,7 +27,7 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 {
 	private ChartFont font;
 	
-	private ChartColorEditor uiColor; 
+	private ChartColorEditor uiColor = new ChartColorEditor(); 
 	private HTML uiText = new HTML("");
 
 	private ListBox uiName = new ListBox(); 
@@ -35,13 +40,16 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 	
 	public ChartFontEditor()
 	{
+		setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		setSpacing(3); 
+		
 		uiPopup.setModal(true);
 		uiPopup.setAutoHideEnabled(true);
 
 		UIUtils.listBoxInit(uiName, ChartFont.FONTS);
 		UIUtils.listBoxInit(uiStyle, new String[] { "plain", "bold", "italic", "bold+italic" });
 		
-		Grid uiGrid = new Grid(2, 4); 
+		Grid uiGrid = new Grid(4, 2); 
 		uiPopup.add(uiGrid);
 		int row = 0; 
 		uiGrid.setText(row, 0,  "Family");
@@ -65,12 +73,16 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 		btnOk.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				if (font == null)
+					font = new ChartFont();
+				
 				font.setName(UIUtils.getListBoxValue(uiName));
 				font.setSize(uiSize.get());
 				font.setStyle(uiStyle.getSelectedIndex());
 
 				updateUi(); 
-				
+
+				uiPopup.hide(); 
 				ValueChangeEvent.fire(ChartFontEditor.this, font); 
 			}
 		}); 
@@ -94,12 +106,25 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 		// Current visible part. 
 		add(uiColor); 
 		add(uiText); 
+		
+		uiColor.addValueChangeHandler(new ValueChangeHandler<ChartColor>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<ChartColor> event) {
+				if (event.getValue() != null && font == null)
+					font = new ChartFont(); 
+				
+				if (font != null)
+					font.setColor(event.getValue());
+				
+				ChartFontEditor.this.updateUi(); 
+				ValueChangeEvent.fire(ChartFontEditor.this, font); 
+			}
+		}); 
 	}
 
 	@Override
 	public void commit() 
-	{
-	}
+	{}
 
 	@Override
 	public ChartFont get() 
@@ -112,7 +137,10 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 	public void set(ChartFont font) 
 	{
 		this.font = font; 
-		uiColor.set(font.getColor());
+		if (font == null)
+			uiColor.set(null);
+		else
+			uiColor.set(font.getColor());
 		
 		updateUi(); 
 	}
@@ -124,16 +152,26 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 			uiText.setText("(none)");
 			return; 
 		}
+
+		if (font.getName() == null || font.getName().equals(""))
+			font.setName(ChartFont.FONTS[0]);
+		
+		if (font.getSize() == 0)
+			font.setSize(9);
 		
 		uiText.setText(font.getName() + " " + font.getSize() + "pt"); 
-		uiText.getElement().setAttribute("style", CSSCreator.getCssAsString(font)); 
+		Element tag = uiText.getElement(); 
+		tag.setAttribute("style", CSSCreator.getCssAsString(font)); 
 	}
 	
 	private void updateFontFields()
 	{
-		UIUtils.setListBoxValue(uiName, font.getName());
-		uiSize.set(font.getSize());
-		uiStyle.setSelectedIndex(font.getStyle());
+		if (font != null)
+		{
+			UIUtils.setListBoxValue(uiName, font.getName());
+			uiSize.set(font.getSize());
+			uiStyle.setSelectedIndex(font.getStyle());
+		}
 	}
 
 	@Override

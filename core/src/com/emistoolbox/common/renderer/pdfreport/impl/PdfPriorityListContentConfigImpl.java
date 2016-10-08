@@ -10,6 +10,9 @@ import com.emistoolbox.common.results.PriorityMetaResult;
 public class PdfPriorityListContentConfigImpl extends PdfMetaResultContentConfigImpl<PriorityMetaResult> implements PdfPriorityListContentConfig, Serializable
 {
 	private EmisTableStyle tableStyle; 
+	
+	private boolean filterEmpty; 
+	private Integer maxRowCount; 
 
 	@Override
 	public <T> T accept(PdfContentConfigVisitor<T> visitor) 
@@ -20,4 +23,20 @@ public class PdfPriorityListContentConfigImpl extends PdfMetaResultContentConfig
 	
 	public void setTableStyle(EmisTableStyle tableStyle) 
 	{ this.tableStyle = tableStyle; }
+
+	@Override
+	public boolean getFilterEmpty() 
+	{ return filterEmpty; }
+
+	@Override
+	public void setFilterEmpty(boolean filter) 
+	{ this.filterEmpty = filter; } 
+
+	@Override
+	public Integer getMaxRowCount() 
+	{ return maxRowCount; } 
+
+	@Override
+	public void setMaxRowCount(Integer rows) 
+	{ this.maxRowCount = rows; } 
 }

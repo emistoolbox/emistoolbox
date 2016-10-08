@@ -564,6 +564,14 @@ table.emisResult tbody tr:nth-child(2n) td.selected {
 }
 
 .layoutFrame.selected {
-	border: 2px dashed #fcc; 
-	z-order: 10; 
+	border: 2px dashed #f00; 
+	z-index: 10; 
+}
+
+.layout-outer-page {
+	border: 1px solid #000; 
+}
+
+.layout-inner-page {
+	border: 1px solid #eee; 
 }

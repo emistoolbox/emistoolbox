@@ -2,10 +2,8 @@ package com.emistoolbox.client.ui.pdf;
 
 import com.emistoolbox.client.EmisEditor;
 import com.emistoolbox.common.ChartColor;
-import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.CSSCreator;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -15,7 +13,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 
 public class ChartColorEditor extends HTML implements EmisEditor<ChartColor>, HasValueChangeHandlers<ChartColor>

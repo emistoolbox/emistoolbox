@@ -776,10 +776,15 @@ public class XmlWriter
     	for (String key : texts.getTextKeys())
     	{
     		String value = texts.getText(key);
-    		if (StringUtils.isEmpty(value))
+    		ChartFont font = texts.getFont(key);
+    		if (StringUtils.isEmpty(value) && font == null)
     			continue; 
     		
-    		createElementAndAdd(key, parent).setTextContent(value); 
+    		Element tag = createElementAndAdd(key, parent); 
+    		if (!StringUtils.isEmpty(value))
+    			tag.setTextContent(value);
+    		if (font != null)
+    			setAttributes(tag, font); 
     	}
     }
     
@@ -907,6 +912,10 @@ public class XmlWriter
         {
         	PdfPriorityListContentConfigImpl prioConfig = (PdfPriorityListContentConfigImpl) contentConfig; 
         	setAttr(tag, "type", "prio"); 
+        	if (prioConfig.getMaxRowCount() != null)
+        		setAttr(tag, "maxRows", "" + prioConfig.getMaxRowCount()); 
+
+        	setAttr(tag, "filterEmpty", prioConfig.getFilterEmpty());
         	addXml(tag, prioConfig.getTableStyle());  
         	addXml(tag, prioConfig.getMetaResult()); 
         }        

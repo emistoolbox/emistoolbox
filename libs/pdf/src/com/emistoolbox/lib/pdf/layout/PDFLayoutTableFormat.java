@@ -10,6 +10,16 @@ public class PDFLayoutTableFormat implements Serializable {
 	PDFLayoutSides<Double> padding;
 	PDFLayoutObjectFit objectFit = PDFLayoutObjectFit.NONE;
 
+	public PDFLayoutTableFormat () {}
+
+	public PDFLayoutTableFormat (PDFLayoutTableFormat format) {
+		this.font = format.font;
+		this.backgroundColor = format.backgroundColor;
+		this.placement = format.placement;
+		this.padding = format.padding;
+		this.objectFit = format.objectFit;
+	}
+
 	public PDFLayoutFont getFont () {
 		return font;
 	}

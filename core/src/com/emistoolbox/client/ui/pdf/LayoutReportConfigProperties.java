@@ -24,7 +24,7 @@ public class LayoutReportConfigProperties extends LayoutProperties<EmisPdfReport
 
 		uiPageOrientation.addChangeHandler(getChangeHandler()); 
 		UIUtils.listBoxInit(uiPageOrientation, PageOrientation.values());
-		
+
 		int row = getRowCount(); 
 
 		setText(row, 0, "Page Size");

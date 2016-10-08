@@ -6,6 +6,8 @@ import java.util.Arrays;
 public class PDFLayoutTableElement extends PDFLayoutElement {
 	private PDFLayoutElement [] [] elements = new PDFLayoutElement [0] [0];
 	private String [] [] texts = new String [0] [0];
+	private Integer [] [] rowSpans = new Integer [0] [0]; 
+	private Integer [] [] colSpans = new Integer [0] [0]; 
 	private PDFLayoutTableFormat defaultFormat;
 	private PDFLayoutTableFormat [] rowFormats = new PDFLayoutTableFormat [0];
 	private PDFLayoutTableFormat [] colFormats = new PDFLayoutTableFormat [0];
@@ -42,6 +44,8 @@ public class PDFLayoutTableElement extends PDFLayoutElement {
 
 		elements = copy (elements,new PDFLayoutElement [rows] [cols]);
 		texts = copy (texts,new String [rows] [cols]);
+		rowSpans = copy (rowSpans,new Integer [rows] [cols]);
+		colSpans = copy (colSpans,new Integer [rows] [cols]);
 		cellFormats = copy (cellFormats,new PDFLayoutTableFormat [rows] [cols]);
 		horizontalLines = copy (horizontalLines,new PDFLayoutLineStyle [rows + 1] [cols]);
 		verticalLines = copy (verticalLines,new PDFLayoutLineStyle [rows] [cols + 1]);
@@ -50,6 +54,19 @@ public class PDFLayoutTableElement extends PDFLayoutElement {
 		this.cols = cols;
 	}
 
+	public void setCellSpan (int row,int col,int rowSpan,int colSpan) {
+		rowSpans [row] [col] = rowSpan;
+		colSpans [row] [col] = colSpan;
+	}
+	
+	public int getRowSpan (int row,int col) {
+		return rowSpans [row] [col] != null ? rowSpans [row] [col] : 1;
+	}
+	
+	public int getColSpan (int row,int col) {
+		return colSpans [row] [col] != null ? colSpans [row] [col] : 1;
+	}
+	
 	// set line style of the external borders of the table
 	public void setTableBorderStyle (PDFLayoutLineStyle style) {
 		for (int col = 0;col < cols;col++) {

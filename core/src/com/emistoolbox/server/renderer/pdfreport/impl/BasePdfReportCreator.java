@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
+import com.emistoolbox.common.model.priolist.PriorityListItem;
 import com.emistoolbox.common.renderer.ChartConfig;
 import com.emistoolbox.common.renderer.ChartConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
@@ -499,7 +501,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         	adapt(prioMetaResult.getContext());
         	
         	PriorityResultCollector collector = new PriorityResultCollector(dataSet, prioMetaResult);
-        	prioContent.setResults(collector.getResults());
+        	prioContent.setResults(filter(collector.getResults(), prioConfig));
 
         	result = prioContent; 
         }
@@ -533,6 +535,28 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         return result;
     }
     
+    private List<PriorityListItem> filter(List<PriorityListItem> items, PdfPriorityListContentConfig config)
+    {
+    	Integer maxCount = config.getMaxRowCount(); 
+
+    	int pos = 0; 
+    	while (pos < items.size())
+    	{
+    		if (maxCount != null && pos >= maxCount)
+    		{
+    			items.remove(pos); 
+    			continue; 
+    		}
+    		
+    		if (config.getFilterEmpty() && items.get(pos).isEmpty())
+    			items.remove(pos); 
+    		else
+    			pos++; 
+    	}
+    	
+    	return items; 
+    }
+        
     private EmisPageGroup getTopPageGroup(PdfReport report, int[] ids, String[] names)
     {
     	NamedIndexList<EmisMetaEntity> entityTypes = metaResult.getHierarchy().getEntityOrder(); 

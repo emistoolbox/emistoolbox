@@ -11,13 +11,14 @@ import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.util.LayoutSides;
-import com.emistoolbox.common.util.Rectangle;
 import com.google.gwt.i18n.client.NumberFormat;
 
 public class CSSCreator {
 	private CSSCreator () {}
 	
 	public static String getCss (ChartColor color) {
+		if (color == null)
+			return null; 
 		return "rgba(" + color.getRed () + "," + color.getGreen () + "," + color.getBlue () + "," + toString (color.getAlpha () / 255.) + ")";
 	}
 	public static String getCssAsString(Map<String, String> values)
@@ -35,6 +36,9 @@ public class CSSCreator {
 	
 	public static Map<String,String> getCss (ChartFont font) {
 		Map<String,String> map = new HashMap<String,String> ();
+		if (font == null)
+			return map; 
+		
 		map.put ("color",getCss (font.getColor ()));
 		map.put ("font-size",getDimension (font.getSize ()));
 		map.put ("font-family",font.getName ());
@@ -55,6 +59,25 @@ public class CSSCreator {
 
 	public static String getCssAsString(LayoutFrameConfig config) {
 		return getCssAsString(getCss(config)); 
+	}
+
+	public static String getCssAsString(BorderStyle border)
+	{ return getCssAsString(getCss(border)); }
+	
+	public static Map<String, String> getCss(BorderStyle border)
+	{ return new HashMap<String, String>(); }
+	
+	public static String getCssAsString(ChartFont font, ChartColor bgColor, BorderStyle border)
+	{ return getCssAsString(getCss(font, bgColor, border)); }
+	
+	public static Map<String, String> getCss(ChartFont font, ChartColor bgColor, BorderStyle border)
+	{
+		Map<String, String> result = new HashMap<String, String>(); 
+		result.putAll(getCss(font)); 
+		result.put("background-color", getCss(bgColor)); 
+		result.putAll(getCss(border)); 
+		
+		return result; 
 	}
 	
 	public static Map<String,String> getCss (LayoutFrameConfig config) {
