@@ -36,7 +36,7 @@ public class LayoutFrameWidget extends SimplePanel implements EmisEditor<LayoutF
 	{
 		this.pageEditor = pageEditor; 
 		
-		setStyleName("layoutFrame"); 
+		setStyleName("layoutFrame"); 	
 		uiContent.setWidth("100%");
 		uiContent.setHeight("100%");
 
