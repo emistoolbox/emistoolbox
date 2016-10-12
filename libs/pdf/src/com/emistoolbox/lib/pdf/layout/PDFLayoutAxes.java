@@ -34,4 +34,8 @@ public class PDFLayoutAxes<T> implements Serializable {
 	public void setAxes (T [] axes) {
 		this.axes = axes;
 	}
+	
+	public String toString () {
+		return "<" + axes [0] + "/" + axes [1] + ">";
+	}
 }
