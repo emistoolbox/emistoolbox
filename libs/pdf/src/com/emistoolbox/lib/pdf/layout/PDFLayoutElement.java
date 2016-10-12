@@ -7,12 +7,13 @@ import java.util.Collections;
 
 abstract public class PDFLayoutElement implements Serializable {
 	private PDFLayoutObjectFit objectFit = PDFLayoutObjectFit.NONE;
-	private PDFLayoutPlacement placement = PDFLayoutAlignmentPlacement.CENTER;
+	private PDFLayoutPlacement placement = PDFLayoutPlacement.CENTER;
 	private PDFLayoutSides<Double> padding;
 	private PDFLayoutBorderStyle borderStyle;
 	private PDFLayoutAxes<Boolean> displacement = new PDFLayoutAxes<Boolean> (false,false);
 	private Color backgroundColor;
 	private PDFLayoutLink link;
+	private int rotation; // in multiples of 90 degrees
 
 	public PDFLayoutObjectFit getObjectFit () {
 		return objectFit;
@@ -62,6 +63,14 @@ abstract public class PDFLayoutElement implements Serializable {
 		this.link = link;
 	}
 
+	public int getRotation () {
+		return rotation;
+	}
+
+	public void setRotation (int rotation) {
+		this.rotation = rotation;
+	}
+
 	public PDFLayoutElement pad (double padding)
 	{ return pad (padding, padding); }
 	
@@ -81,7 +90,12 @@ abstract public class PDFLayoutElement implements Serializable {
 	}
 
 	public PDFLayoutElement position (double x,double y) {
-		setPlacement (new PDFLayoutCoordinatePlacement (x,y));
+		setPlacement (new PDFLayoutPlacement (new PDFLayoutCoordinatePlacement(x), new PDFLayoutCoordinatePlacement (y)));
+		return this;
+	}
+	
+	public PDFLayoutElement rotate (int rightAngles) {
+		setRotation (rightAngles);
 		return this;
 	}
 	
@@ -90,8 +104,8 @@ abstract public class PDFLayoutElement implements Serializable {
 		return this;
 	}
 
-	public PDFLayoutElement align (PDFLayoutHorizontalAlignment horizontalAlignment,PDFLayoutVerticalAlignment verticalAlignment) {
-		setPlacement (new PDFLayoutAlignmentPlacement (horizontalAlignment,verticalAlignment));
+	public PDFLayoutElement align (PDFLayoutHorizontalPlacement horizontalPlacement,PDFLayoutVerticalPlacement verticalPlacement) {
+		setPlacement (new PDFLayoutPlacement (horizontalPlacement,verticalPlacement));
 		return this;
 	}
 
@@ -102,6 +116,11 @@ abstract public class PDFLayoutElement implements Serializable {
 
 	public PDFLayoutElement fit (PDFLayoutObjectFit objectFit) {
 		setObjectFit (objectFit);
+		return this;
+	}
+	
+	public PDFLayoutElement border (double width) {
+		setBorderStyle (new PDFLayoutBorderStyle (width));
 		return this;
 	}
 	

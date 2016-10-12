@@ -248,6 +248,14 @@ public class Transformation
     double sin = Math.sin (phi);
     return new Transformation (new double [] {cos,-sin,sin,cos,0,0});
   }
+  
+  public static Transformation rotationThroughRightAngles (int rightAngles) {
+	  Transformation rotation = rotationThrough (rightAngles * Math.PI / 2);
+	  for (int i = 0;i < rotation.matrix.length;i++)
+		  rotation.matrix [i] = Math.round (rotation.matrix [i]);
+	  return rotation;
+	}
+
 
   public static Transformation translationBy (double x,double y)
   {
@@ -375,11 +383,17 @@ public class Transformation
     double [] matrix = new double [6];
 
     for (int i = 0;i < 2;i++)
-      {
-        double den = 1 / (from [i + 2] - from [i]);
-        matrix [3 * i] = (to [i + 2] - to [i]) * den;
-        matrix [4 + i] = (from [i + 2] * to [i] - from [i] * to [i + 2]) * den;
-      }
+    	if (from [i + 2] == from [i]) {
+    		if (to [i + 2] != to [i])
+    			throw new Error ("can't transform degenerated box into non-degenerated box");
+    		matrix [3 * i] = 1;
+    		matrix [4 + i] = to [i] - from [i];
+    	}
+    	else {
+            double den = 1 / (from [i + 2] - from [i]);
+            matrix [3 * i] = (to [i + 2] - to [i]) * den;
+            matrix [4 + i] = (from [i + 2] * to [i] - from [i] * to [i + 2]) * den;
+    	}
 
     return new Transformation (matrix);
   }

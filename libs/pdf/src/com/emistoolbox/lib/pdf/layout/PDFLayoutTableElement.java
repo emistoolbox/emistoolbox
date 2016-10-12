@@ -101,6 +101,13 @@ public class PDFLayoutTableElement extends PDFLayoutElement {
 		for (int row = 0;row < rows;row++)
 			setVerticalBorderStyle (row,col,style);
 	}
+	
+	public void setAllBorderStyles (PDFLayoutLineStyle style) {
+		for (int col = 0;col <= cols;col++)
+			setVerticalBorderStyle (col,style);
+		for (int row = 0;row <= rows;row++)
+			setHorizontalBorderStyle (row,style);
+	}
 
 	public void setText (int row,int col,String text) {
 		texts [row] [col] = text;
