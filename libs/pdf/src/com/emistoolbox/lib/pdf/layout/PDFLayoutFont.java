@@ -26,6 +26,14 @@ public class PDFLayoutFont implements Serializable
 		this.fontStyle = style; 
 	}
 	
+	public PDFLayoutFont(String name, double size, PDFLayoutFontStyle style,Color color)
+	{
+		this.fontName = name; 
+		this.fontSize = size; 
+		this.fontStyle = style; 
+		this.color = color;
+	}
+	
 	public String getFontName () {
 		return fontName;
 	}
