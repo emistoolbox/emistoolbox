@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFontStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutLineStyle;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTableElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTableFormat;
@@ -34,26 +34,26 @@ public class TablePDFLayoutTest {
 		PDFLayoutTableFormat defaultFormat = new PDFLayoutTableFormat ();
 		defaultFormat.setFont (defaultFont);
 		defaultFormat.setBackgroundColor (Color.LIGHT_GRAY);
-		defaultFormat.setPlacement (PDFLayoutAlignmentPlacement.CENTER);
+		defaultFormat.setPlacement (PDFLayoutPlacement.CENTER);
 		table.setDefaultFormat (defaultFormat);
 		
 		PDFLayoutTableFormat columnFormat = new PDFLayoutTableFormat ();
 		columnFormat.setFont (columnFont);
 		columnFormat.setBackgroundColor (Color.GREEN);
 		columnFormat.setPadding (new PDFLayoutSides<Double> (2.));
-		columnFormat.setPlacement (new PDFLayoutAlignmentPlacement (PDFLayoutHorizontalAlignment.LEFT,PDFLayoutVerticalAlignment.BOTTOM));
+		columnFormat.setPlacement (new PDFLayoutPlacement (PDFLayoutHorizontalAlignment.LEFT,PDFLayoutVerticalAlignment.BOTTOM));
 		table.setColFormat (1,columnFormat);
 		
 		PDFLayoutTableFormat rowFormat = new PDFLayoutTableFormat ();
 		rowFormat.setFont (rowFont);
 		rowFormat.setBackgroundColor (Color.RED);
-		rowFormat.setPlacement (new PDFLayoutAlignmentPlacement (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.TOP));
+		rowFormat.setPlacement (new PDFLayoutPlacement (PDFLayoutHorizontalAlignment.CENTER,PDFLayoutVerticalAlignment.TOP));
 		table.setRowFormat (2,rowFormat);
 		
 		PDFLayoutTableFormat cellFormat = new PDFLayoutTableFormat ();
 		cellFormat.setFont (cellFont);	
 		cellFormat.setBackgroundColor (Color.YELLOW);
-		cellFormat.setPlacement (new PDFLayoutAlignmentPlacement (PDFLayoutHorizontalAlignment.RIGHT,PDFLayoutVerticalAlignment.CENTER));
+		cellFormat.setPlacement (new PDFLayoutPlacement (PDFLayoutHorizontalAlignment.RIGHT,PDFLayoutVerticalAlignment.CENTER));
 		table.setCellFormat (2,2,cellFormat);
 		
 		int row = 0;
@@ -86,7 +86,7 @@ public class TablePDFLayoutTest {
 		defaultFormat = new PDFLayoutTableFormat ();
 		defaultFormat.setFont (cellFont);
 		defaultFormat.setPadding (new PDFLayoutSides<Double> (3.));
-		defaultFormat.setPlacement (PDFLayoutAlignmentPlacement.CENTER);
+		defaultFormat.setPlacement (PDFLayoutPlacement.CENTER);
 		
 		for (int i = 0;i < 2;i++) {
 			tables [i] = new PDFLayoutTableElement ();

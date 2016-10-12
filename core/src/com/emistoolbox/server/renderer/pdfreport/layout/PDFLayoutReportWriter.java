@@ -33,7 +33,6 @@ import com.emistoolbox.common.util.Point;
 import com.emistoolbox.common.util.Rectangle;
 import com.emistoolbox.lib.pdf.PDFLayoutRenderer;
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
-import com.emistoolbox.lib.pdf.layout.PDFLayoutAlignmentPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutBorderStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
@@ -407,7 +406,7 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 	}
 
 	private PDFLayoutPlacement getAlignment(HorizontalAlign hAlign, VerticalAlign vAlign)
-	{ return new PDFLayoutAlignmentPlacement(getHAlign(hAlign), getVAlign(vAlign)); }
+	{ return new PDFLayoutPlacement(getHAlign(hAlign), getVAlign(vAlign)); }
 	
 	private PDFLayoutVerticalAlignment getVAlign(VerticalAlign vAlign)
 	{

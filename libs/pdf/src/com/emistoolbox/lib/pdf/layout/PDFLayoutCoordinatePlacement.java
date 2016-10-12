@@ -1,11 +1,12 @@
 package com.emistoolbox.lib.pdf.layout;
 
-public class PDFLayoutCoordinatePlacement extends PDFLayoutPlacement {
-	private double x,y;
+import java.io.Serializable;
+
+public class PDFLayoutCoordinatePlacement implements PDFLayoutHorizontalPlacement, PDFLayoutVerticalPlacement, Serializable {
+	private double x;
 	
-	public PDFLayoutCoordinatePlacement (double x,double y) {
+	public PDFLayoutCoordinatePlacement (double x) {
 		this.x = x;
-		this.y = y;
 	}
 
 	public double getX () {
@@ -15,15 +16,8 @@ public class PDFLayoutCoordinatePlacement extends PDFLayoutPlacement {
 	public void setX (double x) {
 		this.x = x;
 	}
-
-	public double getY () {
-		return y;
-	}
-
-	public void setY (double y) {
-		this.y = y;
-	}
 	
-	public String toString()
-	{ return "(" + x + ", " + y + ")"; }
+	public String toString () {
+		return String.valueOf (x);
+	}
 }

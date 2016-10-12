@@ -1,6 +1,6 @@
 package com.emistoolbox.lib.pdf.layout;
 
-public enum PDFLayoutVerticalAlignment {
+public enum PDFLayoutVerticalAlignment implements PDFLayoutVerticalPlacement {
 	TOP,
 	CENTER,
 	BOTTOM,

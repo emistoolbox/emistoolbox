@@ -1,6 +1,6 @@
 package com.emistoolbox.lib.pdf.layout;
 
-public enum PDFLayoutHorizontalAlignment {
+public enum PDFLayoutHorizontalAlignment implements PDFLayoutHorizontalPlacement {
 	LEFT,
 	CENTER,
 	RIGHT,
