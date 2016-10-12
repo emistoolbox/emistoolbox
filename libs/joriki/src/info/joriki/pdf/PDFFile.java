@@ -687,7 +687,7 @@ public class PDFFile implements ObjectTypes, PDFOptions
                 info.joriki.io.Util.dump (fontFile.getTable (id),dump);
                 break;
               case 'f' : // list fonts
-              case 'F' : // list fonts on first occurence
+              case 'F' : // list fonts on first occurrence
                 final Set fontSet = new HashSet ();
                 final boolean firstOccurenceOnly = action == 'F';
                 new DocumentTraversal ().traversePages (document,new PageHandler () {
