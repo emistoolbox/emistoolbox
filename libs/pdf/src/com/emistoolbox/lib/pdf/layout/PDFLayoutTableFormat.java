@@ -4,11 +4,11 @@ import java.awt.Color;
 import java.io.Serializable;
 
 public class PDFLayoutTableFormat implements Serializable {
-	PDFLayoutFont font;
-	Color backgroundColor;
-	PDFLayoutPlacement placement;
-	PDFLayoutSides<Double> padding;
-	PDFLayoutObjectFit objectFit = PDFLayoutObjectFit.NONE;
+	private PDFLayoutFont font;
+	private Color backgroundColor;
+	private PDFLayoutPlacement placement;
+	private PDFLayoutSides<Double> padding;
+	private PDFLayoutObjectFit objectFit = PDFLayoutObjectFit.NONE;
 
 	public PDFLayoutTableFormat () {}
 
