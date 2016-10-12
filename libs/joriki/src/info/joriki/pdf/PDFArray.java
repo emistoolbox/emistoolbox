@@ -208,6 +208,13 @@ public class PDFArray extends PDFContainer
     result.add (object);
     return result;
   }
+  
+  public boolean contains (PDFObject object) {
+	  for (PDFObject o : this)
+		  if (o.equals (object))
+			  return true;
+	  return false;
+  }
 
   public int size ()
   {
