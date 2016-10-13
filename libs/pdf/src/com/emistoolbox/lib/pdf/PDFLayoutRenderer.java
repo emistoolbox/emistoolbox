@@ -1199,8 +1199,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream ();
 		for (char c : string.toCharArray ()) {
 			switch (c) {
-			case '“': c = 0xaa; break;
-			case '”': c = 0xba; break;
+			case '\u201c': c = 0xaa; break;
+			case '\u201d': c = 0xba; break;
 			}
 			baos.write (c);
 		}
