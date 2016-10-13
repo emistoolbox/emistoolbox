@@ -13,6 +13,8 @@ import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
+import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
@@ -234,7 +236,7 @@ public class PdfReportEditor extends FlexTable implements EmisEditor<PdfReportCo
         }
     }
 
-    public static void editText(final PdfTextContentConfigImpl textContent, final ValueChangeHandler<String> handler)
+    public static void editText(final PdfTextContentConfig textContent, final ValueChangeHandler<String> handler)
     {
         final TextEditor editor = new TextEditor("Please enter text for report:", textContent.getTitle() == null ? "" : textContent.getTitle(), textContent.getText()); 
         final BlockingScreen block = new BlockingScreen(editor); 
@@ -253,25 +255,35 @@ public class PdfReportEditor extends FlexTable implements EmisEditor<PdfReportCo
     
     private void editVariables(final int index)
     {
-        final PdfContentConfig content = uiContents.getUserObject(index);
+    	final PdfContentConfig content = uiContents.getUserObject(index);
         if (content instanceof PdfVariableContentConfigImpl)
         {
             final PdfVariableContentConfigImpl varContent = (PdfVariableContentConfigImpl) content; 
-            final VariableEditor editor = new VariableEditor(varContent.getEntityType());
-            editor.set(varContent); 
-            final BlockingScreen block = new BlockingScreen(editor); 
-            editor.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-               public void onValueChange(ValueChangeEvent<Boolean> event)
-                {
-                   block.finished(); 
-                   if (event.getValue())
-                   {
-                       editor.update(varContent); 
-                       uiContents.updateText(index,  varContent.getInfo()); 
-                   }
-                }
-            }); 
+            editVariables(varContent, new ValueChangeHandler<Boolean>() {
+				@Override
+				public void onValueChange(ValueChangeEvent<Boolean> event) {
+	                uiContents.updateText(index,  varContent.getInfo()); 
+				}
+            });
         }
+    }
+    
+    public static void editVariables(final PdfVariableContentConfig varContent, final ValueChangeHandler<Boolean> handler)
+    {
+        final VariableEditor editor = new VariableEditor(varContent.getEntityType());
+        editor.set(varContent); 
+        final BlockingScreen block = new BlockingScreen(editor); 
+        editor.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+           public void onValueChange(ValueChangeEvent<Boolean> event)
+            {
+               block.finished(); 
+               if (event.getValue())
+                   editor.update(varContent); 
+               
+               if (handler != null)
+            	   handler.onValueChange(event);
+            }
+        }); 
     }
 
     public void updateButtons()

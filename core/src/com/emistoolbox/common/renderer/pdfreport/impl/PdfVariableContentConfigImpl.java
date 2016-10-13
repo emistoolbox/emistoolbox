@@ -15,7 +15,7 @@ import com.emistoolbox.common.util.NamedUtil;
 
 public class PdfVariableContentConfigImpl extends PdfContentConfigImpl implements PdfVariableContentConfig
 {
-    EmisMetaEntity entity; 
+    private EmisMetaEntity entity; 
     private List<String> titles = new ArrayList<String>(); 
     private List<String> variables = new ArrayList<String>(); 
     

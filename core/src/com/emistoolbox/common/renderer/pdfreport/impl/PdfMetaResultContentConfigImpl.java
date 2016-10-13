@@ -32,8 +32,6 @@ public abstract class PdfMetaResultContentConfigImpl<T extends MetaResult> exten
         {
             return null;
         }
-        EmisMetaEntity indicatorEntityType = null;
-        EmisIndicator indicator = this.metaResult.getIndicator();
 
         EmisMetaEntity result = null; 
         for (MetaResultValue mrValue : metaResult.getMetaResultValues())

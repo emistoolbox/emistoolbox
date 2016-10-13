@@ -2,9 +2,14 @@ package com.emistoolbox.client.ui.pdf;
 
 import com.emistoolbox.client.EmisEditor;
 import com.emistoolbox.client.admin.ui.EmisUtils;
+import com.emistoolbox.client.admin.ui.GwtUtils;
 import com.emistoolbox.client.ui.pdf.layout.LayoutFrameWidget;
 import com.emistoolbox.client.ui.pdf.layout.LayoutPageEditor;
+import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutFrameConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutPageConfigImpl;
@@ -20,6 +25,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -34,7 +40,7 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	private IntPicker uiPageIndex = new IntPicker(new int[] { 1 }, "Page ", ""); 
 	private Label uiPageIndexPost = new Label(""); 
 
-	private IntPicker uiMoveToPage = new IntPicker(new int[0]); 
+	private ListBox uiMoveToPage = new ListBox(); 
 	
 	private int pageIndex = -1; 
 	
@@ -54,7 +60,8 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		uiPageIndex.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				updateUi(uiPageIndex.getSelectedIndex()); 
+				updateUi(uiPageIndex.getSelectedIndex());
+				
 			}
 		}); 
 
@@ -163,22 +170,44 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 		uiMoveToPage.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
-				moveFrame(uiPageEditor.getCurrentFrame(), uiMoveToPage.get());
-				uiPageEditor.selectFrame(null);
+				int page = new Integer(GwtUtils.getListValue(uiMoveToPage));
+				uiMoveToPage.setSelectedIndex(0); 
+				if (page == -1)
+				{
+					uiPageEditor.removeFrame(uiPageEditor.getCurrentFrame());
+					uiPageEditor.selectFrame(null);
+				}
+				else if (page >= 0)
+				{
+					moveFrame(uiPageEditor.getCurrentFrame(), page);
+					uiPageEditor.selectFrame(null);
+				}
 			}
 		}); 
+		
+		uiReportProps.addValueChangeHandler(new ValueChangeHandler<EmisPdfReportConfig>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<EmisPdfReportConfig> event) {
+				set(get()); 
+			}
+		});
 	}
+	
+	public ListBox getMoveToPageUi()
+	{ return uiMoveToPage; } 
 	
 	public void showFrameProperties()
 	{ uiTabs.selectTab(2); }
 	
 	private void addNewTextContent()
 	{
+		uiPageEditor.selectFrame(null);
+		
 		final PdfTextContentConfigImpl textContent = new PdfTextContentConfigImpl(); 
 	    PdfReportEditor.editText(textContent, new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				LayoutFrameConfigImpl frame = new LayoutFrameConfigImpl();
+				LayoutFrameConfig frame = new LayoutFrameConfigImpl();
 				frame.setContentConfig(textContent);
 				uiPageEditor.addFrame(frame, true);
 			}
@@ -186,7 +215,20 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	}
 	
 	private void addNewVariableContent()
-	{}
+	{
+		uiPageEditor.selectFrame(null);
+		
+		final PdfVariableContentConfig varContent = new PdfVariableContentConfigImpl(); 
+		PdfReportEditor.editVariables(varContent, new ValueChangeHandler<Boolean>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				LayoutFrameConfig frame = new LayoutFrameConfigImpl(); 
+				frame.setContentConfig(varContent);
+				uiPageEditor.addFrame(frame, true);
+			}
+		}); 
+	}
 	
 	@Override
 	public void commit()
@@ -241,7 +283,9 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 			uiPageEditor.commit();
 		
 		pageIndex = indexOfPage; 
-		uiPageEditor.set(reportConfig.getPages().get(pageIndex));
+		if (reportConfig.getPages().size() > 0)
+			uiPageEditor.set(reportConfig.getPages().get(pageIndex));
+
 		updatePageIndex(pageIndex, reportConfig.getPages().size()); 
 
 		int[] values = new int[reportConfig.getPages().size()];
@@ -258,11 +302,14 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	
 	private void updatePageIndex(int index, int total)
 	{
-		int[] pages = new int[total - 1]; 
-		for (int i = 0; i < pages.length; i++)
-			pages[i] = i  < index ? i : i - 1; 
-		
-		uiMoveToPage.init(pages, "Page ", "");
+		uiMoveToPage.clear(); 
+		uiMoveToPage.addItem("", "-2");
+		uiMoveToPage.addItem("(delete)", "-1");
+		for (int i = 0; i < total; i++)
+		{
+			if (index != i)
+				uiMoveToPage.addItem("Page " + (i + 1), "" + i); 
+		}
 		
 		uiPageEditor.updatePageIndex(index, total); 
 	}

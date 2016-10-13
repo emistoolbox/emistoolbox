@@ -487,6 +487,7 @@ b, .value {
 .grayPopup {
     background-image: url(grayTransparent.png); 
     background-repeat: repeat; 
+	z-index: 20; 
 }
 
 .whiteBox
@@ -568,6 +569,20 @@ table.emisResult tbody tr:nth-child(2n) td.selected {
 	z-index: 10; 
 }
 
+.layoutFrame > div {
+	display: table; 
+}
+
+.layoutFrame > div > div {
+	display: table-row; 
+	height: 0; 
+	width: 100%; 
+}
+
+.content-text, .content-chart, .content-gis, .content-prio {
+	height: auto!important;
+}
+
 .layout-outer-page {
 	border: 1px solid #000; 
 }
@@ -575,3 +590,31 @@ table.emisResult tbody tr:nth-child(2n) td.selected {
 .layout-inner-page {
 	border: 1px solid #eee; 
 }
+
+.content-gis {
+	background-image: url(img/content-gis.png);
+	background-size: contain;
+	background-position: center; 
+	background-repeat: none; 
+}
+
+.content-chart {
+	background-image: url(img/content-chart.png);
+	background-size: contain; 
+	background-position: center; 
+	background-repeat: none; 
+}
+
+.content-prio {
+	background-image: url(img/content-prio.png);
+	background-size: contain; 
+	background-position: center; 
+	background-repeat: none; 
+}
+
+.content-chart.chart-pie { background-image: url(img/content-chart-pie.png); }
+.content-chart.chart-bar.dim-2 { background-image: url(img/content-chart-2d.png); }
+.content-chart.chart-line.dim-1 { background-image: url(img/content-chart-line.png); }
+.content-chart.chart-line.dim-2 { background-image: url(img/content-chart-line-2d.png); }
+.content-chart.chart-stacked { background-image: url(img/content-chart-stacked.png); }
+.content-chart.chart-scaled { background-image: url(img/content-chart-scaled.png); }

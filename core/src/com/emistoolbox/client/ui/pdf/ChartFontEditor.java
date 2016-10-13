@@ -31,7 +31,7 @@ public class ChartFontEditor extends HorizontalPanel implements EmisEditor<Chart
 	private HTML uiText = new HTML("");
 
 	private ListBox uiName = new ListBox(); 
-	private IntPicker uiSize = new IntPicker(new int[] { 6, 8, 9, 10, 12, 14, 16, 18, 20, 24, 32 }, "", "px"); 
+	private IntPicker uiSize = new IntPicker(new int[] { 6, 8, 9, 10, 12, 14, 16, 18, 20, 24, 32 }, "", "pt"); 
 	private ListBox uiStyle = new ListBox(); 
 
 	private PopupPanel uiPopup = new PopupPanel();

@@ -104,6 +104,12 @@ public abstract class LayoutProperties<T> extends FlexTable implements EmisEdito
 			add(uiFont);
 		}
 		
+		public void setVisible(boolean showText, boolean showFont)
+		{
+			uiText.setVisible(showText); 
+			uiFont.setVisible(showFont);
+		}
+		
 		public void addValueChangeHandlers(ValueChangeHandler handler)
 		{
 			uiText.addValueChangeHandler(handler); 

@@ -122,6 +122,10 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
 
     public boolean allowContentConfig(PdfContentConfig contentConfig)
     {
+    	if (contentConfig instanceof PdfPriorityListContentConfig)
+    		// PriorityList content config can always be added.  
+    		return true; 
+    	
         if (getEntityType() == null)
             return true;
 

@@ -1,3 +1,8 @@
+- Text Frame - need font editor for body. 
+- Text Frame - remove title/subtitle edit fields
+- Frames - max height 
+
+
 
 == NEED TO IMPLEMENT == 
 - [test] Priority list content renderer - PDF 

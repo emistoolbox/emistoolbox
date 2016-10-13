@@ -95,17 +95,14 @@ public class BorderEditor extends FlexTable implements EmisEditor<LayoutSides<Bo
 			int uiIndex = sameSides ? 0 : i; 
 
 			int size = uiSizes[uiIndex].get();  
-			if (size == 0)
-				styles[i] = null; 
-			else
-			{
-				if (styles[i] == null)
-					styles[i] = new BorderStyle(); 
+			if (styles[i] == null)
+				styles[i] = new BorderStyle(); 
 			
-				styles[i].setColor(uiColors[uiIndex].get());
-				styles[i].setWidth(size); 
-			}
+			styles[i].setColor(uiColors[uiIndex].get());
+			styles[i].setWidth(size); 
 		}
+		
+		borders.setValues(styles);
 	}
 
 	@Override

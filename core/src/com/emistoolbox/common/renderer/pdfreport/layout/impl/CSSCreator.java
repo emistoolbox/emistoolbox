@@ -19,7 +19,7 @@ public class CSSCreator {
 	
 	public static String getCss (ChartColor color) {
 		if (color == null)
-			return null; 
+			color = null; 
 		return "rgba(" + color.getRed () + "," + color.getGreen () + "," + color.getBlue () + "," + toString (color.getAlpha () / 255.) + ")";
 	}
 
@@ -98,7 +98,7 @@ public class CSSCreator {
 			});
 			List<String> borderColors = reduceSides (borders,new Extractor<BorderStyle> () {
 				public String extract (BorderStyle borderStyle) {
-					return getCss (borderStyle == null ? new ChartColor () : borderStyle.getColour ());
+					return getCss (borderStyle == null || borderStyle.getColour () == null ? new ChartColor () : borderStyle.getColour ());
 				}
 			});
 			if (borderWidths.size () == 1 && borderColors.size () == 1)

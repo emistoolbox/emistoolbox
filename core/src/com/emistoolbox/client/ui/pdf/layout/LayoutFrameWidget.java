@@ -21,6 +21,8 @@ import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.ui.HTML;
@@ -32,20 +34,22 @@ public class LayoutFrameWidget extends SimplePanel implements EmisEditor<LayoutF
 	private LayoutFrameConfig frameConfig; 
 	private HTML uiContent = new HTML(); 
 	
+	private int containerWidth = 0; 
+	private int containerHeight = 0; 
+	
 	public LayoutFrameWidget(final LayoutPageEditor pageEditor)
 	{
 		this.pageEditor = pageEditor; 
 		
-		setStyleName("layoutFrame"); 	
-		uiContent.setWidth("100%");
-		uiContent.setHeight("100%");
+		setStyleName("layoutFrame");
 
 		add(uiContent); 
-		
+
 		MouseHandler mouseHandler = new MouseHandler(); 
-		uiContent.addMouseDownHandler(mouseHandler); 
-		uiContent.addMouseUpHandler(mouseHandler); 
-		uiContent.addMouseMoveHandler(mouseHandler); 
+		addDomHandler(mouseHandler, MouseDownEvent.getType()); 
+		addDomHandler(mouseHandler, MouseUpEvent.getType());
+		addDomHandler(mouseHandler, MouseMoveEvent.getType());
+		addDomHandler(mouseHandler, MouseOutEvent.getType()); 
 	}
 	
 	@Override
@@ -67,7 +71,7 @@ public class LayoutFrameWidget extends SimplePanel implements EmisEditor<LayoutF
 	
 	private enum MouseMode { MOVE, RESIZE };
 
-	public class MouseHandler implements MouseDownHandler, MouseUpHandler, MouseMoveHandler
+	public class MouseHandler implements MouseDownHandler, MouseUpHandler, MouseMoveHandler, MouseOutHandler
 	{
 		
 		private MouseMode mode; 
@@ -86,7 +90,14 @@ public class LayoutFrameWidget extends SimplePanel implements EmisEditor<LayoutF
 		}
 
 		@Override
+		public void onMouseOut(MouseOutEvent event) 
+		{ finish(event); } 
+
+		@Override
 		public void onMouseUp(MouseUpEvent event) 
+		{ finish(event); }
+		
+		public void finish(MouseEvent event) 
 		{
 			if (event.getNativeButton() == NativeEvent.BUTTON_RIGHT)
 				return; 
@@ -122,6 +133,9 @@ public class LayoutFrameWidget extends SimplePanel implements EmisEditor<LayoutF
 		
 		private void updatePosition(MouseEvent event)
 		{
+			if (event == null || lastX == null || lastY == null)
+				return;
+			
 			int xOffset = event.getScreenX() - lastX;  
 			int yOffset = event.getScreenY() - lastY; 
 			
@@ -139,10 +153,32 @@ public class LayoutFrameWidget extends SimplePanel implements EmisEditor<LayoutF
 		}
 	}
 	
+	public void updateFrameSize(int width, int height)
+	{
+		this.containerWidth = width; 
+		this.containerHeight = height; 
+		
+		width -= frameConfig.getPadding().getRight() + frameConfig.getPadding().getLeft(); 
+		height -= frameConfig.getPadding().getTop() + frameConfig.getPadding().getBottom();
+
+		if (frameConfig.getBorders().getLeft() != null)
+			width -= frameConfig.getBorders().getLeft().getWidth(); 
+		if (frameConfig.getBorders().getRight() != null)
+			width -= frameConfig.getBorders().getRight().getWidth(); 
+		if (frameConfig.getBorders().getTop() != null)
+			height-= frameConfig.getBorders().getTop().getWidth(); 
+		if (frameConfig.getBorders().getBottom() != null)
+			height -= frameConfig.getBorders().getBottom().getWidth();	
+
+		uiContent.setPixelSize(width, height);
+	}
+	
 	public void updateFrameStyle()
 	{ 
 		uiContent.getElement().setAttribute("style", CSSCreator.getCssAsString(frameConfig));
-		uiContent.setHTML(getHtmlText(frameConfig, PdfText.TEXT_TITLE) + getHtmlText(frameConfig, PdfText.TEXT_SUBTITLE) + getContentHtml(frameConfig));
+		uiContent.setHTML(getHtmlText(frameConfig, PdfText.TEXT_TITLE) + getHtmlText(frameConfig, PdfText.TEXT_SUBTITLE) + getContentHtml(frameConfig) + getHtmlText(frameConfig, PdfText.TEXT_FOOTER));
+		
+		updateFrameSize(containerWidth, containerHeight); 
 	}
 	
 	private String getHtmlText(TextSet texts, String key)
@@ -153,9 +189,9 @@ public class LayoutFrameWidget extends SimplePanel implements EmisEditor<LayoutF
 		
 		ChartFont font = texts.getFont(key); 
 		if (font == null)
-			return "<span>" + text + "</span>"; 
+			return "<div>" + text + "</div>"; 
 		
-		return "<span style='" + CSSCreator.getCssAsString(font) + "'>" + text + "</span>"; 
+		return "<div style='" + CSSCreator.getCssAsString(font) + "; height: " + (font.getSize() * 15 / 10) + "pt'>" + text + "</div>"; 
 	}
 	
 	private void showContextMenu()
@@ -182,14 +218,15 @@ class ContentConfigPreview implements PdfContentConfigVisitor<String>
 	public String visit(PdfTextContentConfig config) 
 	{
 		StringBuffer result = new StringBuffer(); 
-		divOpen(result, "content-text");
+		divOpen(result, "class", "content-text");
 		if (config.getTitle() != null)
 		{
-			divOpen(result, "class", "title", "style", CSSCreator.getCssAsString(frameConfig.getFont(PdfText.TEXT_TITLE))); 
+			divOpen(result, "style", CSSCreator.getCssAsString(frameConfig.getFont(PdfText.TEXT_TITLE))); 
 			result.append(config.getTitle());
 			divClose(result);
 		}
-		divOpen(result, "class", "body", "style", CSSCreator.getCssAsString(frameConfig.getFont(PdfText.TEXT_PLAIN))); 
+		
+		divOpen(result, "style", CSSCreator.getCssAsString(frameConfig.getFont(PdfText.TEXT_PLAIN))); 
 		result.append(config.getText());
 		divClose(result); 
 		divClose(result); 
@@ -203,11 +240,12 @@ class ContentConfigPreview implements PdfContentConfigVisitor<String>
 		return null;
 	}
 
+	private static final String[] chartTypes = new String[] { "bar", "pie", "stacked", "scaled", "line"}; 
 	@Override
 	public String visit(PdfChartContentConfig config) 
 	{
-		StringBuffer result = new StringBuffer(); 
-		divOpen(result, "content-chart"); 
+		StringBuffer result = new StringBuffer(); 		
+		divOpen(result, "class", "content-chart chart-" + chartTypes[config.getChartType()] + " dim-" + config.getMetaResult().getDimensionCount()); 
 		divClose(result); 
 		
 		return result.toString();
@@ -217,7 +255,7 @@ class ContentConfigPreview implements PdfContentConfigVisitor<String>
 	public String visit(PdfGisContentConfig config) 
 	{
 		StringBuffer result = new StringBuffer(); 
-		divOpen(result, "content-gis"); 
+		divOpen(result, "class", "content-gis"); 
 		divClose(result); 
 		
 		return result.toString();
@@ -227,7 +265,7 @@ class ContentConfigPreview implements PdfContentConfigVisitor<String>
 	public String visit(PdfPriorityListContentConfig config) 
 	{
 		StringBuffer result = new StringBuffer(); 
-		divOpen(result, "content-prio"); 
+		divOpen(result, "class", "content-prio"); 
 		divClose(result); 
 		
 		return result.toString();
@@ -250,7 +288,7 @@ class ContentConfigPreview implements PdfContentConfigVisitor<String>
 	
 	private void attr(StringBuffer result, String[] namedValues)
 	{
-		for (int i = 0; i < namedValues.length - 1; i++)
+		for (int i = 0; i < namedValues.length - 1; i += 2)
 			attr(result, namedValues[i], namedValues[i + 1]); 
 	}
 	
