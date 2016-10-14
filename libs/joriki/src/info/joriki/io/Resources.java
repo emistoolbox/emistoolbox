@@ -13,8 +13,11 @@ import java.io.Reader;
 public class Resources
 {
   public static InputStream getInputStream (Class location,String resource) {
-    return ClassLoader.getSystemResourceAsStream (location == null ? resource :
-    location.getPackage ().getName ().replaceAll ("\\.","/") + '/' + resource);
+	  if (location == null)
+		  return ClassLoader.getSystemResourceAsStream (resource); 
+
+	  String packageName = location.getPackage ().getName ().replaceAll ("\\.","/"); 
+	  return location.getClassLoader().getResourceAsStream(packageName + '/' + resource);
   }
   
   public static Reader getReader (Class location,String resource) {

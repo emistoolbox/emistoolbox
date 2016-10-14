@@ -68,7 +68,7 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutURILink;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalPlacement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
-import com.emistoolbox.lib.pdf.util.CMYKColor;
+import com.emistoolbox.lib.pdf.util.CMYKColor;	
 import com.emistoolbox.lib.pdf.util.RangeFinder;
 
 import es.jbauer.lib.io.IOOutput;
@@ -1199,9 +1199,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream ();
 		for (char c : string.toCharArray ()) {
 			switch (c) {
-//			case '\'': c = 0xaa; break;
-//			case '\'': c = 0xba; break;
+				case '\u201c': c = 0xaa; break;
+				case '\u201d': c = 0xba; break;
 			}
+			
 			baos.write (c);
 		}
 		return baos.toByteArray ();
