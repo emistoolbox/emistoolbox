@@ -218,11 +218,13 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private void fillRectangle (Rectangle r,Color c) {
-		pushGraphicsState ();
-		setFillColor (c);
-		outputRectangle (r);
-		ps.print ("f\n");
-		popGraphicsState ();
+		if (c != null) {
+			pushGraphicsState ();
+			setFillColor (c);
+			outputRectangle (r);
+			ps.print ("f\n");
+			popGraphicsState ();
+		}
 	}
 
 	private void setColor (Color color,boolean stroke) {
@@ -382,6 +384,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		Rectangle elementBox;
 		switch (objectFit) {
 		case CONTAIN:
+		case SCALE_DOWN:
 			elementBox = getBoundingBox (element);
 			break;
 		case NONE:
@@ -400,7 +403,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		double height = 0;
 		switch (objectFit) {
 		case CONTAIN:
+		case SCALE_DOWN:
 			double scale = Math.min (reducedObjectFitBox.width () / transformedElementBox.width (),reducedObjectFitBox.height () / transformedElementBox.height ());
+			if (objectFit == PDFLayoutObjectFit.SCALE_DOWN && scale > 1)
+				scale = 1;
 			width = scale * elementBox.width ();
 			height = scale * elementBox.height ();
 			break;
@@ -1025,25 +1031,43 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 								cellSpanned [row + i] [col + j] = true;
 						}
 
+			double [] widths = tableElement.getWidths ();
+			double [] heights = tableElement.getHeights ();
 			int [] [] rowSpans = new int [tableElement.getColCount ()] [tableElement.getRowCount ()];
 			int [] [] colSpans = new int [tableElement.getRowCount ()] [tableElement.getColCount ()];
 			double [] [] cellWidths  = new double [tableElement.getRowCount ()] [tableElement.getColCount ()];
 			double [] [] cellHeights = new double [tableElement.getColCount ()] [tableElement.getRowCount ()];
 			
 			for (int row = 0;row < tableElement.getRowCount ();row++)
-				for (int col = 0;col < tableElement.getColCount ();col++) {
-					rowSpans [col] [row] = tableElement.getRowSpan (row,col);
-					colSpans [row] [col] = tableElement.getColSpan (row,col);
-					PDFLayoutElement element = tableElement.getElement (row,col);
-					if (element != null) {
-						Rectangle boundingBox = PDFLayoutRenderer.this.getBoundingBox (element);
-						applyPaddingAndBorder (boundingBox,element,1);
-						if (!cellSpanned [row] [col]) {
-							cellWidths  [row] [col] = boundingBox.width ();
-							cellHeights [col] [row] = boundingBox.height ();
+				for (int col = 0;col < tableElement.getColCount ();col++)
+					if (!cellSpanned [row] [col]) {
+						rowSpans [col] [row] = tableElement.getRowSpan (row,col);
+						colSpans [row] [col] = tableElement.getColSpan (row,col);
+						PDFLayoutElement element = tableElement.getElement (row,col);
+						if (element != null) {
+							PDFLayoutObjectFit objectFit = element.getObjectFit ();
+							
+							boolean fixedWidth = widths != null;
+							boolean scaling = objectFit != PDFLayoutObjectFit.NONE;
+
+							double width = 0;
+							if (fixedWidth) {
+								for (int i = 0;i < colSpans [row] [col];i++)
+									width += widths [i];
+								if (!scaling) {
+									Rectangle widthBox = new Rectangle (0,0,width,0);
+									applyPaddingAndBorder (widthBox,element,-1);
+									width = widthBox.width ();
+								}
+							}
+							
+							Rectangle boundingBox = PDFLayoutRenderer.this.getBoundingBox (element,fixedWidth && !scaling ? width : Double.POSITIVE_INFINITY);
+							applyPaddingAndBorder (boundingBox,element,1);
+							double scale = fixedWidth && scaling ? width / boundingBox.width () : 1;
+							cellWidths  [row] [col] = scale * boundingBox.width ();
+							cellHeights [col] [row] = scale * boundingBox.height ();
 						}
 					}
-				}
 
 			double [] [] horizontalBorderWidths = new double [tableElement.getColCount ()] [tableElement.getRowCount () + 1];
 			double [] [] verticalBorderWidths   = new double [tableElement.getRowCount ()] [tableElement.getColCount () + 1];
@@ -1058,8 +1082,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 					if (!horizontalBorderSpanned [col] [row])
 						horizontalBorderWidths [col] [row] = getWidth (tableElement.getHorizontalLineStyle (row,col));
 
-			horizontalLayout = new LinearLayout (cellWidths,colSpans,verticalBorderWidths);
-			verticalLayout   = new LinearLayout (cellHeights,rowSpans,horizontalBorderWidths);
+			horizontalLayout = new LinearLayout (cellWidths,colSpans,verticalBorderWidths,widths);
+			verticalLayout   = new LinearLayout (cellHeights,rowSpans,horizontalBorderWidths,heights);
 		}	
 		
 		Rectangle getBoundingBox () {
@@ -1075,17 +1099,24 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		double [] cellDimensions;
 		double [] borderDimensions;
 		
-		LinearLayout (double [] [] cellWidths,int [] [] spans,double [] [] borderWidths) {
+		LinearLayout (double [] [] cellWidths,int [] [] spans,double [] [] borderWidths,double [] fixedWidths) {
 			int count = cellWidths.length == 0 ? 0 : cellWidths [0].length;
-			cellDimensions = new double [count];
 			borderDimensions = new double [count + 1];
 
 			// first find border dimensions; they're independent of spanning
 			for (double [] b : borderWidths)
 				for (int i = 0;i < b.length;i++)
 					borderDimensions [i] = Math.max (borderDimensions [i],b [i]);
+
+			// if fixed widths are given, use them
+			if (fixedWidths != null) {
+				cellDimensions = fixedWidths;
+				return;
+			}
 			
-			// now use the non-spanning widths
+			cellDimensions = new double [count];
+
+			// first use the non-spanning widths
 			for (int i = 0;i < cellWidths.length;i++)
 				for (int j = 0;j < count;j++)
 					if (spans [i] [j] == 1)
