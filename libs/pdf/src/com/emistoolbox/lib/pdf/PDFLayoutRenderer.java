@@ -218,11 +218,13 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private void fillRectangle (Rectangle r,Color c) {
-		pushGraphicsState ();
-		setFillColor (c);
-		outputRectangle (r);
-		ps.print ("f\n");
-		popGraphicsState ();
+		if (c != null) {
+			pushGraphicsState ();
+			setFillColor (c);
+			outputRectangle (r);
+			ps.print ("f\n");
+			popGraphicsState ();
+		}
 	}
 
 	private void setColor (Color color,boolean stroke) {
