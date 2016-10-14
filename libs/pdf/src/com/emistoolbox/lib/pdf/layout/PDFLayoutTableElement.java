@@ -4,16 +4,18 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class PDFLayoutTableElement extends PDFLayoutElement {
-	private PDFLayoutElement [] [] elements = new PDFLayoutElement [0] [0];
-	private String [] [] texts = new String [0] [0];
-	private Integer [] [] rowSpans = new Integer [0] [0]; 
-	private Integer [] [] colSpans = new Integer [0] [0]; 
+	private PDFLayoutElement [] [] elements = {};
+	private String [] [] texts = {};
+	private Integer [] [] rowSpans = {}; 
+	private Integer [] [] colSpans = {}; 
 	private PDFLayoutTableFormat defaultFormat;
-	private PDFLayoutTableFormat [] rowFormats = new PDFLayoutTableFormat [0];
-	private PDFLayoutTableFormat [] colFormats = new PDFLayoutTableFormat [0];
-	private PDFLayoutTableFormat [] [] cellFormats = new PDFLayoutTableFormat [0] [0];
-	private PDFLayoutLineStyle [] [] horizontalLines = new PDFLayoutLineStyle [1] [0];
-	private PDFLayoutLineStyle [] [] verticalLines = new PDFLayoutLineStyle [0] [1];
+	private PDFLayoutTableFormat [] rowFormats = {};
+	private PDFLayoutTableFormat [] colFormats = {};
+	private PDFLayoutTableFormat [] [] cellFormats = {};
+	private PDFLayoutLineStyle [] [] horizontalLines = {};
+	private PDFLayoutLineStyle [] [] verticalLines = {};
+	private double [] widths;
+	private double [] heights;
 	private int rows;
 	private int cols;
 
@@ -37,10 +39,17 @@ public class PDFLayoutTableElement extends PDFLayoutElement {
 		if (rows == this.rows && cols == this.cols)
 			return;
 
-		if (rows != this.rows)
+		if (rows != this.rows) {
 			rowFormats = Arrays.copyOf (rowFormats,rows);
-		if (cols != this.cols)
+			if (heights != null)
+				heights = Arrays.copyOf (heights,rows);
+		}
+
+		if (cols != this.cols) {
 			colFormats = Arrays.copyOf (colFormats,cols);
+			if (widths != null)
+				widths = Arrays.copyOf (widths,cols);
+		}
 
 		elements = copy (elements,new PDFLayoutElement [rows] [cols]);
 		texts = copy (texts,new String [rows] [cols]);
@@ -152,6 +161,26 @@ public class PDFLayoutTableElement extends PDFLayoutElement {
 
 	public void setCellFormat (int row,int col,PDFLayoutTableFormat format) {
 		cellFormats [row] [col] = format;
+	}
+
+	public double [] getWidths () {
+		return widths;
+	}
+	
+	public void setWidths (double ... widths) {
+		if (widths.length != cols)
+			throw new IllegalArgumentException ("width count must equal column count");
+		this.widths = widths;
+	}
+
+	public double [] getHeights () {
+		return heights;
+	}
+	
+	public void setHeights (double ... heights) {
+		if (heights.length != rows)
+			throw new IllegalArgumentException ("height count must equal row count");
+		this.heights = heights;
 	}
 
 	public PDFLayoutTableFormat getFormat (int row,int col) {
