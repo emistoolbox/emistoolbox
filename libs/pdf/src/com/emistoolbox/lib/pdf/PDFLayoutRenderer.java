@@ -384,6 +384,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		Rectangle elementBox;
 		switch (objectFit) {
 		case CONTAIN:
+		case SCALE_DOWN:
 			elementBox = getBoundingBox (element);
 			break;
 		case NONE:
@@ -402,7 +403,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		double height = 0;
 		switch (objectFit) {
 		case CONTAIN:
+		case SCALE_DOWN:
 			double scale = Math.min (reducedObjectFitBox.width () / transformedElementBox.width (),reducedObjectFitBox.height () / transformedElementBox.height ());
+			if (objectFit == PDFLayoutObjectFit.SCALE_DOWN && scale > 1)
+				scale = 1;
 			width = scale * elementBox.width ();
 			height = scale * elementBox.height ();
 			break;
