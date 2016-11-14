@@ -574,7 +574,7 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
                         report.setName(newId);
                         MetaResultEditor.this.getReportConfig().getPdfReports().add(report);
 
-                        uiReports.add(report.getText(PdfText.TEXT_TITLE), report);
+                        uiReports.add(report.getName(), report);
                     }
 
                     popup.hide();

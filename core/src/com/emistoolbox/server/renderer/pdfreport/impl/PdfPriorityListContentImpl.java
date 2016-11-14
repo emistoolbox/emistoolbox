@@ -39,7 +39,7 @@ public class PdfPriorityListContentImpl extends PdfContentBase<PdfPriorityListCo
 		fieldCount = meta.getAdditionalFields().length; 
 		valueCount = meta.getMetaResultValues().size(); 
 		
-		String[] headers = new String[fieldCount + valueCount + 1];
+		headers = new String[fieldCount + valueCount + 1];
 		headers[0] = ""; 
 		for (int i = 0; i < fieldCount; i++) 
 			headers[1 + i] = meta.getAdditionalFields()[i];  

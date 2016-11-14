@@ -170,7 +170,10 @@ public class ReportMetaResultEditor extends MetaResultEditor<ReportMetaResult>
         {
             if (reportConfig.getEntityType() != null)
                 uiReports.add(reportConfig.getName() + " (" + reportConfig.getEntityType().getName() + ")", reportConfig);
+            else
+            	uiReports.add(reportConfig.getName(), reportConfig);
         }
+        
         uiReports.addChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent event)
             {

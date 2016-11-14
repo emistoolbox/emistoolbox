@@ -394,6 +394,7 @@ public class ReportModule
 
         PriorityMetaResultEditor prioEditor = new PriorityMetaResultEditor(this.toolbox, this.config.getModel(), this.config.getReportConfig(), getRootEntities());
         uiGlobalFilter.addValueChangeHandler(new GlobalFilterValueChangeHandler<PriorityMetaResult>(prioEditor));
+        prioEditor.addShowReportHandler(showReportHandler);
         prioEditor.addValueChangeHandler(new ValueChangeHandler<PriorityMetaResult>() {
             public void onValueChange(ValueChangeEvent<PriorityMetaResult> event)
             {

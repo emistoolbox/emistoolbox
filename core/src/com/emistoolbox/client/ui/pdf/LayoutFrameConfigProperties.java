@@ -1,9 +1,15 @@
 package com.emistoolbox.client.ui.pdf;
 
+import java.util.List;
 import java.util.Map;
 
 import com.emistoolbox.client.admin.ui.EmisUtils;
+import com.emistoolbox.common.renderer.pdfreport.PdfChartContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfContentConfigVisitor;
+import com.emistoolbox.common.renderer.pdfreport.PdfGisContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfPriorityListContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfTableContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
@@ -13,11 +19,15 @@ import com.emistoolbox.common.renderer.pdfreport.impl.SimpleTableStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutFrameConfigImpl;
+import com.emistoolbox.common.results.MetaResult;
+import com.emistoolbox.common.results.MetaResultValue;
+import com.emistoolbox.common.results.TableMetaResult;
 import com.emistoolbox.common.util.LayoutSides;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PushButton;
@@ -25,6 +35,8 @@ import com.google.gwt.user.client.ui.PushButton;
 public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameConfig>
 {
 	private LayoutFrameConfig config; 
+	
+	private HTML uiFrameInfo = new HTML(); 
 	 
 	private Map<String, TextSetEntryUi> uiTextSet; 
 	private ChartColorEditor uiBgColor = new ChartColorEditor(); 
@@ -53,6 +65,10 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 	{		
 		int row = 0; 
 
+		setText(row, 0, "Info"); 
+		setWidget(row, 1, uiFrameInfo); 
+		row++; 
+		
 		// Priority List styling. 
 		prioListRow = row; 
 		setText(row, 0, "List Filter");
@@ -62,6 +78,7 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		
 		tableStyleRow = row; 
 		setText(row, 0, "Table Style"); 
+		getCellFormatter().setVerticalAlignment(row, 0, HasVerticalAlignment.ALIGN_TOP);
 		setWidget(row, 1, uiTableStyle); 
 		getRowFormatter().setVisible(row, false); 
 		row++; 
@@ -166,6 +183,8 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		{
 			setVisible(true); 
 
+			uiFrameInfo.setHTML(getFrameInfoHtml(config.getContentConfig()));
+			
 			uiBgColor.set(config.getBackgroundColour()); 
 			uiBorderRadius.set(config.getBorderRadius()); 
 			uiBorders.set(config.getBorders()); 
@@ -205,6 +224,72 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 
 		}
 	}
+	
+	private String getFrameInfoHtml(PdfContentConfig content)
+	{
+		PdfContentConfigVisitor<String> visitor = new PdfContentConfigVisitor<String>() {
+			@Override
+			public String visit(PdfTextContentConfig config) 
+			{ return "<b>Texts</b>"; }
+
+			@Override
+			public String visit(PdfVariableContentConfig config) 
+			{ return "<b>Variables</b>"; } 
+
+			@Override
+			public String visit(PdfChartContentConfig config) 
+			{ return "<b>Chart</b><br />" + getMetaResultInfo(config.getMetaResult()); }
+
+			@Override
+			public String visit(PdfGisContentConfig config) 
+			{ return "<b>Map</b>"; }
+
+			@Override
+			public String visit(PdfPriorityListContentConfig config) 
+			{ return "<b>Priority List</b>"; } 
+
+			@Override
+			public String visit(TableStyleConfig config) 
+			{ 
+				if (config instanceof PdfTableContentConfig)
+					return "<b>Table</b><br />" + getMetaResultInfo(((PdfTableContentConfig) config).getMetaResult()); 
+				
+				return null; 
+			}
+		}; 
+		
+		return content.accept(visitor);  
+	}
+	
+	private String getMetaResultInfo(MetaResult metaResult)
+	{
+		StringBuffer result = new StringBuffer(); 
+		for (MetaResultValue value : metaResult.getMetaResultValues())
+		{
+			if (result.length() > 0)
+				result.append(", "); 
+			result.append(value.getIndicator().getName()); 
+			if (value.getAggregatorKey() != null)
+			{
+				result.append("/"); 
+				result.append(value.getAggregatorKey()); 
+			}
+		}
+		
+		if (metaResult instanceof TableMetaResult)
+		{
+			TableMetaResult tableMetaResult = (TableMetaResult) metaResult; 
+			for (int i = 0; i < tableMetaResult.getDimensionCount(); i++)
+			{
+				if (i > 0)
+					result.append(", "); 
+				result.append(tableMetaResult.getDimension(i).getName());
+			}
+		}
+		
+		return result.toString(); 
+	}
+	
 	
 	private void editText()
 	{

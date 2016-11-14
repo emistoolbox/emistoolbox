@@ -14,17 +14,17 @@ public class SimpleTableStyle extends TableStyleImpl implements EmisTableStyle, 
 	private boolean topHeaders = true; 
 	private boolean leftHeaders = true; 
 	
-	private ChartFont headerFont; 
-	private ChartFont dataFont; 
+	private ChartFont headerFont = ChartFont.DEFAULT_FONT.copy(); 
+	private ChartFont dataFont = ChartFont.DEFAULT_FONT.copy();
 	
-	private BorderStyle tableBorder; 
-	private BorderStyle headerBorder; 
-	private BorderStyle dataBorder; 
+	private BorderStyle tableBorder = BorderStyle.DEFAULT_BORDER.copy();
+	private BorderStyle headerBorder = BorderStyle.DEFAULT_BORDER.copy();
+	private BorderStyle dataBorder = BorderStyle.DEFAULT_BORDER.copy();
 
-	private ChartColor headerBackground; 
-	private ChartColor dataBackground; 
+	private ChartColor headerBackground = ChartColor.GRAY.copy(); 
+	private ChartColor dataBackground = ChartColor.WHITE.copy(); 
 	
-	private double padding; 
+	private double padding = 2; 
 	
 	public void init()
 	{

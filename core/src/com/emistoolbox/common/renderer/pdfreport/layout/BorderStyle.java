@@ -6,6 +6,8 @@ import com.emistoolbox.common.ChartColor;
 
 public class BorderStyle implements Serializable
 {
+	public static BorderStyle DEFAULT_BORDER = new BorderStyle(1, ChartColor.BLACK.copy());
+	
 	private ChartColor color; 
 	private int width;
 
@@ -29,4 +31,13 @@ public class BorderStyle implements Serializable
 	
 	public void setWidth(int width) 
 	{ this.width = width; } 
+	
+	public BorderStyle copy()
+	{ 
+		BorderStyle result = new BorderStyle(); 
+		result.color = color == null ? null : color.copy(); 
+		result.width = width; 
+		
+		return result; 
+	}
 }

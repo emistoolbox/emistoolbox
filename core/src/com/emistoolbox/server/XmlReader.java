@@ -1169,7 +1169,7 @@ public class XmlReader
 
 	public EmisTableStyle getTableStyle(Element tag)
 	{
-		String type = tag.getAttribute("type");
+		String type = tag.getAttribute("style");
 		if (type.equals("simple"))
 		{
 			SimpleTableStyle result = new SimpleTableStyle(); 

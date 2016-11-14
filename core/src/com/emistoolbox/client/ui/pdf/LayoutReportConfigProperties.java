@@ -1,22 +1,34 @@
 package com.emistoolbox.client.ui.pdf;
 
+import com.emistoolbox.client.admin.ui.ListBoxWithUserObjects;
 import com.emistoolbox.client.util.ui.UIUtils;
+import com.emistoolbox.common.model.meta.EmisMeta;
+import com.emistoolbox.common.model.meta.EmisMetaEntity;
+import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
 
 public class LayoutReportConfigProperties extends LayoutProperties<EmisPdfReportConfig>
 {
 	private EmisPdfReportConfig config = null; 
+	
 	private ListBox uiPageSize = new ListBox();  
 	private ListBox uiPageOrientation = new ListBox(); 
-	
+    private ListBoxWithUserObjects<EmisMetaEntity> uiEntity = new ListBoxWithUserObjects<EmisMetaEntity>();
+	private TextBox uiName = new TextBox(); 
+    
+    private EmisMeta meta; 
+    
 //	private Map<String, TextSetEntryUi> uiTexts; 
 
 	
-	public LayoutReportConfigProperties()
-	{	
+	public LayoutReportConfigProperties(EmisMeta emis)
+	{
+		this.meta = emis; 
+		
 		uiPageSize.addChangeHandler(getChangeHandler()); 
 		UIUtils.listBoxInit(uiPageSize, PageSize.values()); 
 
@@ -25,11 +37,19 @@ public class LayoutReportConfigProperties extends LayoutProperties<EmisPdfReport
 
 		int row = getRowCount(); 
 
+		setText(row, 0, "Report"); 
+		setWidget(row++, 1, uiName); 
+		
 		setText(row, 0, "Page Size");
 		setWidget(row++, 1, uiPageSize); 
 		
 		setText(row, 0, "Page Orientation"); 
 		setWidget(row++, 1, uiPageOrientation);
+		
+		setText(row, 0, "Location"); 
+		setWidget(row++, 1, uiEntity); 
+        for (EmisMetaEntity entity : emis.getEntities())
+            this.uiEntity.addItem(entity.getName(), entity);
 
 		uiPageSize.addChangeHandler(getChangeHandler()); 
 		uiPageOrientation.addChangeHandler(getChangeHandler()); 
@@ -46,6 +66,8 @@ public class LayoutReportConfigProperties extends LayoutProperties<EmisPdfReport
 	
 //		updateTextSet(uiTexts, config);
 		config.setPage(PageSize.valueOf(UIUtils.getListBoxValue(uiPageSize)), PageOrientation.valueOf(UIUtils.getListBoxValue(uiPageOrientation)));
+		config.setEntityType(uiEntity.getUserObject());
+		config.setName(uiName.getText());
 	}
 
 	@Override
@@ -64,11 +86,21 @@ public class LayoutReportConfigProperties extends LayoutProperties<EmisPdfReport
 		else
 		{
 			setVisible(true); 
-			
+
+			uiName.setText(config.getName());
 			UIUtils.setListBoxValue(uiPageSize, config.getPageSize().toString());
 			UIUtils.setListBoxValue(uiPageOrientation, config.getOrientation().toString());
-	
-//			setTextSet(uiTexts, config);
+
+	        EmisMetaEntity reportEntity = config.getJuniorEntity();
+	        EmisMetaHierarchy hierarchy = config.getHierarchy();
+
+	        // Update report location level UI. 
+	        uiEntity.clear();
+	        for (EmisMetaEntity entity : this.meta.getEntities())
+	            if ((reportEntity == null) || (hierarchy == null) || (!reportEntity.isChildOf(entity, hierarchy)))
+	                this.uiEntity.addItem(entity.getName(), entity);
+	        
+	        this.uiEntity.setValue(config.getEntityType());
 		}
 	}
 }

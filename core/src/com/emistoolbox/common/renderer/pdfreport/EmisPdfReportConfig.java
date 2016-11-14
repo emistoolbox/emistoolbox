@@ -19,7 +19,9 @@ public interface EmisPdfReportConfig extends Named, TextSet
     public List<PdfContentConfig> getContentConfigs(); 
     
     public EmisMetaDateEnum getSeniorDateEnum();
+    
     public EmisMetaEntity getSeniorEntity();
+    public EmisMetaEntity getJuniorEntity(); 
 
     public EmisMetaHierarchy getHierarchy();
     

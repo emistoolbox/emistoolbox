@@ -19,7 +19,8 @@ public class CSSCreator {
 	
 	public static String getCss (ChartColor color) {
 		if (color == null)
-			color = null; 
+			return "rgb(0, 0, 0)"; 
+		
 		return "rgba(" + color.getRed () + "," + color.getGreen () + "," + color.getBlue () + "," + toString (color.getAlpha () / 255.) + ")";
 	}
 
@@ -64,7 +65,15 @@ public class CSSCreator {
 	}
 
 	public static String getCssAsString(BorderStyle border)
-	{ return getCssAsString(getCss(border)); }
+	{
+		if (border == null || border.getWidth() == 0)
+			return null; 
+		
+		if (border.getColour() == null)
+			border.setColor(new ChartColor(0, 0, 0));  
+		
+		return getCssAsString(getCss(border)); 
+	}
 	
 	public static Map<String,String> getCss (BorderStyle border) {
 		return Collections.singletonMap ("border",getSolidBorder (border));

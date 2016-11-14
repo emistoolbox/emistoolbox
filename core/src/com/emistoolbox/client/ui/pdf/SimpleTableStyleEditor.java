@@ -131,24 +131,31 @@ public class SimpleTableStyleEditor extends HTML implements EmisEditor<SimpleTab
 			
 			uiHeaderBgColor.set(style.getHeaderBackground()); 
 			uiHeaderFont.set(style.getHeaderFont());
-			BorderStyle border = style.getHeaderBorder(); 
-			uiHeaderBorderColor.set(border.getColour());
-			uiHeaderBorderWidth.set(border.getWidth());
 			
 			uiDataBgColor.set(style.getDataBackground()); 
 			uiDataFont.set(style.getDataFont());
-			border = style.getDataBorder(); 
-			uiDataBorderColor.set(border.getColour());
-			uiDataBorderWidth.set(border.getWidth());
 
-			border = style.getTableBorder(); 
-			uiTableBorderColor.set(border.getColour());
-			uiTableBorderWidth.set(border.getWidth());
+			setBorder(style.getHeaderBorder(), uiHeaderBorderColor, uiHeaderBorderWidth); 
+			setBorder(style.getDataBorder(), uiDataBorderColor, uiDataBorderWidth); 
+			setBorder(style.getTableBorder(), uiTableBorderColor, uiTableBorderWidth); 
 
 			uiPadding.set((int) style.getPadding());
 			
 			updateUi(); 
 		}
+	}
+
+	private void setBorder(BorderStyle border, ChartColorEditor uiColor, IntPicker uiWidth)
+	{
+		if (border == null || border.getColour() == null)
+			uiColor.set(null); 
+		else
+			uiColor.set(border.getColour());
+		
+		if (border == null)
+			uiWidth.set(0);
+		else
+			uiWidth.set(border.getWidth());
 	}
 	
 	public void updateUi()
@@ -158,7 +165,7 @@ public class SimpleTableStyleEditor extends HTML implements EmisEditor<SimpleTab
 		String dataCss = CSSCreator.getCssAsString(style.getDataFont(), style.getDataBackground(), style.getDataBorder());
 		
 		StringBuffer result = new StringBuffer(); 
-		result.append("<table style='").append(tableCss).append("'>"); 
+		result.append("<table style='border-collapse: collapse; ").append(tableCss).append("'>"); 
 
 		result.append("<tr>");
 		for (int i = 0; i < 3; i++)

@@ -1,7 +1,12 @@
+== Demo == 
+- ChartTest
+	- Page title, subtitle and footer are not shown. 
+	- chart's title is outside border. 
+
+
 - Text Frame - need font editor for body. 
 - Text Frame - remove title/subtitle edit fields
 - Frames - max height 
-
 
 
 == NEED TO IMPLEMENT == 

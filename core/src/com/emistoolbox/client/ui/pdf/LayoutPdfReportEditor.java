@@ -5,6 +5,7 @@ import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.client.admin.ui.GwtUtils;
 import com.emistoolbox.client.ui.pdf.layout.LayoutFrameWidget;
 import com.emistoolbox.client.ui.pdf.layout.LayoutPageEditor;
+import com.emistoolbox.common.model.meta.EmisMeta;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
@@ -52,9 +53,9 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	private PushButton btnNewText = new PushButton("New Text Content"); 
 	private PushButton btnNewVars = new PushButton("New Variable Content"); 
 
-	private LayoutReportConfigProperties uiReportProps = new LayoutReportConfigProperties(); 
+	private LayoutReportConfigProperties uiReportProps; 
 	
-	public LayoutPdfReportEditor()
+	public LayoutPdfReportEditor(EmisMeta emis)
 	{
 		uiPageEditor = new LayoutPageEditor(this); 
 		uiPageIndex.addChangeHandler(new ChangeHandler() {
@@ -149,6 +150,7 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 			}
 		}); 
 		
+		uiReportProps = new LayoutReportConfigProperties(emis); 
 		//		uiTabs.add(uiPageList, "Pages");
 		uiTabs.add(uiReportProps, "Report"); 
 		uiTabs.add(uiPageEditor.getPageConfigProps(), "Page");

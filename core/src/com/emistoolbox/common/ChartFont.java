@@ -58,4 +58,16 @@ public class ChartFont implements Serializable
 
 	public void setColor(ChartColor color) 
 	{ this.color = color; }
+	
+	public ChartFont copy()
+	{
+		ChartFont result = new ChartFont(); 
+		result.name = name; 
+		result.style = style; 
+		result.size = size; 
+		result.color = color == null ? null : color.copy(); 
+		
+		return result; 
+	}
+	
 }

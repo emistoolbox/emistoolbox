@@ -1204,10 +1204,14 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		PDFLayoutSides<Double> padding = element.getPadding ();
 		if (padding != null) {
 			// top and bottom are switched because of the sign convention for the y coordinate
-			r.xmin -= sign * padding.getLeft ();
-			r.ymin -= sign * padding.getBottom ();
-			r.xmax += sign * padding.getRight ();
-			r.ymax += sign * padding.getTop ();
+			if (padding.getLeft() != null)
+				r.xmin -= sign * padding.getLeft ();
+			if (padding.getBottom() != null)
+				r.ymin -= sign * padding.getBottom ();
+			if (padding.getRight() != null)
+				r.xmax += sign * padding.getRight ();
+			if (padding.getTop() != null)
+				r.ymax += sign * padding.getTop ();
 		}
 	}
 

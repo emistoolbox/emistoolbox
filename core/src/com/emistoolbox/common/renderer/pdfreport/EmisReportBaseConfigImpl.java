@@ -56,11 +56,10 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
 	@Override
 	public boolean hasShortTitles() 
 	{ return shortTitles; } 
-
-
+	
     public EmisMetaDateEnum getSeniorDateEnum()
     {
-        EmisMetaDateEnum result = null;
+    	EmisMetaDateEnum result = null;
         for (PdfContentConfig contentConfig : getContentConfigs())
         {
             if (!(contentConfig instanceof PdfMetaResultContentConfig))
@@ -71,13 +70,20 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
             if (tmp == null)
                 continue;
 
-            if ((result == null) || (result.getDimensions() > tmp.getDimensions()))
-                result = tmp;
+            if (result == null || result.getDimensions() > tmp.getDimensions())
+            	result = tmp;
         }
+        
         return result;
     }
 
+    public EmisMetaEntity getJuniorEntity()
+    { return getEntity(false); }
+    
     public EmisMetaEntity getSeniorEntity()
+    { return getEntity(true); } 
+    
+    public EmisMetaEntity getEntity(boolean senior)
     {
         EmisMetaHierarchy hierarchy = getHierarchy();
         if (hierarchy == null)
@@ -92,8 +98,19 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
 
             if (result == null)
                 result = entityType;
-            else if (result.isChildOf(entityType, hierarchy))
-                result = entityType;
+            else 
+        	{
+            	if (senior)
+            	{
+	            	if (result.isChildOf(entityType, hierarchy))
+	                    result = entityType;
+            	}
+            	else
+            	{
+            		if (entityType.isChildOf(result, hierarchy))
+            			result = entityType; 
+            	}
+        	}
         }
 
         return result;
@@ -127,6 +144,7 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
     		return true; 
     	
         if (getEntityType() == null)
+        	// Report doesn't have an entity type - we allow anything. 
             return true;
 
         if (!(contentConfig instanceof PdfMetaResultContentConfig))
@@ -142,7 +160,7 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
             if ((contentHierarchy != null) && (!NamedUtil.sameName(contentHierarchy, currentHierarchy)))
                 return false;
         }
-
-        return (contentConfigEntity != null) && (!getEntityType().isChildOf(contentConfigEntity, metaResult.getHierarchy()));
+        
+        return contentConfigEntity != null && !contentConfigEntity.isChildOf(getEntityType(), metaResult.getHierarchy());
     }
 }

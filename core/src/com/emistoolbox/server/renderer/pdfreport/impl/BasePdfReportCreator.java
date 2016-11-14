@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.emistoolbox.common.ChartFont;
+import com.emistoolbox.common.TableCellFormat;
 import com.emistoolbox.common.model.EmisEntity;
 import com.emistoolbox.common.model.EmisEnumSet;
 import com.emistoolbox.common.model.EmisEnumTupleValue;
@@ -32,12 +33,11 @@ import com.emistoolbox.common.renderer.pdfreport.PdfGisContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfMetaResultContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfPriorityListContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfTableContentConfig;
-import com.emistoolbox.common.renderer.pdfreport.TableStyleConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
-import com.emistoolbox.common.renderer.pdfreport.impl.PdfTableContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.impl.TableStyleAdaptor;
 import com.emistoolbox.common.results.GisMetaResult;
 import com.emistoolbox.common.results.MetaResultDimension;
 import com.emistoolbox.common.results.MetaResultDimensionUtil;
@@ -517,7 +517,15 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 	        try { 
 	            Result[] results = TableResultCollector.getMultiResult(dataSet, tableMetaResult);
 
-		        PdfResultTableContentImpl tableResult = results[1].getDimensions() == 1 ? new Result1dTableContentImpl() : new Result2dTableContentImpl();
+	            boolean isOneDimension = results[1].getDimensions() == 1; 
+		        PdfResultTableContentImpl tableResult = isOneDimension ? new Result1dTableContentImpl() : new Result2dTableContentImpl();
+		        if (isOneDimension)
+		        	config.setTableStyle(new TableStyleAdaptor(config.getTableStyle()) {
+						@Override
+						public TableCellFormat getTopHeaderFormat() 
+						{ return null ; }
+		        	}); 
+		        
 		        tableResult.setConfig(config); 
 		        tableResult.setResult(results[1]);
 	

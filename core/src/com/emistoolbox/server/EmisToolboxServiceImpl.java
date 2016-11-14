@@ -809,8 +809,23 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
         writer.setDateInfo(metaResult); 
         try
         { writer.writeReport(PdfUtil.getPdfReport(metaResult, getDataSet(dataset)), outputFile); }
+        catch (IOException ex)
+        {
+        	ex.printStackTrace(System.out);	
+        	throw ex; 
+        } 
         catch (PdfReportWriterException ex)
-        { throw new IOException("Failed to write report to '" + outputFile.getName() + "'", ex); }
+        {
+        	ex.printStackTrace(System.out);	
+        	throw new IOException("Failed to write report to '" + outputFile.getName() + "'", ex); 
+        }
+        catch (RuntimeException ex)
+        { 
+        	ex.printStackTrace(System.out);
+        	throw ex; 
+        }
+        catch (Throwable ex)
+        { ex.printStackTrace(System.out); }
         
         return outputFile.getName();
     }

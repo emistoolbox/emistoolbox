@@ -272,7 +272,6 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 		throws IOException
 	{
 		PDFLayout layout = createPage(size, margins);  
-		
 		// TODO - handle titles of page (maybe defined in frame already as part of the LayoutPdfReportCreator)
 		for (LayoutFrame frame : page.getFrames())
 			layout.getOuterFrame ().addElement(createFrame(frame)); 
@@ -308,7 +307,7 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 			PdfChartContent chartContent = (PdfChartContent) content; 
 			updateFrameTitle(frame, chartContent.getTitle());
 			item = renderChart((PdfChartContent) content, config.getPosition().getWidth(), config.getPosition().getHeight());   
-			item.fit(PDFLayoutObjectFit.COVER); 
+			item.fit(PDFLayoutObjectFit.FILL); 
 		}
 		else if (content instanceof PdfGisContent)
 		{
@@ -322,12 +321,17 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 			item = new PDFLayoutTextElement(textContent.getText(), getFont(textContent.getTextFont()));  
 		}
 		else if (content instanceof PdfTableContent)
+		{
 			item = renderTable((PdfTableContent) content); 
-
+			item.fit(PDFLayoutObjectFit.SCALE_DOWN); 
+		}
+		
 		if (item != null)
 		{
 			// Wrap content with title, subtitle and footer.  
-			item.fit(PDFLayoutObjectFit.CONTAIN);
+			if (item.getObjectFit() != null)
+				item.fit(PDFLayoutObjectFit.CONTAIN);
+			
 			addTitlesAndContent(result, item, frame);
 			
 			// style box

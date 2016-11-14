@@ -16,7 +16,7 @@ public class EmisPdfReportEditor extends SimplePanel implements EmisEditor<EmisP
 	
 	public EmisPdfReportEditor(EmisMeta emis)
 	{
-		layoutEditor = new LayoutPdfReportEditor(); 
+		layoutEditor = new LayoutPdfReportEditor(emis); 
 		simpleEditor = new PdfReportEditor(emis);
 	}
 	

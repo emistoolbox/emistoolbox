@@ -12,7 +12,7 @@ public class Result1dTableContentImpl extends PdfResultTableContentImpl
 		if (result.getDimensions() != 1)
 			throw new IllegalArgumentException("Invalid result dimensions - expecting only one"); 
 	
-		headers = getResult().getHeadings(0); 
+		headers = result.getHeadings(0); 
 
 		super.setResult(result);
 	}
