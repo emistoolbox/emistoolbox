@@ -1,8 +1,9 @@
 package com.emistoolbox.lib.pdf.layout;
 
 import java.awt.Color;
+import java.io.Serializable;
 
-public class PDFLayoutLink {
+public class PDFLayoutLink implements Serializable {
 	private double borderWidth = 1;
 	private double borderRadius = 0;
 	private Color borderColor = Color.BLACK;
