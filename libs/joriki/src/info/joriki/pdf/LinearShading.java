@@ -11,7 +11,7 @@ import info.joriki.util.NotImplementedException;
 // this is *not* an axial (a.k.a. gradient) shading --
 // it's linear in the sense of one-dimensional, as opposed
 // to the remaining, two-dimensional shading types.
-// It's descendants are axial shadings and radial shadings.
+// Its descendants are axial shadings and radial shadings.
 public class LinearShading extends DomainShading
 {
   public boolean [] extend;
