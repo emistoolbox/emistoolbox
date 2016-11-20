@@ -169,7 +169,6 @@ abstract public class PDFFont implements Font, PDFOptions
     PDFStream toUnicodeStream = (PDFStream) fontDictionary.get ("ToUnicode");
     if (toUnicodeStream != null)
       try {
-    	  Util.copy (toUnicodeStream.getInputStream ("5.17"),"/Users/joriki/test.txt");
         toUnicodeMap = new ToUnicodeMap (toUnicodeStream.getInputStream ("5.17"),nbyte);
       } catch (IOException ioe) { ioe.printStackTrace (); }
  
