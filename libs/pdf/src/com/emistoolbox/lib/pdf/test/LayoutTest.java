@@ -19,6 +19,7 @@ public class LayoutTest {
 		layout.addAll(new TablePDFLayoutTest().getLayout ()); 
 		layout.addAll(new LinkPDFLayoutTest().getLayout ());
 		layout.addAll(new ImagePDFLayoutTest (testDir).getLayout ());
+		layout.addAll(new CropPDFLayoutTest (testDir).getLayout ());
 		
 		
 		new PDFLayoutRenderer (true).render (layout,new IOFileOutput (new File (testDir,"test.pdf"),"application/pdf",null));
