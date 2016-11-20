@@ -1,0 +1,33 @@
+/CIDInit
+14 dict begin
+/begincmap {
+/Codes 0 array def
+/CodeRanges 0 array def
+/CodeSpaceRanges 0 array def
+/CIDRanges 0 array def
+/NotDefRanges 0 array def
+} def
+/endcmap {} def
+
+/begindata {pop mark} def
+/append {                             % value name
+% missing begincmap in texterity_brochure200311-2v5_1.pdf
+dup currentdict exch known not {begincmap} if
+dup load dup length 1 add array       % value name old new
+exch dup length 2 index exch 5 index  % value name new old new lastindex value
+put 1 index copy pop def pop
+} def
+
+/begincodespacerange {begindata} def
+/endcodespacerange {] /CodeSpaceRanges append} def
+/beginbfrange {begindata} def
+/endbfrange {] /CodeRanges append} def
+/beginbfchar {begindata} def
+/endbfchar {] /Codes append} def
+/beginnotdefrange {begindata} def
+/endnotdefrange {] /NotDefRanges append} def
+/begincidrange {begindata} def
+/endcidrange {] /CIDRanges append} def
+
+
+currentdict end /ProcSet defineresource

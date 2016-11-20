@@ -6,6 +6,7 @@ import info.joriki.graphics.Transformation;
 import info.joriki.io.SeekableByteArray;
 import info.joriki.io.Util;
 import info.joriki.pdf.ConstructiblePDFDocument;
+import info.joriki.pdf.ContentStreamBounder;
 import info.joriki.pdf.PDFArray;
 import info.joriki.pdf.PDFDictionary;
 import info.joriki.pdf.PDFFile;
@@ -982,7 +983,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			}
 			
 			public Rectangle visit (PDFLayoutPDFElement element) throws IOException {
-				return getPage (element).getMediaBox ().toRectangle ();
+				PDFDictionary page = getPage (element);
+				return element.isCropping () ?
+						new ContentStreamBounder ().getBoundingBox (page) :
+						page.getMediaBox ().toRectangle ();
 			}
 
 			public Rectangle visit (PDFLayoutTextElement textElement) {
