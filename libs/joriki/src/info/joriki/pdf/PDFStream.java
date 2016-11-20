@@ -10,13 +10,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.util.Random;
-
 import java.awt.GridLayout;
 import java.awt.Panel;
 import java.awt.Button;
 import java.awt.Container;
 import java.awt.BorderLayout;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -31,7 +29,6 @@ import info.joriki.io.InputStreamProvider;
 import info.joriki.io.FileInputStreamProvider;
 import info.joriki.io.ByteArrayInputStreamProvider;
 import info.joriki.io.StreamableInputStreamProvider;
-
 import info.joriki.util.Assertions;
 
 public class PDFStream extends PDFDictionary
@@ -249,7 +246,8 @@ public class PDFStream extends PDFDictionary
           Util.dump (getData (),file);
           if (command.equals ("Edit")) {
             streamProvider = new FileInputStreamProvider (file);
-            removeFilters ();
+            if (!new PDFName ("DCTDecode").equals (get ("Filter")))
+              removeFilters ();
             remove ("Length");
             isFont = contains ("Length1");
 //          built-in terminal emacs
