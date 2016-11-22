@@ -73,6 +73,7 @@ public class ContentStreamBounder extends StateHandler {
 	}
 	
 	public void shade (PDFShading shading) {
+		super.shade (shading);
 		if (shading.boundingBox != null)
 			throw new Error ("bounding shading with bounding box not implemented");
 		if (!(shading instanceof LinearShading))
