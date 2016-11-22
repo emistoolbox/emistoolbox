@@ -120,43 +120,75 @@ public class ContentStreamBounder extends StateHandler {
 	
 	public void usePath (boolean stroke,int fillRule,int clipRule) {
 		super.usePath (stroke,fillRule,clipRule);
-		if (stroke)
-			pathBoundingBox.growBy (graphicsState.lineWidth);
-		pathBoundingBox.intersectWith (clipBoundingBox);
-		if (stroke || fillRule != NOFILL)
-			boundingBox.add (pathBoundingBox);
+		add (pathBoundingBox,fillRule != NOFILL,stroke);
 		if (clipRule != NOFILL)
+			// path bounding box was clipped by add ()
 			clipBoundingBox = new Rectangle (pathBoundingBox);
 		pathBoundingBox = new Rectangle ();
 	}
 	
+	private void add (Rectangle box,boolean fill,boolean stroke) {
+		if (stroke) {
+			// TODO: not taking into account miter line joins
+			double [] m = graphicsState.ctm.matrix;
+			double xwidth = Math.sqrt (m [0] * m [0] + m [2] * m [2]) * graphicsState.lineWidth / 2;
+			double ywidth = Math.sqrt (m [1] * m [1] + m [3] * m [3]) * graphicsState.lineWidth / 2;
+			box.xmin -= xwidth;
+			box.xmax += xwidth;
+			box.ymin -= ywidth;
+			box.ymax += ywidth;
+		}
+		box.intersectWith (clipBoundingBox);
+		if (stroke || fill)
+			boundingBox.add (box);
+	}
+
 	public void show (List text) {
+		startShow ();
 		for (Object o : text)
 			if (o instanceof byte [])
-				show ((byte []) o);
+				add ((byte []) o);
 			else if (o instanceof PDFNumber)
 				graphicsState.textState.adjustBy ((PDFNumber) o);
 			else
 				throw new Error ("unknown text operator argument type " + o.getClass ());
+		endShow ();
 	}
 	
 	public void show (byte [] text) {
+		startShow ();
+		add (text);
+		endShow ();
+	}
+
+	Rectangle textBoundingBox;
+
+	private void startShow () {
+		textBoundingBox = new Rectangle ();
+	}
+
+	private void endShow () {
+		TextRenderingMode mode = graphicsState.textState.renderingMode;
+		add (textBoundingBox,mode.fills (),mode.strokes ());
+
+		if (mode.clips ())
+			throw new Error ("bounding clipping text not implemented");
+		if (graphicsState.textState.font instanceof Type3Font)
+			throw new Error ("bounding Type 3 fonts not implemented");
+	}
+
+	private void add (byte [] text) {
 		boundText ();
 		graphicsState.textState.advanceBy (text);
 		boundText ();
 	}
 	
 	private void boundText () {
-		if (graphicsState.textState.renderingMode.strokes () ||
-			graphicsState.textState.renderingMode.clips () ||
-			!graphicsState.textState.renderingMode.fills ())
-			throw new Error ("non-fill text bounding not implemented");
-		
 		PDFFont font = graphicsState.textState.font;
 		if (font.vertical)
 			throw new Error ("text bounding for vertical fonts not tested");
 		Transformation transform = new Transformation (graphicsState.textState.getTotalTextMatrix (),graphicsState.ctm);
-		boundingBox.add (new Point (0,font.getDescent ()).transformedBy (transform));
-		boundingBox.add (new Point (0,font.getAscent  ()).transformedBy (transform));
+		textBoundingBox.add (new Point (0,font.getDescent ()).transformedBy (transform));
+		textBoundingBox.add (new Point (0,font.getAscent  ()).transformedBy (transform));
 	}
 }
