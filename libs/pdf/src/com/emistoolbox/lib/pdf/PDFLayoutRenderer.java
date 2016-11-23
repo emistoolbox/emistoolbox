@@ -379,50 +379,102 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		PDFLayoutHorizontalPlacement horizontalPlacement = placement.getHorizontalPlacement ();
 		PDFLayoutVerticalPlacement verticalPlacement = placement.getVerticalPlacement ();
 		PDFLayoutObjectFit objectFit = element.getObjectFit ();
-		Rectangle reducedObjectFitBox = new Rectangle (objectFitBox);
-		reducedObjectFitBox.transformBy (getCurrentTransform ());
-		applyPaddingAndBorder (reducedObjectFitBox,element,-1);
+		Rectangle currentObjectFitBox = new Rectangle (objectFitBox);
+
+		// reduce current object fit box in case of fixed coordinates
+
+		if (horizontalPlacement instanceof PDFLayoutCoordinatePlacement)
+			currentObjectFitBox.xmin = ((PDFLayoutCoordinatePlacement) horizontalPlacement).getX ();
+		else if (horizontalPlacement instanceof PDFLayoutHorizontalAlignment)
+			switch ((PDFLayoutHorizontalAlignment) horizontalPlacement) {
+			case BEFORE:
+				currentObjectFitBox.xmax = previousElementBox != null ? previousElementBox.xmin : frameBox.xmax;
+				break;
+			case AFTER:
+				currentObjectFitBox.xmin = previousElementBox != null ? previousElementBox.xmax : frameBox.xmin;
+				break;
+			case PREVIOUS_LEFT:
+				currentObjectFitBox.xmin = (previousElementBox != null ? previousElementBox : frameBox).xmin;
+				break;
+			case PREVIOUS_RIGHT:
+				currentObjectFitBox.xmax = (previousElementBox != null ? previousElementBox : frameBox).xmax;
+				break;
+			case LEFT:
+			case CENTER:
+			case RIGHT:
+				break;
+			default:
+				throw new Error ("horizontal alignment " + horizontalPlacement + " not implemented");
+			}
+		else
+			throw new Error ("horizontal placement " + horizontalPlacement + " not implemented");
+
+		if (verticalPlacement instanceof PDFLayoutCoordinatePlacement)
+			currentObjectFitBox.ymin = ((PDFLayoutCoordinatePlacement) verticalPlacement).getX ();
+		else if (verticalPlacement instanceof PDFLayoutVerticalAlignment)
+			switch ((PDFLayoutVerticalAlignment) verticalPlacement) {
+			case ABOVE:
+				currentObjectFitBox.ymax = previousElementBox != null ? previousElementBox.ymin : frameBox.ymax;
+				break;
+			case BELOW:
+				currentObjectFitBox.ymin = previousElementBox != null ? previousElementBox.ymax : frameBox.ymin;
+				break;
+			case PREVIOUS_TOP:
+				currentObjectFitBox.ymin = (previousElementBox != null ? previousElementBox : frameBox).ymin;
+				break;
+			case PREVIOUS_BOTTOM:
+				currentObjectFitBox.ymax = (previousElementBox != null ? previousElementBox : frameBox).ymax;
+				break;
+			case TOP:
+			case CENTER:
+			case BOTTOM:
+				break;
+			default:
+				throw new Error ("vertical alignment " + verticalPlacement + " not implemented");
+			}
+		else
+			throw new Error ("vertical placement " + verticalPlacement + " not implemented");
+
+		// determine element size, and scale it if applicable
+
 		Rectangle elementBox;
-		switch (objectFit) {
-		case CONTAIN:
-		case SCALE_DOWN:
-			elementBox = getBoundingBox (element);
-			break;
-		case NONE:
-			double maxWidth = reducedObjectFitBox.width ();
-			if (horizontalPlacement instanceof PDFLayoutCoordinatePlacement)
-				maxWidth -= ((PDFLayoutCoordinatePlacement) horizontalPlacement).getX () - reducedObjectFitBox.xmin;
-			elementBox = getBoundingBox (element,maxWidth);
-			break;
-		default:
-			throw new Error ("object fit " + objectFit + " not implemented");
-		}
-		Rectangle transformedElementBox = new Rectangle (elementBox);
-		transformedElementBox.transformBy (getCurrentTransform ());
-		// TODO: This is all not tested properly since the tests so far don't have scaled frames so it doesn't really matter which transforms we apply at this point
-		double width = 0;
-		double height = 0;
-		switch (objectFit) {
-		case CONTAIN:
-		case SCALE_DOWN:
-			double scale = Math.min (reducedObjectFitBox.width () / transformedElementBox.width (),reducedObjectFitBox.height () / transformedElementBox.height ());
-			if (objectFit == PDFLayoutObjectFit.SCALE_DOWN && scale > 1)
-				scale = 1;
-			width = scale * elementBox.width ();
-			height = scale * elementBox.height ();
-			break;
-		case NONE:
-			break;
+		Rectangle newElementBox;
+
+		{
+			// reduce the current object fit box by padding and border in user space
+			Rectangle reducedObjectFitBox = new Rectangle (currentObjectFitBox);
+			reducedObjectFitBox.transformBy (getCurrentTransform ());
+			applyPaddingAndBorder (reducedObjectFitBox,element,-1);
+			reducedObjectFitBox.transformBy (getCurrentTransform ().inverse ());
+
+			switch (objectFit) {
+			case CONTAIN:
+			case SCALE_DOWN:
+				elementBox = getBoundingBox (element);
+				double scale = Math.min (reducedObjectFitBox.width () / elementBox.width (),reducedObjectFitBox.height () / elementBox.height ());
+				if (objectFit == PDFLayoutObjectFit.SCALE_DOWN && scale > 1)
+					scale = 1;
+				newElementBox = new Rectangle (0,0,scale * elementBox.width (),scale * elementBox.height ());
+				break;
+			case NONE:
+				elementBox = getBoundingBox (element,reducedObjectFitBox.width ());
+				newElementBox = new Rectangle (elementBox);
+				break;
 			default:
 				throw new Error ("object fit " + objectFit + " not implemented");
+			}
 		}
+
 		// TODO: Does an object-fitted element cause displacement? Probably not, as it would take up
 		// the remaining space in at least one direction, not leaving any space for further object fitting
-		Rectangle newElementBox = objectFit == PDFLayoutObjectFit.NONE ? new Rectangle (elementBox) : new Rectangle (0,0,width,height);
+
+		// augment the new element box by padding and border in user space
 		Rectangle augmentedNewElementBox = new Rectangle (newElementBox);
 		augmentedNewElementBox.transformBy (getCurrentTransform ());
 		applyPaddingAndBorder (augmentedNewElementBox,element,1);
 		augmentedNewElementBox.transformBy (getCurrentTransform ().inverse ());
+
+		// determine element position
 		
 		double x;
 		if (horizontalPlacement instanceof PDFLayoutCoordinatePlacement) {
@@ -433,18 +485,14 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		else if (horizontalPlacement instanceof PDFLayoutHorizontalAlignment)
 			switch ((PDFLayoutHorizontalAlignment) horizontalPlacement) {
 			case BEFORE:
-				x = (previousElementBox != null ? previousElementBox.xmin : frameBox.xmax) - augmentedNewElementBox.width ();
+			case PREVIOUS_RIGHT:
+				x = currentObjectFitBox.xmax - augmentedNewElementBox.width ();
 				alignedWithEdge.setLeft (false);
 				break;
 			case AFTER:
-				x = previousElementBox != null ? previousElementBox.xmax : frameBox.xmin;
-				alignedWithEdge.setRight (false);
-				break;
 			case PREVIOUS_LEFT:
-				x = (previousElementBox != null ? previousElementBox : frameBox).xmin;
-				break;
-			case PREVIOUS_RIGHT:
-				x = (previousElementBox != null ? previousElementBox : frameBox).xmax  - augmentedNewElementBox.width ();
+				x = currentObjectFitBox.xmin;
+				alignedWithEdge.setRight (false);
 				break;
 			case LEFT:
 				x = frameBox.xmin;
@@ -452,7 +500,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				alignedWithEdge.setRight (false);
 				break;
 			case CENTER:
-				x = objectFitBox.xmin + (objectFitBox.width () - augmentedNewElementBox.width ()) / 2;
+				x = currentObjectFitBox.xmin + (currentObjectFitBox.width () - augmentedNewElementBox.width ()) / 2;
 				alignedWithEdge.setLeft (false);
 				alignedWithEdge.setRight (false);
 				break;
@@ -476,18 +524,14 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		else if (verticalPlacement instanceof PDFLayoutVerticalAlignment)
 			switch ((PDFLayoutVerticalAlignment) verticalPlacement) {
 			case ABOVE:
-				y = (previousElementBox != null ? previousElementBox.ymin : frameBox.ymax) - augmentedNewElementBox.height ();
+			case PREVIOUS_BOTTOM:
+				y = currentObjectFitBox.ymax - augmentedNewElementBox.height ();
 				alignedWithEdge.setTop (false);
 				break;
 			case BELOW:
-				y = previousElementBox != null ? previousElementBox.ymax : frameBox.ymin;
-				alignedWithEdge.setBottom (false);
-				break;
 			case PREVIOUS_TOP:
-				y = (previousElementBox != null ? previousElementBox : frameBox).ymin;
-				break;
-			case PREVIOUS_BOTTOM:
-				y = (previousElementBox != null ? previousElementBox : frameBox).ymax  - augmentedNewElementBox.height ();
+				y = currentObjectFitBox.ymin;
+				alignedWithEdge.setBottom (false);
 				break;
 			case TOP:
 				y = frameBox.ymin;
@@ -495,7 +539,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				alignedWithEdge.setBottom (false);
 				break;
 			case CENTER:
-				y = objectFitBox.ymin + (objectFitBox.height () - augmentedNewElementBox.height ()) / 2;
+				y = currentObjectFitBox.ymin + (currentObjectFitBox.height () - augmentedNewElementBox.height ()) / 2;
 				alignedWithEdge.setTop (false);
 				alignedWithEdge.setBottom (false);
 				break;
@@ -510,8 +554,12 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		else
 			throw new Error ("vertical placement " + verticalPlacement + " not implemented");
 
+		// shift the (augmented) new element box to the determined position
+
 		newElementBox.shiftBy (augmentedNewElementBox.xmin - x,augmentedNewElementBox.ymin - y);
 		augmentedNewElementBox.shiftBy (augmentedNewElementBox.xmin - x,augmentedNewElementBox.ymin - y);
+
+		// displace, if applicable
 
 		if (element.getDisplacement ().getVertical ()) {
 			if (alignedWithEdge.getTop ())
@@ -526,6 +574,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			if (alignedWithEdge.getRight ())
 				objectFitBox.xmax = augmentedNewElementBox.xmin;
 		}
+
+		// now comes the actual drawing
 
 		pushTransform ();
 //		can either draw new box before transform or old box after transform
@@ -1225,10 +1275,10 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			PDFLayoutSides<PDFLayoutLineStyle> lineStyles = borderStyle.getLineStyles ();
 			if (lineStyles != null) {
 				// top and bottom are switched because of the sign convention for the y coordinate
-				r.xmin -= lineStyles.getLeft ().getWidth ();
-				r.ymin -= lineStyles.getBottom ().getWidth ();
-				r.xmax += lineStyles.getRight ().getWidth ();
-				r.ymax += lineStyles.getTop ().getWidth ();
+				r.xmin -= sign * lineStyles.getLeft ().getWidth ();
+				r.ymin -= sign * lineStyles.getBottom ().getWidth ();
+				r.xmax += sign * lineStyles.getRight ().getWidth ();
+				r.ymax += sign * lineStyles.getTop ().getWidth ();
 			}
 		}
 	}
