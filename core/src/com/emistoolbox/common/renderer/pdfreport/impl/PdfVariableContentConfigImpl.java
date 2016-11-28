@@ -19,7 +19,7 @@ public class PdfVariableContentConfigImpl extends PdfContentConfigImpl implement
     private List<String> titles = new ArrayList<String>(); 
     private List<String> variables = new ArrayList<String>(); 
     
-    private EmisTableStyle tableStyle; 
+    private EmisTableStyle tableStyle = new SimpleTableStyle(); 
 
     public EmisMetaEntity getEntityType()
     { return entity; }

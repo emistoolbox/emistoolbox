@@ -5,6 +5,7 @@ import java.io.Serializable;
 import com.emistoolbox.common.ChartColor;
 import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.TableCellFormat;
+import com.emistoolbox.common.TableCellFormat.HorizontalAlign;
 import com.emistoolbox.common.renderer.pdfreport.EmisTableStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.util.LayoutSides;
@@ -26,6 +27,9 @@ public class SimpleTableStyle extends TableStyleImpl implements EmisTableStyle, 
 	
 	private double padding = 2; 
 	
+	public SimpleTableStyle()
+	{ init(); } 
+	
 	public void init()
 	{
 		setBorder(BorderType.TABLE_VERTICAL, tableBorder);
@@ -37,12 +41,16 @@ public class SimpleTableStyle extends TableStyleImpl implements EmisTableStyle, 
 		setBorder(BorderType.DATA_HORIZONTAL, dataBorder); 
 		setBorder(BorderType.DATA_VERTICAL, dataBorder); 
 		
-		setDataCellFormat(getFormat(dataFont, dataBackground));
+		setDataCellFormat(getFormat(dataFont, dataBackground, HorizontalAlign.RIGHT));
 		if (leftHeaders)
-			setLeftHeaderFormat(getFormat(headerFont, headerBackground));
+			setLeftHeaderFormat(getFormat(headerFont, headerBackground, HorizontalAlign.LEFT));
+		else 
+			setLeftHeaderFormat(null); 
 		
 		if (topHeaders)
-			setTopHeaderFormat(getFormat(headerFont, headerBackground)); 
+			setTopHeaderFormat(getFormat(headerFont, headerBackground, HorizontalAlign.CENTER)); 
+		else
+			setTopHeaderFormat(null); 
 	}
 	
 	public void setHeaders(boolean top, boolean left)
@@ -57,12 +65,13 @@ public class SimpleTableStyle extends TableStyleImpl implements EmisTableStyle, 
 	public boolean getLeftHeaders()
 	{ return leftHeaders; } 
 	
-	TableCellFormat getFormat(ChartFont font, ChartColor bgColor)
+	TableCellFormat getFormat(ChartFont font, ChartColor bgColor, HorizontalAlign hAlign)
 	{
 		TableCellFormat format = new TableCellFormat(); 
 		format.setFont(font);
 		format.setBackgroundColor(bgColor);
 		format.setPadding(new LayoutSides<Double>(padding));
+		format.setHorizontalAlign(hAlign);
 		
 		return format; 
 	}

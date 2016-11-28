@@ -187,7 +187,7 @@ public class CSSCreator {
 	}
 	
 	private static String getDimension (double x) {
-		return x == 0 ? "0" : toString (x) + "pt";
+		return x == 0 ? "0" : toString (x) + "px";
 	}
 	
 	private static String toString (double x) {

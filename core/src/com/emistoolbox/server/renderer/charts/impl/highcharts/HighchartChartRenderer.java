@@ -46,9 +46,18 @@ import es.jbauer.lib.io.impl.IOFileOutput;
 public class HighchartChartRenderer extends BaseChartRenderer implements ChartRenderer 
 {
 	private HighchartRenderer renderer; 
+	private int scale = 2;
+	private int width = 0;
 	
 	public HighchartChartRenderer(HighchartRenderer renderer)
 	{ this.renderer = renderer;  }
+	
+	public HighchartChartRenderer(HighchartRenderer renderer, int scale, int width)
+	{
+		this(renderer); 
+		this.scale = scale; 
+		this.width = width; 
+	}
 	
 	@Override
 	public boolean canCreateContentType(String contentType) 
@@ -76,7 +85,7 @@ public class HighchartChartRenderer extends BaseChartRenderer implements ChartRe
 			renderType = HighchartRenderingType.PDF; 
 		
 		IOInput input = null; 
-		try { input = renderer.render(json, renderType, 0, 600); }
+		try { input = renderer.render(json, renderType, scale, width); }
 		catch (InterruptedException ex)
 		{ throw new IOException("Failed to render Highchart", ex); }
 		

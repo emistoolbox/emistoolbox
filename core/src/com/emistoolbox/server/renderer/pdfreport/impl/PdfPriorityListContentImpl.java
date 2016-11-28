@@ -1,6 +1,7 @@
 package com.emistoolbox.server.renderer.pdfreport.impl;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 
@@ -12,7 +13,6 @@ import com.emistoolbox.common.results.PriorityMetaResult;
 import com.emistoolbox.server.renderer.pdfreport.FontIdentifier;
 import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
 import com.emistoolbox.server.renderer.pdfreport.PdfPriorityListContent;
-import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
 
 public class PdfPriorityListContentImpl extends PdfContentBase<PdfPriorityListContentConfig> implements PdfPriorityListContent, Serializable 
 {
@@ -24,7 +24,7 @@ public class PdfPriorityListContentImpl extends PdfContentBase<PdfPriorityListCo
 	private int valueCount = 0; 
 	private int fieldCount = 0; 
 
-	private NumberFormat[] formats = null; 
+	private String[] formats = null; 
 	
 	@Override
 	public List<PriorityListItem> getResults() 
@@ -44,11 +44,13 @@ public class PdfPriorityListContentImpl extends PdfContentBase<PdfPriorityListCo
 		for (int i = 0; i < fieldCount; i++) 
 			headers[1 + i] = meta.getAdditionalFields()[i];  
 
-		NumberFormat[] formats = new NumberFormat[valueCount]; 
+		formats = new String[valueCount]; 
 		for (int i = 0; i < valueCount; i++) 
 		{
 			headers[1 + fieldCount + i] = meta.getMetaResultValue(i).getName(true); 
 			headers[1 + fieldCount + i] = meta.getMetaResultValue(i).getName(true); 
+			
+			formats[i] = meta.getMetaResultValue(i).getFormat();  
 		}
 	}
 
@@ -72,7 +74,7 @@ public class PdfPriorityListContentImpl extends PdfContentBase<PdfPriorityListCo
 
 	@Override
 	public int getRows() 
-	{ return result.size(); } 
+	{ return result.size() + 1; } 
 
 	@Override
 	public String getText(int row, int col) 
@@ -87,7 +89,13 @@ public class PdfPriorityListContentImpl extends PdfContentBase<PdfPriorityListCo
 		if (col <= fieldCount)
 			return item.getEntityValues()[col - 1]; 
 		
-		return "X" + item.getValues()[col - fieldCount - 1]; 
+		return getFormattedValue(formats[col - fieldCount - 1], item.getValues()[col - fieldCount - 1]);
+	}
+	
+	private String getFormattedValue(String format, double value)
+	{
+		NumberFormat fmt= new DecimalFormat(format); 
+		return fmt.format(value); 
 	}
 
 	@Override

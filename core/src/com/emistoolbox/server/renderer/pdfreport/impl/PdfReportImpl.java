@@ -20,6 +20,9 @@ public class PdfReportImpl implements PdfReport
 
     public List<EmisPdfPage> getPages()
     { return this.pages; }
+    
+    public int getPageCount()
+    { return pages.size(); } 
 
     public EmisPdfReportConfig getReportConfig()
     { return this.reportConfig; }

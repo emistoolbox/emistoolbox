@@ -96,6 +96,9 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
             if (entityType == null)
                 continue;
 
+            if (contentConfig instanceof PdfPriorityListContentConfig)
+            	continue; 
+            
             if (result == null)
                 result = entityType;
             else 

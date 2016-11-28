@@ -156,7 +156,7 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
             return;
 
         for (EmisPdfReportConfig config : configs)
-            this.uiReports.addItem(config.getName(), config); // config.getText(PdfText.TEXT_TITLE), config);
+            this.uiReports.addItem(config.getName(), config);
 
         if (configs.size() > 0)
             selectReport(0, true);

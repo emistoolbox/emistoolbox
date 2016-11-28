@@ -14,6 +14,7 @@ public class TextSetImpl implements TextSet, Serializable
 	private Set<String> keys = new HashSet<String>(); 
 	private Map<String, String> texts = new HashMap<String, String>(); 
 	private Map<String, ChartFont> fonts= new HashMap<String, ChartFont>(); 
+	private Map<String, String> aligns = new HashMap<String, String>(); 
 	
 	public TextSetImpl(String[] keys)
 	{ Collections.addAll(this.keys, keys); }
@@ -47,6 +48,20 @@ public class TextSetImpl implements TextSet, Serializable
 			return null; 
 		
 		return result;
-	} 
+	}
 
+	@Override
+	public void putText(String key, String value, ChartFont font, String align) 
+	{ 
+		putText(key, value, font); 
+		putAlignment(key, align); 
+	}
+
+	@Override
+	public String getAlignment(String key) 
+	{ return aligns.get(key); } 
+
+	@Override
+	public void putAlignment(String key, String align) 
+	{ aligns.put(key, align); } 
 }

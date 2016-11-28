@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +61,7 @@ import com.emistoolbox.server.renderer.pdfreport.PdfReportCreator;
 import com.emistoolbox.server.results.PriorityResultCollector;
 import com.emistoolbox.server.results.ResultCollector;
 import com.emistoolbox.server.results.TableResultCollector;
+import com.emistoolbox.server.util.TemplateEngine;
 
 import es.jbauer.lib.io.impl.IOFileInput;
 
@@ -75,7 +75,6 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 	
 	protected PdfReport reportResult; 
 	
-
 	protected abstract int getPageCountPerEntity(); 
 	
 	public synchronized PdfReport create(ReportMetaResult metaResult, EmisDataSet dataSet) 
@@ -98,7 +97,17 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         int[] oldIds = metaResult.getEntityPathIds(); 
         String[] oldNames = metaResult.getEntityPathNames(); 
         
-        addAllPages(metaResult.getEntityPathIds(), metaResult.getEntityPathNames(), indexEntityType, getTotalPageCount(context), getTopPageGroup(reportResult, oldIds, oldNames));
+        int totalPageCount = getTotalPageCount(context); 
+        EmisPageGroup topPageGroup = getTopPageGroup(reportResult, oldIds, oldNames); 
+
+        TemplateEngine templates = new TemplateEngine(); 
+        templates.put("report_name", config.getName());
+        templates.put("report_location_level",  topPageGroup.getLevel());
+        templates.put("report_location_id",  topPageGroup.getId());
+        templates.put("report_location_name",  topPageGroup.getName());
+        templates.put("report_pageTotal", totalPageCount); 
+        
+        addAllPages(metaResult.getEntityPathIds(), metaResult.getEntityPathNames(), indexEntityType, totalPageCount, topPageGroup, templates);
 
         metaResult.getContext().setEntityType(oldEntityType); 
         metaResult.getContext().setEntities(oldEntities); 
@@ -107,8 +116,16 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         // Reset context values. 
         return reportResult;
 	}
+	
+	private <T> T last(T[] values, T defaultValue)
+	{
+		if (values == null || values.length == 0)
+			return defaultValue; 
+		
+		return values[values.length - 1]; 
+	}
 
-	protected abstract void addEntityPages(EmisEntity entity, int[] ids, String[] names, int totalPages, EmisPageGroup group); 
+	protected abstract void addEntityPages(EmisEntity entity, int[] ids, String[] names, int totalPages, EmisPageGroup group, TemplateEngine templates); 
 	
 	protected void init(EmisEntity entity, int[] ids, String[] names)
 	{
@@ -122,7 +139,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         metaResult.setEntityPath(ids, names);
 	}
 	
-    private void addAllPages(int[] ids, String[] names, int indexEntityType, int totalPages, EmisPageGroup group)
+    private void addAllPages(int[] ids, String[] names, int indexEntityType, int totalPages, EmisPageGroup group, TemplateEngine templates)
     {
         EmisMetaEntity entityType = metaResult.getHierarchy().getEntityOrder().get(indexEntityType);
         if (indexEntityType + 1 == ids.length)
@@ -130,7 +147,12 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
             EmisEntity entity = new Entity(entityType, ids[ids.length - 1]); 
             entity.setName(names[names.length - 1]); 
             
-            addEntityPages(entity, ids, names, totalPages, group); 
+            templates.put("group_level", group.getLevel()); 
+            templates.put("group_id", group.getId()); 
+            templates.put("group_name", group.getName()); 
+            updateTemplateHierarchy(templates, ids, names); 
+            
+            addEntityPages(entity, ids, names, totalPages, group, templates); 
             return; 
         }
 
@@ -168,10 +190,46 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
             childGroup.setInfo(hierarchy.getMetaHierarchy().getEntityOrder().get(ids.length).getName(), newIds[newNames.length - 1], newNames[newNames.length - 1]);
             group.addPageGroup(childGroup); 
             
-            addAllPages(newIds, newNames, indexEntityType, totalPages, childGroup);
+            addAllPages(newIds, newNames, indexEntityType, totalPages, childGroup, templates);
         }
     }
-    
+
+    private void updateTemplateHierarchy(TemplateEngine templates, int[] ids, String[] names)
+    {
+    	EmisMetaHierarchy hierarchy = metaResult.getHierarchy();  
+    	if (hierarchy == null)
+    		return; 
+
+    	templates.remove(new String[] { "parent_level", "parent_id", "parent_name", "location_level", "location_id", "location_name" });
+    	for (int i = 0; i < ids.length; i++)
+    	{
+    		String level = hierarchy.getEntityOrder().get(i).getName();
+    		templates.put("hierarchy_" + level + "_id", ids[i]);
+    		templates.put("hierarchy_" + level + "_name", names[i]);
+    		
+    		if (i == ids.length - 1)
+    		{
+        		templates.put("location_level", level);
+        		templates.put("location_id", ids[i]);
+        		templates.put("location_name", names[i]);
+    		}
+    		
+    		if (i == ids.length - 2)
+    		{
+        		templates.put("parent_level", level);
+        		templates.put("parent_id", ids[i]);
+        		templates.put("parent_name", names[i]);
+    		}
+    	}
+
+    	for (int i = ids.length; i < hierarchy.getEntityOrder().size(); i++)
+    	{
+    		String level = hierarchy.getEntityOrder().get(i).getName();
+    		templates.remove("hierarchy_" + level + "_id");
+    		templates.remove("hierarchy_" + level + "_name");
+    	}
+    } 
+
     protected int getDateIndex(EmisContext context)
     {
         List<EmisEnumTupleValue> dates = context.getDates();
@@ -263,23 +321,19 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         	if (context.getDateType().getDimensions() > newContext.getDateType().getDimensions())
         	{
         		context.setDateType(newContext.getDateType()); 
-        		context.setDates(newContext.getDates()); 
-        	
+        		context.setDates(newContext.getDates());         	
         	}
         	else
         		context.setDates(newContext.getDates(context.getDateType()));
         }
         
         if ((context.getEntities() == null) || (context.getEntities().size() == 0))
-        {
             return;
-        }
 
         EmisEntity newEntity = getEntity(((EmisEntity) context.getEntities().get(0)).getEntityType());
         if (newEntity == null)
-        {
             return;
-        }
+
         List<EmisEntity> entities = new ArrayList<EmisEntity>();
         entities.add(newEntity);
         context.setEntities(entities);
@@ -421,7 +475,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 	    return totalPages; 
 	}
 	
-    protected PdfContent createContent(PdfContentConfig contentConfig)
+    protected PdfContent createContent(PdfContentConfig contentConfig, TemplateEngine templates)
     {
         PdfContent result = null;
 
@@ -472,6 +526,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
         {
             PdfVariableContentConfig variableConfig = (PdfVariableContentConfig) contentConfig;
             PdfVariableContentImpl tmp = new PdfVariableContentImpl(contentConfig.getTitle(), variableConfig.getSeniorEntity(), variableConfig.getTitles(), variableConfig.getVariables());  
+            tmp.setConfig((PdfVariableContentConfig) contentConfig);
             if (tmp.setContext(dataSet, metaResult.getContext()))
                 result = tmp; 
         }
@@ -519,13 +574,6 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 
 	            boolean isOneDimension = results[1].getDimensions() == 1; 
 		        PdfResultTableContentImpl tableResult = isOneDimension ? new Result1dTableContentImpl() : new Result2dTableContentImpl();
-		        if (isOneDimension)
-		        	config.setTableStyle(new TableStyleAdaptor(config.getTableStyle()) {
-						@Override
-						public TableCellFormat getTopHeaderFormat() 
-						{ return null ; }
-		        	}); 
-		        
 		        tableResult.setConfig(config); 
 		        tableResult.setResult(results[1]);
 	

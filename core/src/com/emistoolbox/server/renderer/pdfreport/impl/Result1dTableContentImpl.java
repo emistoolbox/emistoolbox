@@ -23,14 +23,17 @@ public class Result1dTableContentImpl extends PdfResultTableContentImpl
 
 	@Override
 	public int getRows() 
-	{ return getResult().getDimensionSize(0); }
+	{ return getResult().getDimensionSize(0) + 1; }
 
 	@Override
 	public String getText(int row, int col) 
 	{
+		if (row == 0)
+			return col == 0 ? "" : getResult().getValueLabel(); 
+		
 		if (col == 0)
-			return headers[row]; 
+			return headers[row - 1]; 
 		else
-			return "" + getResult().get(new int[] { row }); 
+			return "" + getResult().get(new int[] { row -  1}); 
 	}
 }

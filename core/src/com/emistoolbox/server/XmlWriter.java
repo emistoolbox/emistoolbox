@@ -101,6 +101,7 @@ import com.emistoolbox.common.user.EmisUser;
 import com.emistoolbox.common.util.LayoutSides;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedUtil;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
 import com.emistoolbox.server.excelMerge.ExcelReportConfigSerializer;
 import com.emistoolbox.server.renderer.pdfreport.PdfContentWithResult;
 
@@ -777,7 +778,9 @@ public class XmlWriter
     	{
     		String value = texts.getText(key);
     		ChartFont font = texts.getFont(key);
-    		if (StringUtils.isEmpty(value) && font == null)
+    		String align = texts.getAlignment(key); 
+    		
+    		if (StringUtils.isEmpty(value) && font == null && align == null)
     			continue; 
     		
     		Element tag = createElementAndAdd(key, parent); 
@@ -785,6 +788,8 @@ public class XmlWriter
     			tag.setTextContent(value);
     		if (font != null)
     			setAttributes(tag, font); 
+    		if (align != null)
+    			setAttr(tag, "align", align);
     	}
     }
     
@@ -820,6 +825,7 @@ public class XmlWriter
     private void addXml(Element parent, LayoutFrameConfig frame)
     {
     	Element tag = createElementAndAdd("frame", parent);
+        addXml(tag, (TextSet) frame); 
 
     	if (frame.getPosition() != null)
     		setIds(tag, "position", frame.getPosition().toDoubleArray());

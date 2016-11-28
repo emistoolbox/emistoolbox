@@ -27,6 +27,8 @@ public class LayoutReportConfigProperties extends LayoutProperties<EmisPdfReport
 	
 	public LayoutReportConfigProperties(EmisMeta emis)
 	{
+		super(null); 
+		
 		this.meta = emis; 
 		
 		uiPageSize.addChangeHandler(getChangeHandler()); 

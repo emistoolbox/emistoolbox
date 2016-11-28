@@ -7,6 +7,7 @@ import com.emistoolbox.client.ui.pdf.layout.LayoutFrameWidget;
 import com.emistoolbox.client.ui.pdf.layout.LayoutPageEditor;
 import com.emistoolbox.common.model.meta.EmisMeta;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
 import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfVariableContentConfigImpl;
@@ -197,7 +198,10 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	
 	public ListBox getMoveToPageUi()
 	{ return uiMoveToPage; } 
-	
+
+	public void showPageProperties()
+	{ uiTabs.selectTab(1); }
+
 	public void showFrameProperties()
 	{ uiTabs.selectTab(2); }
 	
@@ -205,22 +209,22 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	{
 		uiPageEditor.selectFrame(null);
 		
-		final PdfTextContentConfigImpl textContent = new PdfTextContentConfigImpl(); 
-	    PdfReportEditor.editText(textContent, new ValueChangeHandler<String>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<String> event) {
-				LayoutFrameConfig frame = new LayoutFrameConfigImpl();
-				frame.setContentConfig(textContent);
-				uiPageEditor.addFrame(frame, true);
-			}
-	    }); 
+		LayoutFrameConfig frame = new LayoutFrameConfigImpl(true);
+		PdfTextContentConfigImpl textContent = new PdfTextContentConfigImpl(); 
+		frame.setContentConfig(textContent);
+		uiPageEditor.addFrame(frame, true);
 	}
 	
 	private void addNewVariableContent()
 	{
+		if (reportConfig.getEntityType() == null)
+			return; 
+		
 		uiPageEditor.selectFrame(null);
 		
-		final PdfVariableContentConfig varContent = new PdfVariableContentConfigImpl(); 
+		final PdfVariableContentConfigImpl varContent = new PdfVariableContentConfigImpl(); 
+		varContent.setEntity(reportConfig.getEntityType()); 
+		
 		PdfReportEditor.editVariables(varContent, new ValueChangeHandler<Boolean>() {
 
 			@Override
@@ -235,8 +239,11 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	@Override
 	public void commit()
 	{
-		uiPageEditor.commit(); 
-		uiReportProps.commit(); 
+		if (uiPageEditor != null)
+			uiPageEditor.commit(); 
+		
+		if (uiReportProps != null)
+			uiReportProps.commit(); 
 //		uiPageList.commit();
 //		reportConfig.setPages(uiPageList.get()); 
 	}
@@ -245,8 +252,12 @@ public class LayoutPdfReportEditor extends FlexTable implements EmisEditor<Layou
 	public LayoutPdfReportConfig get() 
 	{
 		commit(); 
-		uiPageEditor.commit(); 
-		uiReportProps.commit(); 
+		
+		if (uiPageEditor != null)
+			uiPageEditor.commit(); 
+		
+		if (uiReportProps != null)
+			uiReportProps.commit(); 
 		
 		return reportConfig; 
 	}

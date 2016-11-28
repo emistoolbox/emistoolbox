@@ -5,11 +5,12 @@ import java.util.List;
 
 public abstract interface PdfReport
 {
-    public abstract EmisPdfReportConfig getReportConfig();
-    public abstract void setReportConfig(EmisPdfReportConfig config);
+    public EmisPdfReportConfig getReportConfig();
+    public void setReportConfig(EmisPdfReportConfig config);
 
-    public abstract void addPage(EmisPdfPage page);
-    public abstract List<EmisPdfPage> getPages();
+    public void addPage(EmisPdfPage page);
+    public List<EmisPdfPage> getPages();
+    public int getPageCount(); 
     
     public EmisPageGroup getPageGroup(); 
     public void setPageGroup(EmisPageGroup group); 

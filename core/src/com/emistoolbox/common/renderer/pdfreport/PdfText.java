@@ -10,9 +10,14 @@ public class PdfText
 {
 	public static final String TEXT_TITLE = "title";
 	public static final String TEXT_SUBTITLE = "subtitle";
-	public static final String TEXT_PLAIN = "plain";
+	public static final String TEXT_BODY = "body";
 	public static final String TEXT_FOOTER = "footer";
 	public static final String TEXT_GROUP = "group";
+	
+	public static final String ALIGN_LEFT = "left"; 
+	public static final String ALIGN_CENTER = "center"; 
+	public static final String ALIGN_RIGHT = "right"; 
+	
 
 	public final static ChartFont DEFAULT_FONT_HACK = new ChartFont(ChartFont.FONT_HELVETICA, ChartFont.PLAIN, 12);  
 	public final static ChartFont DEFAULT_TITLE_FONT_HACK = new ChartFont(ChartFont.FONT_HELVETICA, ChartFont.BOLD, 14);

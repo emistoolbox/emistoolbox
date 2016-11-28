@@ -562,6 +562,7 @@ table.emisResult tbody tr:nth-child(2n) td.selected {
 	background-color: #fff; 
 	color: #000; 
 	border: 2px dashed #ccc; 
+	overflow: hidden; 
 }
 
 .layoutFrame.selected {

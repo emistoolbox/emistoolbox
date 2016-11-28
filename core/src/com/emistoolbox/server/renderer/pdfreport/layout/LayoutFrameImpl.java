@@ -12,6 +12,9 @@ public class LayoutFrameImpl extends TextSetImpl implements LayoutFrame
 	public LayoutFrameImpl()
 	{ super(LayoutFrameConfig.TEXT_KEYS); }
 	
+	public LayoutFrameImpl(String[] keys)
+	{ super(keys); } 
+	
 	@Override
 	public LayoutFrameConfig getFrameConfig() 
 	{ return config; }

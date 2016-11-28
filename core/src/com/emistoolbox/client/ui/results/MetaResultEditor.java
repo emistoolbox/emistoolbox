@@ -546,7 +546,7 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
         for (EmisPdfReportConfig report : reports)
         {
             if (report.allowContentConfig(contentConfig))
-                uiReports.add(report.getText(PdfText.TEXT_TITLE) + (report.getEntityType() != null ? "(" + report.getEntityType().getName() + ")" : ""), report);
+                uiReports.add(report.getName() + (report.getEntityType() != null ? "(" + report.getEntityType().getName() + ")" : ""), report);
         }
         HorizontalPanel hp = new HorizontalPanel();
         if (addButtons.length == 1)

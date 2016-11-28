@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import com.emistoolbox.lib.pdf.PDFLayoutRenderer;
 import com.emistoolbox.lib.pdf.layout.PDFLayout;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutBorderStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutElement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutFileElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFont;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFontStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutFrameElement;
@@ -51,6 +53,7 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutTableElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTableFormat;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTextElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutVerticalAlignment;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutVisitor;
 import com.emistoolbox.lib.pdf.util.PDFLayoutLogVisitor;
 import com.emistoolbox.server.renderer.gis.GisUtil;
 import com.emistoolbox.server.renderer.pdfreport.EmisPageGroup;
@@ -59,15 +62,14 @@ import com.emistoolbox.server.renderer.pdfreport.PdfChartContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfGisContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfImageContent;
-import com.emistoolbox.server.renderer.pdfreport.PdfPriorityListContent;
 import com.emistoolbox.server.renderer.pdfreport.PdfReport;
 import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
 import com.emistoolbox.server.renderer.pdfreport.impl.PDFAdvancedReportWriter;
 import com.emistoolbox.server.renderer.pdfreport.impl.PdfTextContent;
-import com.emistoolbox.server.renderer.pdfreport.impl.PdfVariableContentImpl;
 
 import es.jbauer.lib.io.IOInput;
 import es.jbauer.lib.io.IOOutput;
+import es.jbauer.lib.io.impl.IOByteArrayInput;
 import es.jbauer.lib.io.impl.IOFileInput;
 import es.jbauer.lib.io.impl.IOFileOutput;
 import es.jbauer.lib.io.impl.IOInputStreamInput;
@@ -75,6 +77,9 @@ import es.jbauer.lib.io.impl.IOOutputStreamOutput;
 
 public class PDFLayoutReportWriter extends PDFAdvancedReportWriter 
 {
+	private double pageTextPadding = 3; 
+	private double frameTextPadding = 2; 
+	
 	private double indentation = 20; // in points
 	private double lineSpacing = 18; // in points
 	private PDFLayoutFont font = new PDFLayoutFont ("Courier",12,PDFLayoutFontStyle.PLAIN);
@@ -163,7 +168,7 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 			
 			try { writeObjectStream(out, pages); }
 			catch (Throwable err)
-			{}
+			{  err.printStackTrace(); }
 		}
 		
 		render(out, pages); 
@@ -178,6 +183,9 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 			name = name.substring(0, pos); 
 		
 		File objFile = new File(out.getParentFile(), name + ".layout"); 
+
+		for (PDFLayout page : pages)
+			page.accept(new PdfLayoutSerializableInput()); 
 		
 		IOOutput ioo = new IOFileOutput(objFile); 
 		OutputStream os = null; 
@@ -271,21 +279,53 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 	private PDFLayout renderPage(LayoutPage page, Point size, Rectangle margins)
 		throws IOException
 	{
-		PDFLayout layout = createPage(size, margins);  
-		// TODO - handle titles of page (maybe defined in frame already as part of the LayoutPdfReportCreator)
+		PDFLayout layout = createPage(size, margins);
+		addText(layout.getOuterFrame (), page, PdfText.TEXT_TITLE, PDFLayoutVerticalAlignment.TOP, new PDFLayoutSides<Double>(new Double[] {0.0, 0.0, 0.0, pageTextPadding})); 
+		addText(layout.getOuterFrame (), page, PdfText.TEXT_SUBTITLE, PDFLayoutVerticalAlignment.BELOW, new PDFLayoutSides<Double>(new Double[] {0.0, 0.0, 0.0, pageTextPadding}));
 		for (LayoutFrame frame : page.getFrames())
 			layout.getOuterFrame ().addElement(createFrame(frame)); 
 		
-		layout.getOuterFrame ().addElement(createAlignedText(page.getText(PdfText.TEXT_FOOTER), page.getFont(PdfText.TEXT_FOOTER), PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BOTTOM));
+		addText(layout.getOuterFrame (), page, PdfText.TEXT_FOOTER, PDFLayoutVerticalAlignment.BOTTOM, new PDFLayoutSides<Double>(new Double[] {0.0, pageTextPadding, 0.0, 0.0})); 
 		
 		return layout; 
 	}
+	
+	private void addText(PDFLayoutFrameElement frame, TextSet texts, String key, PDFLayoutVerticalAlignment vAlign, PDFLayoutSides<Double> padding)
+	{
+		PDFLayoutElement tmp = createAlignedText(texts, key, vAlign, padding); 
+		if (tmp == null)
+			return; 
+		
+		frame.addElement(tmp);  
+	}
 
-	private PDFLayoutElement createAlignedText(String title, ChartFont font, PDFLayoutHorizontalAlignment horizontal, PDFLayoutVerticalAlignment vertical) 
+	public PDFLayoutElement createAlignedText(TextSet texts, String key, PDFLayoutVerticalAlignment vAlign, PDFLayoutSides<Double> padding)
+	{
+		String text = texts.getText(key); 
+		if (StringUtils.isEmpty(text))
+			return null; 
+		
+		return createAlignedText(text, texts.getFont(key), getHAlign(texts.getAlignment(key)), vAlign, padding); 
+	}
+	
+	private PDFLayoutHorizontalAlignment getHAlign(String align)
+	{
+		if (align == null)
+			return PDFLayoutHorizontalAlignment.LEFT;
+		
+		return PDFLayoutHorizontalAlignment.valueOf(align.toUpperCase()); 
+	}
+	
+	private PDFLayoutElement createAlignedText(String title, ChartFont font, PDFLayoutHorizontalAlignment horizontal, PDFLayoutVerticalAlignment vertical, PDFLayoutSides<Double> padding) 
 	{
 		if (StringUtils.isEmpty(title))
 			return null; 
-		return new PDFLayoutTextElement(title, getFont(font)).align(horizontal, vertical); 
+
+		PDFLayoutElement result = new PDFLayoutTextElement(title, getFont(font)).align(horizontal, vertical);  
+		if (padding != null)
+			result.setPadding(padding);
+		
+		return result; 
 	}
 		
 	private PDFLayoutElement createFrame(LayoutFrame frame)
@@ -305,7 +345,6 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 		else if (content instanceof PdfChartContent)
 		{
 			PdfChartContent chartContent = (PdfChartContent) content; 
-			updateFrameTitle(frame, chartContent.getTitle());
 			item = renderChart((PdfChartContent) content, config.getPosition().getWidth(), config.getPosition().getHeight());   
 			item.fit(PDFLayoutObjectFit.FILL); 
 		}
@@ -315,27 +354,24 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 			return new PDFLayoutImageElement(new IOFileInput(new File(values[0]), "image/png", null));
 		}
 		else if (content instanceof PdfTextContent)
-		{
-			PdfTextContent textContent = (PdfTextContent) content;
-			updateFrameTitle(frame, textContent.getTitle()); 
-			item = new PDFLayoutTextElement(textContent.getText(), getFont(textContent.getTextFont()));  
-		}
+			item = createAlignedText(frame, PdfText.TEXT_BODY, PDFLayoutVerticalAlignment.BELOW, new PDFLayoutSides<Double>(new Double[] { 0.0, 0.0, 0.0, frameTextPadding }));
 		else if (content instanceof PdfTableContent)
 		{
 			item = renderTable((PdfTableContent) content); 
 			item.fit(PDFLayoutObjectFit.SCALE_DOWN); 
+			item.align(PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.TOP); 
 		}
 		
 		if (item != null)
 		{
 			// Wrap content with title, subtitle and footer.  
-			if (item.getObjectFit() != null)
-				item.fit(PDFLayoutObjectFit.CONTAIN);
+			if (item.getObjectFit() == null)
+				item.fit(PDFLayoutObjectFit.SCALE_DOWN);
 			
 			addTitlesAndContent(result, item, frame);
 			
 			// style box
-			addStyles(item, frame); 
+			addStyles(result, frame); 
 		}
 		
 		return result; 
@@ -352,29 +388,19 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 		
 	private void addTitlesAndContent(PDFLayoutFrameElement frame, PDFLayoutElement content, TextSet text)
 	{
-		PDFLayoutElement title = getTextElement(text, PdfText.TEXT_TITLE, PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.BELOW); 
-		if (title != null)
-			frame.addElement(title.pad(0, 0, 0, 6)); 
-		frame.addElement(getTextElement(text, PdfText.TEXT_SUBTITLE, PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.BELOW)); 
+		addText(frame, text, PdfText.TEXT_TITLE, PDFLayoutVerticalAlignment.BELOW, new PDFLayoutSides<Double>(new Double[] { 0.0, 0.0, 0.0, frameTextPadding })); 
+		addText(frame, text, PdfText.TEXT_SUBTITLE, PDFLayoutVerticalAlignment.BELOW, new PDFLayoutSides<Double>(new Double[] { 0.0, 0.0, 0.0, frameTextPadding }));
+
 		frame.addElement(content);
-		content.align(PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BELOW);
-		frame.addElement(getTextElement(text, PdfText.TEXT_FOOTER, PDFLayoutHorizontalAlignment.LEFT, PDFLayoutVerticalAlignment.BOTTOM));
+		PDFLayoutPlacement placement = content.getPlacement(); 
+		if (placement == null)
+			content.align(PDFLayoutHorizontalAlignment.CENTER, PDFLayoutVerticalAlignment.BELOW);
+		else
+			placement.setVerticalPlacement(PDFLayoutVerticalAlignment.BELOW); 
+		
+		addText(frame, text, PdfText.TEXT_FOOTER, PDFLayoutVerticalAlignment.BOTTOM, new PDFLayoutSides<Double>(new Double[] { 0.0, frameTextPadding, 0.0, 0.0 })); 
 	}
 
-	private PDFLayoutElement getTextElement(TextSet text, String key, PDFLayoutHorizontalAlignment horz, PDFLayoutVerticalAlignment vert)
-	{
-		if (text.getText(key) == null)
-			return null; 
-		
-		PDFLayoutTextElement result = new PDFLayoutTextElement(); 
-		result.setText(text.getText(key));
-		result.setFont(getFont(text.getFont(key)));
-		result.align(horz, vert);
-//		result.setDisplacement(null); // TODO 
-		
-		return result;
-	}
-	
 	private PDFLayoutElement renderTable(PdfTableContent content)
 	{
 		EmisTableStyle style = content.getTableStyle(); 
@@ -384,18 +410,44 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 			for (int row = 0; row < content.getRows(); row++)
 			{
 				table.setText(row, col, content.getText(row, col));
-				if (col == 0 && style.getTopHeaderFormat() != null)
+				if (row == 0 && style.getTopHeaderFormat() != null)
 					table.setCellFormat(row, col, getTableFormat(style.getTopHeaderFormat()));
-				else if (row == 0 && style.getLeftHeaderFormat() != null)
+				else if (col == 0 && style.getLeftHeaderFormat() != null)
 					table.setCellFormat(row, col, getTableFormat(style.getLeftHeaderFormat()));
 				else 
 					table.setCellFormat(row, col, getTableFormat(style.getDataCellFormat(col)));
 			}
 
-		table.setTableBorderStyle(getLineStyle(style.getBorder(BorderType.TABLE_HORIZONTAL))); 
+		table.setTableBorderStyle(getLineStyle(style.getBorder(BorderType.TABLE_HORIZONTAL)));
 
+		// Set table headers. 
+		for (int col = 1; col < content.getColumns(); col++)
+		{
+			if (col == 1)
+				table.setVerticalBorderStyle(1, getLine(style, BorderType.HEADER_LEFT_VERTICAL));
+			else
+			{
+				table.setVerticalBorderStyle(col, getLine(style, BorderType.DATA_VERTICAL));
+				table.setVerticalBorderStyle(0, col, getLine(style, BorderType.HEADER_TOP_VERTICAL));
+			}
+		}
+		
+		for (int row = 1; row < content.getRows(); row++)
+		{
+			if (row == 1)
+				table.setHorizontalBorderStyle(1, getLine(style, BorderType.HEADER_TOP_HORIZONTAL));
+			else
+			{
+				table.setHorizontalBorderStyle(row, getLine(style, BorderType.DATA_HORIZONTAL));
+				table.setHorizontalBorderStyle(row, 0, getLine(style, BorderType.HEADER_LEFT_HORIZONTAL));
+			}
+		}
+		
 		return table; 
 	}
+	
+	private PDFLayoutLineStyle getLine(EmisTableStyle style, BorderType border)
+	{ return getLineStyle(style.getBorder(border)); }
 	
 	private PDFLayoutTableFormat getTableFormat(TableCellFormat format)
 	{
@@ -459,7 +511,11 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 		else if (in.getContentType().equals("image/png"))
 			return new PDFLayoutImageElement(in);
 		else if (in.getContentType().equals("application/pdf"))
-			return new PDFLayoutPDFElement(in);
+		{
+			PDFLayoutPDFElement pdf = new PDFLayoutPDFElement(in);
+			pdf.setCropping(true); 
+			return pdf; 
+		}
 		
 		throw new IllegalArgumentException("Unsupported chart output format"); 
 	}
@@ -587,4 +643,76 @@ public class PDFLayoutReportWriter extends PDFAdvancedReportWriter
 	@Override
 	public String getExtension() 
 	{ return ".pdf"; } 
+}
+
+class PdfLayoutSerializableInput implements PDFLayoutVisitor<Void>
+{
+	@Override
+	public Void visit(PDFLayout page) throws IOException 
+	{ 
+		page.getOuterFrame().accept(this); 
+		return null; 
+	}
+
+	@Override
+	public Void visit(PDFLayoutFrameElement frame) throws IOException 
+	{
+		for (PDFLayoutElement e : frame.getElements())
+			e.accept(this); 
+		
+		return null; 
+	}
+
+	@Override
+	public Void visit(PDFLayoutHighchartElement pdf) throws IOException 
+	{
+		visit((PDFLayoutFileElement) pdf); 
+		return null;
+	}
+
+	@Override
+	public Void visit(PDFLayoutImageElement pdf) throws IOException 
+	{
+		visit((PDFLayoutFileElement) pdf); 
+		return null;
+	}
+
+	@Override
+	public Void visit(PDFLayoutPDFElement pdf) throws IOException 
+	{
+		visit((PDFLayoutFileElement) pdf); 
+		return null;
+	}
+
+	private void visit(PDFLayoutFileElement pdf) throws IOException 
+	{ pdf.setInput(makeSerializable(pdf.getInput())); }
+
+	@Override
+	public Void visit(PDFLayoutTableElement tableElement) throws IOException 
+	{ return null; }
+
+	@Override
+	public Void visit(PDFLayoutTextElement textElement) throws IOException 
+	{ return null; }
+
+	private IOInput makeSerializable(IOInput input)
+		throws IOException
+	{
+		if (input == null)
+			return null; 
+		
+		if (input instanceof IOByteArrayInput)
+			return input; 
+		
+		InputStream is = null;
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		try {
+			is = input.getInputStream(); 
+			IOUtils.copy(is, os);
+			return new IOByteArrayInput(os.toByteArray(), input.getName(), input.getContentType(), input.getEncoding());
+		}
+		finally { 
+			IOUtils.closeQuietly(is);
+		}
+	}
 }

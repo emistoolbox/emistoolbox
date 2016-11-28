@@ -18,6 +18,7 @@ import com.emistoolbox.common.renderer.pdfreport.impl.PdfTextContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.SimpleTableStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutFrameConfigImpl;
 import com.emistoolbox.common.results.MetaResult;
 import com.emistoolbox.common.results.MetaResultValue;
@@ -52,20 +53,23 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 	private SimpleTableStyleEditor uiTableStyle = new SimpleTableStyleEditor(); 
 	private int tableStyleRow; 
 	
-	private PushButton btnEditText = new PushButton("Edit Text"); 
+	private TextSetEntryUi uiBody = new TextSetEntryUi(true); 
 	private int textEditRow; 
 	
 	private PushButton btnVarText = new PushButton("Edit Variables"); 
 	private int varEditRow; 
 	
-	private static String[] ALL_TEXT_KEYS = new String[] { PdfText.TEXT_TITLE, PdfText.TEXT_SUBTITLE, PdfText.TEXT_PLAIN, PdfText.TEXT_FOOTER }; 
-	private static String[] ALL_TEXT_HEADERS = new String[] { "Title", "Subtitle", "Body", "Footer" };  
-	
-	public LayoutFrameConfigProperties()
+	private static String[] ALL_TEXT_KEYS = new String[] { PdfText.TEXT_TITLE, PdfText.TEXT_SUBTITLE, PdfText.TEXT_FOOTER }; 
+	private static String[] ALL_TEXT_HEADERS = new String[] { "Title", "Subtitle", "Footer" };  
+
+	public LayoutFrameConfigProperties(LayoutPdfReportEditor editor)
 	{		
+		super(editor); 
+		
 		int row = 0; 
 
 		setText(row, 0, "Info"); 
+		getCellFormatter().setVerticalAlignment(row, 0, HasVerticalAlignment.ALIGN_TOP);
 		setWidget(row, 1, uiFrameInfo); 
 		row++; 
 		
@@ -76,6 +80,11 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		getRowFormatter().setVisible(row, false); 
 		row++; 
 		
+		// Move control
+		moveRow = row; 
+		setText(row, 0, "Move/Delete Frame"); 
+		row++;
+		
 		tableStyleRow = row; 
 		setText(row, 0, "Table Style"); 
 		getCellFormatter().setVerticalAlignment(row, 0, HasVerticalAlignment.ALIGN_TOP);
@@ -84,16 +93,12 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		row++; 
 		
 		textEditRow = row; 
-		setWidget(row, 1, btnEditText);
-		EmisUtils.initSmall(btnEditText, 90); 
+		setText(row, 0, "Body"); 
+		getCellFormatter().setVerticalAlignment(row, 0, HasVerticalAlignment.ALIGN_TOP);
+		setWidget(row, 1, uiBody);
 		getRowFormatter().setVisible(row, false); 
-		btnEditText.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				editText(); 
-			}
-		}); 
 		row++; 
+		uiBody.addValueChangeHandler(getValueChangeHandler(), getChangeHandler());
 		
 		varEditRow = row; 
 		setWidget(row, 1, btnVarText);
@@ -107,11 +112,6 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		}); 
 		row++; 
 
-		// Move control
-		moveRow = row; 
-		setText(row, 0, "Move/Delete Frame"); 
-		row++;
-		
 		setText(row, 0, "Background");
 		setWidget(row++, 1, uiBgColor);
 
@@ -132,6 +132,7 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		uiBorderRadius.addChangeHandler(getChangeHandler()); 
 		uiPadding.addChangeHandler(getChangeHandler()); 
 		uiBorders.addValueChangeHandler(getValueChangeHandler()); 
+		uiTableStyle.addValueChangeHandler(getValueChangeHandler()); 
 		
 		set(null);
 	}
@@ -156,6 +157,7 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		
 		updateTextSet(uiTextSet, config); 
 		
+		
 		if (config.getContentConfig() instanceof PdfPriorityListContentConfig)
 			config.setContentConfig(uiPrioList.get());
 		
@@ -164,6 +166,9 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 			TableStyleConfig tableConfig = (TableStyleConfig) config.getContentConfig(); 
 			tableConfig.setTableStyle(uiTableStyle.get());
 		}
+		
+		if (config.getContentConfig() instanceof PdfTextContentConfig)
+			config.putText(PdfText.TEXT_BODY, uiBody.getText(), uiBody.getFont());
 	}
 
 	@Override
@@ -176,11 +181,16 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 	@Override
 	public void set(LayoutFrameConfig config) 
 	{
+		LayoutPdfReportConfig reportConfig = getReportEditor().get(); 
 		this.config = config; 
 		if (config == null)
+		{
+			updateTexts(reportConfig, null, uiTextSet); 
 			setVisible(false);
+		}
 		else
 		{
+			updateTexts(reportConfig, config, uiTextSet);
 			setVisible(true); 
 
 			uiFrameInfo.setHTML(getFrameInfoHtml(config.getContentConfig()));
@@ -213,7 +223,12 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 				getRowFormatter().setVisible(tableStyleRow, false);
 			
 			if (config.getContentConfig() instanceof PdfTextContentConfig)
+			{
 				getRowFormatter().setVisible(textEditRow, true);
+				uiBody.setText(config.getText(PdfText.TEXT_BODY));
+				uiBody.setFont(config.getFont(PdfText.TEXT_BODY));
+				uiBody.setConfigs(reportConfig, config.getContentConfig());
+			}
 			else
 				getRowFormatter().setVisible(textEditRow, false);
 
@@ -242,11 +257,11 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 
 			@Override
 			public String visit(PdfGisContentConfig config) 
-			{ return "<b>Map</b>"; }
+			{ return "<b>Map</b><br />" + getMetaResultInfo(config.getMetaResult()); }
 
 			@Override
 			public String visit(PdfPriorityListContentConfig config) 
-			{ return "<b>Priority List</b>"; } 
+			{ return "<b>Priority List</b><br />" + getMetaResultInfo(config.getMetaResult()); } 
 
 			@Override
 			public String visit(TableStyleConfig config) 
@@ -254,7 +269,7 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 				if (config instanceof PdfTableContentConfig)
 					return "<b>Table</b><br />" + getMetaResultInfo(((PdfTableContentConfig) config).getMetaResult()); 
 				
-				return null; 
+				return "<b>Table</b>"; 
 			}
 		}; 
 		
@@ -281,8 +296,9 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 			TableMetaResult tableMetaResult = (TableMetaResult) metaResult; 
 			for (int i = 0; i < tableMetaResult.getDimensionCount(); i++)
 			{
-				if (i > 0)
+				if (result.length() > 0)
 					result.append(", "); 
+
 				result.append(tableMetaResult.getDimension(i).getName());
 			}
 		}
@@ -315,5 +331,5 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 	
 	
 	public void updatePageIndex(int index, int total)
-	{ getRowFormatter().setVisible(0, total > 1); }
+	{ getRowFormatter().setVisible(moveRow, total > 1); }
 }

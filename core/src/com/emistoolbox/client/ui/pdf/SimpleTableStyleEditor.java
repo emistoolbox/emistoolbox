@@ -109,6 +109,7 @@ public class SimpleTableStyleEditor extends HTML implements EmisEditor<SimpleTab
 		style.setTableBorder(border);
 		
 		style.setPadding(uiPadding.get());
+		style.init(); 
 	}
 
 	@Override
@@ -159,6 +160,20 @@ public class SimpleTableStyleEditor extends HTML implements EmisEditor<SimpleTab
 	}
 	
 	public void updateUi()
+	{ setHTML(SimpleTableStyleEditor.getTablePreview(style)); }
+	
+	public static String getTablePreview(SimpleTableStyle style)
+	{
+		String[][] data = new String[][] { 
+			{ "", "Header", "Header" }, 
+			{ "Header", "100", "300" },
+			{ "Header", "100", "300" }
+		}; 
+		
+		return getTablePreview(data, style); 
+	}
+	
+	public static String getTablePreview(String[][] data, SimpleTableStyle style)
 	{
 		String tableCss = CSSCreator.getCssAsString(style.getTableBorder());
 		String headerCss = CSSCreator.getCssAsString(style.getHeaderFont(), style.getHeaderBackground(), style.getHeaderBorder()); 
@@ -167,22 +182,22 @@ public class SimpleTableStyleEditor extends HTML implements EmisEditor<SimpleTab
 		StringBuffer result = new StringBuffer(); 
 		result.append("<table style='border-collapse: collapse; ").append(tableCss).append("'>"); 
 
-		result.append("<tr>");
-		for (int i = 0; i < 3; i++)
-			result.append("<td style='").append(headerCss).append("'>Header</td>");
-		result.append("</tr>"); 
-		
-		for (int row = 1; row < 3; row++)
+		for (int row = 0; row < data.length; row++)
 		{
 			result.append("<tr>");
-			result.append("<td style='").append(headerCss).append("'>Header</td>");
-			result.append("<td style='").append(dataCss).append("'>100</td>");
-			result.append("<td style='").append(dataCss).append("'>200</td>");
-			result.append("</tr>");
+			for (int col = 0; col < data[0].length; col++)
+			{
+				String cellCss = dataCss; 
+				if (row == 0 || col == 0)
+					cellCss = headerCss; 
+				
+				result.append("<td style='").append(cellCss).append("'>").append(data[row][col]).append("</td>"); 
+			}
+			result.append("</tr>"); 
 		}
-		
+				
 		result.append("</table>"); 
 		
-		setHTML(result.toString()); 
+		return result.toString(); 
 	}
 }

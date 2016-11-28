@@ -1,7 +1,10 @@
 package com.emistoolbox.server.renderer.pdfreport.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.model.EmisEntity;
 import com.emistoolbox.common.model.EmisEnumTupleValue;
 import com.emistoolbox.common.model.analysis.EmisContext;
@@ -9,18 +12,22 @@ import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaData.EmisDataType;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
+import com.emistoolbox.common.renderer.pdfreport.EmisTableStyle;
+import com.emistoolbox.common.renderer.pdfreport.PdfVariableContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.impl.SimpleTableStyle;
 import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.server.model.EmisDataSet;
 import com.emistoolbox.server.model.EmisEntityData;
 import com.emistoolbox.server.model.EmisEntityDataSet;
 import com.emistoolbox.server.model.impl.EntityDataAccess;
+import com.emistoolbox.server.renderer.pdfreport.FontIdentifier;
 import com.emistoolbox.server.renderer.pdfreport.PdfContentVisitor;
 import com.emistoolbox.server.renderer.pdfreport.PdfTableContent;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
-public class PdfVariableContentImpl extends PdfTableContentBase implements PdfTableContent
+public class PdfVariableContentImpl extends PdfContentBase<PdfVariableContentConfig> implements PdfTableContent
 {
     EmisMetaEntity entityType; 
     private List<String> names; 
@@ -29,6 +36,9 @@ public class PdfVariableContentImpl extends PdfTableContentBase implements PdfTa
     private EmisEntityDataSet entityDataSet;  
     private int dateIndex; 
     private EmisEntity entity; 
+    
+    private EmisTableStyle tableStyle = new SimpleTableStyle(); 
+    private Map<FontIdentifier, ChartFont> fonts = new HashMap<FontIdentifier, ChartFont>(); 
     
     public PdfVariableContentImpl(String title, EmisMetaEntity entityType, List<String> names, List<String> variables)
     {
@@ -39,7 +49,23 @@ public class PdfVariableContentImpl extends PdfTableContentBase implements PdfTa
         this.variables = variables; 
     }
     
-    public boolean setContext(EmisDataSet dataset, EmisContext context)
+    @Override
+	public EmisTableStyle getTableStyle() 
+    { return tableStyle; }
+
+	@Override
+	public void setTableStyle(EmisTableStyle style) 
+	{ this.tableStyle = style; }
+
+	@Override
+	public void setFont(FontIdentifier id, ChartFont font) 
+	{ fonts.put(id, font); } 
+
+	@Override
+	public ChartFont getFont(FontIdentifier id) 
+	{ return fonts.get(id); } 
+
+	public boolean setContext(EmisDataSet dataset, EmisContext context)
     { 
         List<EmisEntity> entities = context.getEntities();
         if (entities.size() != 1)
@@ -137,8 +163,8 @@ public class PdfVariableContentImpl extends PdfTableContentBase implements PdfTa
 			return names.get(row - 1); 
 
 		if (col == 1)
-			getValue(variables.get(row - 1));  
+			return getValue(variables.get(row - 1));  
 
-		return null;
+		return "";
 	} 
 }

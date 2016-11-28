@@ -109,6 +109,8 @@ import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.EmisTableStyle;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfReportConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfText;
+import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.TextSet;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfChartContentConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
@@ -148,6 +150,7 @@ import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedIndexList;
 import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.common.util.Rectangle;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutHorizontalAlignment;
 import com.emistoolbox.server.excelMerge.ExcelReportConfigSerializer;
 
 import java.io.IOException;
@@ -994,7 +997,7 @@ public class XmlReader
 			if (tag == null)
 				continue; 
 			
-			texts.putText(key, tag.getTextContent(), getFont(tag)); 
+			texts.putText(key, tag.getTextContent(), getFont(tag), getAttr(tag, "align", PdfText.ALIGN_LEFT));  
 		}
 	}
 	
@@ -1037,9 +1040,13 @@ public class XmlReader
 
 	private LayoutFrameConfig getLayoutFrame(Element tag, List<EmisIndicator> indicators)
 	{
-		LayoutFrameConfig frame = new LayoutFrameConfigImpl(); 
+		PdfContentConfig content = getPdfContentConfig(getElement(tag, "pdfContent"), indicators);
+		
+		LayoutFrameConfig frame = new LayoutFrameConfigImpl(content instanceof PdfTextContentConfig); 
+		frame.setContentConfig(content); 
 		
 		frame.setPosition(new Rectangle(getIdsAsDoubleArray(tag, "position")));
+		readTexts(tag, (TextSet) frame);
 		
 		// borders
 		// borderRadius
@@ -1062,8 +1069,6 @@ public class XmlReader
 			frame.setBackgroundImagePath(getAttr(backgroundTag, "image"));
 			frame.setBackgroundColour(getAttrAsColour(backgroundTag, "colour", null));
 		}
-
-		frame.setContentConfig(getPdfContentConfig(getElement(tag, "pdfContent"), indicators));
 
 		return frame;
 	}
@@ -1141,7 +1146,11 @@ public class XmlReader
 			tmp.setFilterEmpty(getAttrAsBoolean(tag, "filterEmpty"));
 			tmp.setTableStyle(getTableStyle(getElement(tag, "tableStyle")));
 			tmp.setMetaResult(getPriorityMetaResult(getElement(tag, "prioMetaResult"), indicators)); 
+			
+			result = tmp; 
 		}
+		else 
+			throw new IllegalArgumentException("Unknown pdf content type: " + type); 
 
 		result.setTitle(getAttr(tag, "title"));
 
@@ -1191,7 +1200,7 @@ public class XmlReader
 			return result; 
 		}
 		
-		return null; 
+		return new SimpleTableStyle(); 
 	}
 	
 	public PriorityMetaResult getPriorityMetaResult(Element tag, List<EmisIndicator> indicators)

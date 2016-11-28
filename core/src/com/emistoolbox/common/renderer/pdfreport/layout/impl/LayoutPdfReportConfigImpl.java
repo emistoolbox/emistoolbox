@@ -7,7 +7,10 @@ import java.util.List;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.renderer.pdfreport.EmisReportBaseConfigImpl;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfMetaResultContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.PdfPriorityListContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
+import com.emistoolbox.common.renderer.pdfreport.PdfTextContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
@@ -59,7 +62,10 @@ public class LayoutPdfReportConfigImpl extends EmisReportBaseConfigImpl implemen
 			pages.add(pageConfig);
         }
 
-		LayoutFrameConfig frame = new LayoutFrameConfigImpl(); 
+		LayoutFrameConfig frame = new LayoutFrameConfigImpl(contentConfig instanceof PdfTextContentConfig); 
+		if (contentConfig instanceof PdfMetaResultContentConfig && !(contentConfig instanceof PdfPriorityListContentConfig))
+			frame.putText(PdfText.TEXT_TITLE, "{content_title}"); 
+		
 		frame.setContentConfig(contentConfig); 
 		frame.setPosition(getDefaultPosition());
 		
@@ -70,5 +76,5 @@ public class LayoutPdfReportConfigImpl extends EmisReportBaseConfigImpl implemen
 	}
 
 	private Rectangle getDefaultPosition()
-	{ return new Rectangle(0, 0, 100, 100); }
+	{ return new Rectangle(0, 0, 250, 200); }
 }

@@ -3,6 +3,7 @@ package com.emistoolbox.client.ui.pdf;
 import java.util.Map;
 
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
+import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.google.gwt.user.client.ui.TextBox;
 
 public class LayoutPageConfigProperties extends LayoutProperties<LayoutPageConfig> 
@@ -12,8 +13,10 @@ public class LayoutPageConfigProperties extends LayoutProperties<LayoutPageConfi
 	private ChartColorEditor uiBgColor = new ChartColorEditor(); 
 	private Map<String, TextSetEntryUi> uiTexts; 
 
-	public LayoutPageConfigProperties()
+	public LayoutPageConfigProperties(LayoutPdfReportEditor editor)
 	{
+		super(editor); 
+		
 		int row = getRowCount(); 
 		
 //		setText(row, 0, "Background");
@@ -45,6 +48,7 @@ public class LayoutPageConfigProperties extends LayoutProperties<LayoutPageConfi
 	@Override
 	public void set(LayoutPageConfig config) 
 	{
+		updateTexts(getReportEditor().get(), null, uiTexts); 
 		this.config = config; 
 		if (config == null)
 			this.setVisible(false);

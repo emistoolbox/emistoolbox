@@ -478,6 +478,11 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
             err.printStackTrace();
             throw err; 
         }
+        catch (Throwable err)
+        { 
+        	err.printStackTrace(); 
+        	throw new IOException(err); 
+        }
     }
 
     private IOException handleException(Throwable ex)

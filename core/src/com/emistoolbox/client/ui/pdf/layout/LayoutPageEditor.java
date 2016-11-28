@@ -5,15 +5,16 @@ import com.emistoolbox.client.ui.pdf.LayoutFrameConfigProperties;
 import com.emistoolbox.client.ui.pdf.LayoutPageConfigProperties;
 import com.emistoolbox.client.ui.pdf.LayoutPdfReportEditor;
 import com.emistoolbox.common.renderer.pdfreport.PdfText;
-import com.emistoolbox.common.ChartColor;
+import com.emistoolbox.common.ChartFont;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageSize;
-import com.emistoolbox.common.renderer.pdfreport.layout.BorderStyle;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutFrameConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPageConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.CSSCreator;
 import com.emistoolbox.common.util.Point;
 import com.emistoolbox.common.util.Rectangle;
+import com.google.gwt.dom.client.Style.Position;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -35,17 +36,24 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 	private PageSize pageSize; 
 	private PageOrientation pageOrientation; 
 
-	private LayoutPageConfigProperties uiPageProps = new LayoutPageConfigProperties(); 
-	private LayoutFrameConfigProperties uiFrameProps= new LayoutFrameConfigProperties(); 
+	private LayoutPageConfigProperties uiPageProps;  
+	private LayoutFrameConfigProperties uiFrameProps; 
 
-	private LayoutFrameWidget uiFrameCurrent = null; 
+	private LayoutFrameWidget uiFrameCurrent = null;
 	private LayoutPdfReportEditor reportEditor = null; 
+	
+	private HTML uiTitle = new HTML(); 
+	private HTML uiSubtitle = new HTML(); 
+	private HTML uiFooter = new HTML(); 
 	
 	public LayoutPageEditor(LayoutPdfReportEditor editor)
 	{
 		setWidth("100%"); 
 		setHeight("100%"); 
 
+		uiPageProps = new LayoutPageConfigProperties(editor);
+		uiFrameProps = new LayoutFrameConfigProperties(editor); 
+		
 		uiFrameProps.setMoveToPageUi(editor.getMoveToPageUi());
 
 		add(uiOuterPage); 
@@ -54,6 +62,15 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		uiPage.addStyleName("layout-inner-page");
 
 		this.reportEditor = editor; 
+		
+		uiPageProps.addValueChangeHandler(new ValueChangeHandler<LayoutPageConfig>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<LayoutPageConfig> event) 
+			{
+				set(get());
+				reportEditor.showPageProperties(); 
+			}
+		}); 
 		
 		uiFrameProps.addValueChangeHandler(new ValueChangeHandler<LayoutFrameConfig>() {
 			@Override
@@ -237,16 +254,74 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 	private void updateUi()
 	{
 		uiPage.clear(); 
+		uiPage.add(uiTitle);
+		uiPage.add(uiSubtitle);
+		uiPage.add(uiFooter);
+		uiTitle.setWidth("100%");
+		uiSubtitle.setWidth("100%");
+		uiFooter.setWidth("100%");
+		
 		uiFrameProps.set(null);
 		if (pageConfig == null || pageConfig.getFrames().size() == 0)
+		{
 			uiPage.add(uiNoContent); 
+			uiNoContent.setVisible(true);
+		}
 		else
 		{
 			for (LayoutFrameConfig frame : pageConfig.getFrames())
 				addFrameUi(frame); 
 		}
+
+		// Set and position texts.
+		int titleHeight = 0; 
+		int subtitleHeight = 0; 
+		int footerHeight = 0; 
+		
+		if (pageConfig != null)
+		{
+			titleHeight = setTextPreview(uiTitle, PdfText.TEXT_TITLE); 
+			uiTitle.getElement().getStyle().setPosition(Position.ABSOLUTE);
+			
+			subtitleHeight = setTextPreview(uiSubtitle, PdfText.TEXT_SUBTITLE);
+			uiSubtitle.getElement().getStyle().setPosition(Position.ABSOLUTE);
+
+			footerHeight = setTextPreview(uiFooter, PdfText.TEXT_FOOTER);
+			uiFooter.getElement().getStyle().setPosition(Position.ABSOLUTE);
+			
+			// Position elements. 
+			if (titleHeight > 0)
+				uiTitle.getElement().getStyle().setTop(0.0, Unit.PX);
+	
+			if (subtitleHeight > 0)
+				uiSubtitle.getElement().getStyle().setTop(titleHeight, Unit.PX);
+			
+			if (footerHeight > 0)
+				uiFooter.getElement().getStyle().setTop(uiPage.getOffsetHeight() - footerHeight * 4 / 3, Unit.PX);
+		}
+
+		uiTitle.setVisible(titleHeight > 0); 
+		uiSubtitle.setVisible(subtitleHeight > 0);
+		uiFooter.setVisible(subtitleHeight > 0);
 	}
 
+	private int setTextPreview(HTML html, String key)
+	{
+		String text = pageConfig.getText(key); 
+		if (text == null || text.isEmpty())
+		{
+			html.setHTML("");
+			return 0; 
+		}
+		
+		ChartFont font = pageConfig.getFont(key); 
+		if (font == null)
+			font = ChartFont.DEFAULT_FONT; 
+
+		html.setHTML(HtmlPreview.getHtmlText(pageConfig, key));
+		return font.getSize() * 15 / 10; 
+	}
+	
 	public void addFrame(LayoutFrameConfig frame, boolean isNew)
 	{
 		if (isNew)
@@ -270,6 +345,10 @@ public class LayoutPageEditor extends ScrollPanel implements EmisEditor<LayoutPa
 		uiPage.add(uiFrame, getPanelX(pos.getLeft()), getPanelY(pos.getTop()));
 		uiFrame.updateFrameStyle();
 		uiFrame.updateFrameSize(width, height); 
+		
+		uiNoContent.setVisible(false);
+		
+		selectFrame(uiFrame);
 	}
 
 	public void updatePageIndex(int index, int total)

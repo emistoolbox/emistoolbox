@@ -22,9 +22,12 @@ public class LayoutFrameConfigImpl extends TextSetImpl implements LayoutFrameCon
 	private LayoutSides<Double> padding = new LayoutSides<Double>(0.0); 
 	
 	private PdfContentConfig content; 
-	
+
 	public LayoutFrameConfigImpl()
-	{ super(TEXT_KEYS); } 
+	{ this(false); }
+	
+	public LayoutFrameConfigImpl(boolean withBody)
+	{ super(withBody ? TEXT_KEYS_WITH_BODY : TEXT_KEYS); } 
 	
 	@Override
 	public Rectangle getPosition() 

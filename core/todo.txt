@@ -1,64 +1,34 @@
-== Demo == 
-- ChartTest
-	- Page title, subtitle and footer are not shown. 
-	- chart's title is outside border. 
+== TESTING == 
+- Report name changes after running report? 
+- ValueChange on Page Propertes changes to Frame. 
 
+- No initial {content_title} for priority list. 
+- No {content_title} for priority list in text variable picker. 
 
-- Text Frame - need font editor for body. 
-- Text Frame - remove title/subtitle edit fields
-- Frames - max height 
+== CURRENT == 
 
+== BUGS == 
+- Title - add variable doesn't trigger update. 
+- Delete frame not shown. 
 
-== NEED TO IMPLEMENT == 
-- [test] Priority list content renderer - PDF 
-- [test] Variable list content renderer - PDF
-- [test] GIS content renderer - PDF
-- [test] Priority list content renderer - HTML 
-- [test] Variable list content renderer - HTML
+- PDF Report: Chart gender for Province, then try to add Districts of Province. 
+- Default frame background: white. 
+
+== NEXT TODO == 
+!- Frame Widget: adapt height of content
+	
+== TODO == 
+
+- Table previews: chart data - create HTML based on data we know (PdfTableContentConfigIpml)
 
 - Add GIS to report. 
-- Configure Priorty List in UI
-- Configure Variable List in UI
 - Configure GIS in UI
+- GIS preview
+- GIS content renderer - PDF
 
-== Current == 
-- [test] HTML report
-- TextContent added. 
-	* update delete / move	
-	* listbox delete not initialized
-- Priority list - add to report - switch to report. 
-- Frame editor - add delete and move as context menu. 
-- PageUI - delete frame, change page and back, frame is back (same with move)
+- New report - show page tab, not frame empty tab.
 
-== Next == 
-- TextContent edit
-- VarContent add / edit
-- Frame preview (styling, content)
-- Frame drag / drop. 
-
-== Essential == 
-- Priority list - load saved report - display all settings (ok to not show location) 
-
-- Page editor: 
-	- Add Text Frame
-	- Add Variable Frame
-	- Page size even if empty. 
-	- Page margins.
-
-== Important == 
-- Change size / orientation - modify right away
-- UI to edit Text Frame. 
-- UI to edit Variable Frame. 
-- UI to edit tabel styles. 
-
-- UI for priority table options
-
-== Nice to Have == 
-- Page 1 of 10 - dropdown for current page with links to all pages. 
-- Text blocks with font editor options. 
-- Style no font better
-	
-== EXTRA WORK == 
-- Documentation (3 days) 
-- Design improvements
-
+- Priority list content renderer - HTML 
+- GIS content renderer - HTML
+- Chart Data table renderer - HTML
+- Variable list content renderer - HTML

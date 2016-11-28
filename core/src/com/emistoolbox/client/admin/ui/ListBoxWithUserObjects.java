@@ -47,7 +47,7 @@ public class ListBoxWithUserObjects<T> extends OptGroupListBox
 
     public T getUserObject()
     {
-        if (getSelectedIndex() == -1)
+        if (userObjects.size() == 0 || getSelectedIndex() == -1)
             return null;
 
         return getUserObject(getSelectedIndex());

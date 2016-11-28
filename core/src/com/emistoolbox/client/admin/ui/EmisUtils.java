@@ -167,6 +167,9 @@ public class EmisUtils
     
     public static String getFormattedValue(String format, double value)
     {
+    	if (format == null)
+    		return "" + value; 
+    	
         if (value < 0 || Double.isNaN(value))
             return "";
         
