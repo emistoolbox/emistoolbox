@@ -448,6 +448,9 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			reducedObjectFitBox.transformBy (getCurrentTransform ().inverse ());
 
 			switch (objectFit) {
+			case FILL:
+				newElementBox = new Rectangle (0,0,reducedObjectFitBox.width (),reducedObjectFitBox.height ());
+				break;
 			case CONTAIN:
 			case SCALE_DOWN:
 				elementBox = getBoundingBox (element);
