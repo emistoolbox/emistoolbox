@@ -445,6 +445,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 
 		// determine element size, and scale it if applicable
 
+		Rectangle unrotatedElementBox; 
 		Rectangle elementBox;
 		Rectangle newElementBox;
 
@@ -455,21 +456,22 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			applyPaddingAndBorder (reducedObjectFitBox,element,-1);
 			reducedObjectFitBox.transformBy (getCurrentTransform ().inverse ());
 
+			unrotatedElementBox = objectFit == PDFLayoutObjectFit.NONE ? getBoundingBox (element,(element.getRotation () & 1) == 0 ? reducedObjectFitBox.width () : reducedObjectFitBox.height ()) : getBoundingBox (element);
+			elementBox = new Rectangle (unrotatedElementBox);
+			elementBox = elementBox.transformBy (Transformation.rotationThroughRightAngles (element.getRotation ()));
+			
 			switch (objectFit) {
 			case FILL:
-				elementBox = getBoundingBox (element);
 				newElementBox = new Rectangle (0,0,reducedObjectFitBox.width (),reducedObjectFitBox.height ());
 				break;
 			case CONTAIN:
 			case SCALE_DOWN:
-				elementBox = getBoundingBox (element);
 				double scale = Math.min (reducedObjectFitBox.width () / elementBox.width (),reducedObjectFitBox.height () / elementBox.height ());
 				if (objectFit == PDFLayoutObjectFit.SCALE_DOWN && scale > 1)
 					scale = 1;
 				newElementBox = new Rectangle (0,0,scale * elementBox.width (),scale * elementBox.height ());
 				break;
 			case NONE:
-				elementBox = getBoundingBox (element,reducedObjectFitBox.width ());
 				newElementBox = new Rectangle (elementBox);
 				break;
 			default:
@@ -679,7 +681,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		boolean isLeaf = !(element instanceof PDFLayoutFrameElement);
 		if (isLeaf) {
 			if (!(element instanceof PDFLayoutTableElement))
-				flip (elementBox);
+				flip (unrotatedElementBox);
 			pushGraphicsState ();
 			outputTransform (getCurrentTransform ());
 		}
@@ -1083,7 +1085,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			public Rectangle visit (PDFLayoutTableElement tableElement) throws IOException {
 				return new TableLayout (tableElement).getBoundingBox ();
 			}
-		}).transformBy (Transformation.rotationThroughRightAngles (element.getRotation ()));
+		});
 	}
 	
 	private class TableLayout {
