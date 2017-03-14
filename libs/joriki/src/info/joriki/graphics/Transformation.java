@@ -373,8 +373,8 @@ public class Transformation
     return isAxisParallel () && isLinear ();
   }
 
-  public static Transformation matchBoxes (Rectangle form,Rectangle to) {
-    return matchBoxes (form.toDoubleArray(),to.toDoubleArray());
+  public static Transformation matchBoxes (Rectangle from,Rectangle to) {
+    return matchBoxes (from.toDoubleArray(),to.toDoubleArray());
   }
   
   // both boxes in the form [x1 y1 x2 y2]
