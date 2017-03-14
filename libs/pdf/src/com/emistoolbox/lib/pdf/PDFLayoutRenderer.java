@@ -360,21 +360,27 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return null;
 	}
 
+	static class LayoutState {
+		Rectangle box;
+		Double baseline;
+	}
+	
 	public Void visit (PDFLayoutFrameElement frame) throws IOException {
 		PDFLayoutSides<Boolean> alignedWithEdge = new PDFLayoutSides<Boolean> (true);
 		Rectangle frameBox = getBoundingBox (frame);
 		Rectangle objectFitBox = new Rectangle (frameBox);
-		Rectangle previousElementBox = null;
+		LayoutState layoutState = new LayoutState ();
 		for (PDFLayoutElement element : frame.getElements ())
-			previousElementBox = render (element,objectFitBox,alignedWithEdge,frameBox,previousElementBox);
+			render (element,objectFitBox,alignedWithEdge,frameBox,layoutState);
 		return null;
 	}
 
 	private void render (PDFLayoutElement element,Rectangle box) throws IOException {
-		render (element,new Rectangle (box),new PDFLayoutSides<Boolean> (true),box,null);
+		render (element,new Rectangle (box),new PDFLayoutSides<Boolean> (true),box,new LayoutState ());
 	}
 	
-	private Rectangle render (PDFLayoutElement element,Rectangle objectFitBox,PDFLayoutSides<Boolean> alignedWithEdge,Rectangle frameBox,Rectangle previousElementBox) throws IOException {
+	private void render (PDFLayoutElement element,Rectangle objectFitBox,PDFLayoutSides<Boolean> alignedWithEdge,Rectangle frameBox,LayoutState layoutState) throws IOException {
+		Rectangle previousElementBox = layoutState.box;
 		PDFLayoutPlacement placement = element.getPlacement ();
 		PDFLayoutHorizontalPlacement horizontalPlacement = placement.getHorizontalPlacement ();
 		PDFLayoutVerticalPlacement verticalPlacement = placement.getVerticalPlacement ();
@@ -425,6 +431,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			case PREVIOUS_BOTTOM:
 				currentObjectFitBox.ymax = (previousElementBox != null ? previousElementBox : frameBox).ymax;
 				break;
+			case PREVIOUS_CENTER:
+			case PREVIOUS_BASELINE:
 			case TOP:
 			case CENTER:
 			case BOTTOM:
@@ -531,6 +539,18 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			case PREVIOUS_BOTTOM:
 				y = currentObjectFitBox.ymax - augmentedNewElementBox.height ();
 				alignedWithEdge.setTop (false);
+				break;
+			case PREVIOUS_BASELINE: // doesn't work with scaling or rotation
+				if (layoutState.baseline == null)
+					throw new Error ("previous baseline placement without previous text element");
+				if (!(element instanceof PDFLayoutTextElement))
+					throw new Error ("previous baseline placement for non-text element");
+				y = layoutState.baseline + augmentedNewElementBox.ymin - newElementBox.ymin - newElementBox.ymax;
+				alignedWithEdge.setTop (false);
+				alignedWithEdge.setBottom (false);
+				break;
+			case PREVIOUS_CENTER:
+				y = previousElementBox.ymin + (previousElementBox.height () - augmentedNewElementBox.height ()) / 2;
 				break;
 			case BELOW:
 			case PREVIOUS_TOP:
@@ -675,7 +695,9 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		
 		popTransform ();
 		
-		return augmentedNewElementBox;
+		layoutState.box = augmentedNewElementBox;
+		if (element instanceof PDFLayoutTextElement)
+			layoutState.baseline = newElementBox.ymin + newElementBox.height () * elementBox.ymax / elementBox.height ();
 	}
 
 	public Void visit (PDFLayoutHighchartElement element) throws IOException {
