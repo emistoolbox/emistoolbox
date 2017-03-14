@@ -14,6 +14,7 @@ abstract public class PDFLayoutElement implements Serializable {
 	private Color backgroundColor;
 	private PDFLayoutLink link;
 	private int rotation; // in multiples of 90 degrees
+	private boolean clipping; // clip inside border (including border radius)
 	private PDFLayoutShadowStyle shadowStyle;
 
 	public PDFLayoutObjectFit getObjectFit () {
@@ -70,6 +71,14 @@ abstract public class PDFLayoutElement implements Serializable {
 
 	public void setRotation (int rotation) {
 		this.rotation = rotation;
+	}
+
+	public boolean isClipping () {
+		return clipping;
+	}
+
+	public void setClipping (boolean clipping) {
+		this.clipping = clipping;
 	}
 
 	public PDFLayoutShadowStyle getShadowStyle () {

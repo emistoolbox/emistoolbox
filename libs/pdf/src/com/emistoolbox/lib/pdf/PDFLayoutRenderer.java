@@ -633,41 +633,45 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		Point [] [] paddedPoints = getCornerPoints (paddedElementBox,borderStyle == null ? 0 : borderStyle.getBorderRadius (),null);
 		if (borderStyle != null) {
 			Color borderColor = null;
-			PDFLayoutLineStyle [] lineStyles = borderStyle.getLineStyles ().getValues (new PDFLayoutLineStyle [4]);
+			PDFLayoutSides<PDFLayoutLineStyle> rawLineStyles = borderStyle.getLineStyles ();
+			// this is allowed to be null so we can have a border radius without a border, for clipping (and perhaps later for general shadows)
+			if (rawLineStyles != null) {
+				PDFLayoutLineStyle [] lineStyles = rawLineStyles.getValues (new PDFLayoutLineStyle [4]);
 
-			for (PDFLayoutLineStyle style : lineStyles)
-				if (style.getWidth () != 0) {
-					Color color = style.getColor ();
-					if (borderColor != null && !color.equals (borderColor))
-						throw new Error ("different border colours not implemented");
-					borderColor = color;
-				}
-
-			if (borderColor != null) {
-				setFillColor (borderColor);
-
-				Point [] [] borderPoints = getCornerPoints (borderElementBox,borderStyle.getBorderRadius (),lineStyles);
-
-				boolean allSegmentsExist = true;
-				// check for beginnings of sections of contiguous existing segments and draw each such section
-				for (int i = 0;i < 4;i++) {
-					if (lineStyles [i] == null && lineStyles [(i + 1) % 4] != null) {
-						int j = i + 2;
-						while (lineStyles [j % 4] != null)
-							j++;
-						List<Point []> section = new ArrayList<Point []> ();
-						section.addAll (getPointList (paddedPoints,i + 1,j - 1,false));
-						section.addAll (getPointList (borderPoints,i + 1,j - 1,true));
-						draw (section);
-						coordinateCommand ("f*");
-						allSegmentsExist = false;
+				for (PDFLayoutLineStyle style : lineStyles)
+					if (style.getWidth () != 0) {
+						Color color = style.getColor ();
+						if (borderColor != null && !color.equals (borderColor))
+							throw new Error ("different border colours not implemented");
+						borderColor = color;
 					}
-				}
-				// if there was no beginning, all four segments exist; in this case the inner and outer paths are separate
-				if (allSegmentsExist) {
-					draw (getPointList (paddedPoints,0,3,false));
-					draw (getPointList (borderPoints,0,3,true));
-					coordinateCommand ("f*");
+
+				if (borderColor != null) {
+					setFillColor (borderColor);
+
+					Point [] [] borderPoints = getCornerPoints (borderElementBox,borderStyle.getBorderRadius (),lineStyles);
+
+					boolean allSegmentsExist = true;
+					// check for beginnings of sections of contiguous existing segments and draw each such section
+					for (int i = 0;i < 4;i++) {
+						if (lineStyles [i] == null && lineStyles [(i + 1) % 4] != null) {
+							int j = i + 2;
+							while (lineStyles [j % 4] != null)
+								j++;
+							List<Point []> section = new ArrayList<Point []> ();
+							section.addAll (getPointList (paddedPoints,i + 1,j - 1,false));
+							section.addAll (getPointList (borderPoints,i + 1,j - 1,true));
+							draw (section);
+							coordinateCommand ("f*");
+							allSegmentsExist = false;
+						}
+					}
+					// if there was no beginning, all four segments exist; in this case the inner and outer paths are separate
+					if (allSegmentsExist) {
+						draw (getPointList (paddedPoints,0,3,false));
+						draw (getPointList (borderPoints,0,3,true));
+						coordinateCommand ("f*");
+					}
 				}
 			}
 		}
@@ -714,6 +718,12 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			popGraphicsState ();
 		}
 		
+		if (element.isClipping ()) {
+			pushGraphicsState ();
+			draw (getPointList (paddedPoints,0,3,false));
+			coordinateCommand ("W* n");
+		}
+		
 		transform (Transformation.rotationThroughRightAngles (element.getRotation ()));
 
 		boolean isLeaf = !(element instanceof PDFLayoutFrameElement);
@@ -734,6 +744,9 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		positionMap.put (element,new Position (currentPage,linkBoxes));
 		
 		popTransform ();
+		
+		if (element.isClipping ())
+			popGraphicsState ();
 		
 		layoutState.box = augmentedNewElementBox;
 		if (element instanceof PDFLayoutTextElement)
