@@ -105,8 +105,7 @@ public class TextState extends CloneableObject
     int nword = 0;
 
     CharacterIterator iterator = font.getCharacterIterator (text);
-    int code;
-    while ((code = iterator.next ()) >= 0)
+    while (iterator.next () >= 0)
       {
         advance += iterator.getAdvance ();
         nchar++;
