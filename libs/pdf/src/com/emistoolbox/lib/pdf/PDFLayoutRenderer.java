@@ -1,5 +1,6 @@
 package com.emistoolbox.lib.pdf;
 
+import info.joriki.adobe.GlyphList;
 import info.joriki.graphics.Point;
 import info.joriki.graphics.Rectangle;
 import info.joriki.graphics.Transformation;
@@ -12,6 +13,7 @@ import info.joriki.pdf.PDFDictionary;
 import info.joriki.pdf.PDFFile;
 import info.joriki.pdf.PDFFont;
 import info.joriki.pdf.PDFIndirectObject;
+import info.joriki.pdf.PDFInteger;
 import info.joriki.pdf.PDFName;
 import info.joriki.pdf.PDFNull;
 import info.joriki.pdf.PDFNumber;
@@ -795,7 +797,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		double ty = 0;
 		TextState textState = getTextState (layoutFont);
 		for (String piece : pieceMap.get (textElement)) {
-			byte [] bytes = getBytes (piece);
+			byte [] bytes = getBytes (piece,layoutFont);
 			double tx = -textAlignmentFactor * textState.getAdvance (bytes);
 			coordinateCommand ("Tm",1,0,0,1,tx,ty);
 			ps.print ("(");
@@ -819,7 +821,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		
 		List<Rectangle> contentRectangles = new ArrayList<Rectangle> ();
 		for (String piece : pieceMap.get (textElement)) {
-			double width = textState.getAdvance (getBytes (piece));
+			double width = textState.getAdvance (getBytes (piece,layoutFont));
 			contentRectangles.add (new Rectangle (-textAlignmentFactor * width,ty + descent,(1 - textAlignmentFactor) * width,ty + ascent));
 			ty -= layoutFont.getLineSpacing () * fontSize;
 		}
@@ -930,31 +932,36 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		abstract PDFDictionary getResource (T t);
 	}
 
+	private Map<PDFLayoutFont,PDFDictionary> fontMap = new HashMap<PDFLayoutFont,PDFDictionary> ();
+	
 	private ResourceLabeler<PDFLayoutFont> fontLabeler = new ResourceLabeler<PDFLayoutFont> ("F","Font") {
 		PDFDictionary getResource (PDFLayoutFont layoutFont) {
-			if (!standardFontNames.contains (layoutFont.getFontName ()))
-				throw new Error ("only standard fonts implemented");
+			PDFDictionary dictionary = fontMap.get (layoutFont);
+			if (dictionary == null) {
+				if (!standardFontNames.contains (layoutFont.getFontName ()))
+					throw new Error ("only standard fonts implemented");
 
-			PDFDictionary dictionary = new PDFDictionary ("Font");
-			dictionary.put ("Subtype","Type1");
+				dictionary = new PDFDictionary ("Font");
+				dictionary.put ("Subtype","Type1");
 
-			String baseFont = layoutFont.getFontName ();
-			boolean isBold = layoutFont.getFontStyle ().isBold ();
-			boolean isItalic = layoutFont.getFontStyle ().isItalic ();
-			boolean isTimes = baseFont.equals ("Times");
-			if (isBold || isItalic) {
-				baseFont += '-';
-				if (isBold)
-					baseFont += "Bold";
-				if (isItalic)
-					baseFont += isTimes ? "Italic" : "Oblique";
+				String baseFont = layoutFont.getFontName ();
+				boolean isBold = layoutFont.getFontStyle ().isBold ();
+				boolean isItalic = layoutFont.getFontStyle ().isItalic ();
+				boolean isTimes = baseFont.equals ("Times");
+				if (isBold || isItalic) {
+					baseFont += '-';
+					if (isBold)
+						baseFont += "Bold";
+					if (isItalic)
+						baseFont += isTimes ? "Italic" : "Oblique";
+				}
+				else if (isTimes)
+					baseFont += "-Roman";
+
+				dictionary.put ("BaseFont",baseFont);
+
+				fontMap.put (layoutFont,dictionary);
 			}
-			else if (isTimes)
-				baseFont += "-Roman";
-
-			dictionary.put ("BaseFont",baseFont);
-			// TODO: using standard encoding for now -- do proper encoding
-
 			return dictionary;
 		}
 	};
@@ -1070,6 +1077,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			public Rectangle visit (PDFLayoutTextElement textElement) {
 				PDFLayoutFont layoutFont = textElement.getFont ();
 				double fontSize = layoutFont.getFontSize ();
+				getBytes (textElement.getText (),layoutFont); // this is just to update the encoding so the text state advance uses the right widths for non-ASCII characters 
 				PDFFont pdfFont = getPDFFont (layoutFont);
 				double descent = fontSize * pdfFont.getDescent ();
 				double ascent = fontSize * pdfFont.getAscent ();
@@ -1077,7 +1085,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				double width = 0;
 				List<String> pieces = wrap (textElement,maxWidth);
 				for (String piece : pieces)
-					width = Math.max (width,textState.getAdvance (getBytes (piece)));
+					width = Math.max (width,textState.getAdvance (getBytes (piece,layoutFont)));
 				double textAlignmentFactor = getTextAlignmentFactor (textElement);
 				return new Rectangle (-textAlignmentFactor * width,descent - fontSize * layoutFont.getLineSpacing () * (pieces.size () - 1),(1 - textAlignmentFactor) * width,ascent);
 			}
@@ -1311,17 +1319,33 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		}
 	}
 
-	private byte [] getBytes (String string) {  // TODO: proper encoding
-		// TODO: this is a hack to allow smart quotes without proper encoding
+	private byte [] getBytes (String string,PDFLayoutFont layoutFont) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream ();
-		for (char c : string.toCharArray ()) {
-			switch (c) {
-				case '\u201c': c = 0xaa; break;
-				case '\u201d': c = 0xba; break;
+		outer:
+		for (char c : string.toCharArray ())
+			if (c < 0x80)
+				// ASCII character
+				baos.write (c);
+			else {
+				// non-ASCII character
+				String glyph = GlyphList.getGlyphName (c);
+				// retrieve encoding differences array
+				PDFDictionary fontDictionary = fontLabeler.getResource (layoutFont);
+				PDFDictionary encodingDictionary = fontDictionary.getOrCreateDictionary ("Encoding");
+				PDFArray differences = (PDFArray) encodingDictionary.get ("Differences");
+				if (differences == null) {
+					differences = new PDFArray (new PDFInteger (0x80));
+					encodingDictionary.put ("Differences",differences);
+				}
+				// check if it already contains this glyph
+				for (int i = 1;i < differences.size ();i++)
+					if (((PDFName) differences.get (i)).getName ().equals (glyph)) {
+						baos.write (0x80 + i - 1);
+						continue outer;
+					}
+				// it doesn't -- add the glyph 
+				differences.add (new PDFName (glyph));
 			}
-			
-			baos.write (c);
-		}
 		return baos.toByteArray ();
 	}
 
@@ -1347,13 +1371,14 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	// TODO: proper handling of multiple spaces
 	private List<String> wrap (PDFLayoutTextElement element,double maxWidth) {
 		List<String> pieces = new ArrayList<String> ();
-		TextState textState = getTextState (element.getFont ());
+		PDFLayoutFont layoutFont = element.getFont ();
+		TextState textState = getTextState (layoutFont);
 		String text = element.getText ().trim () + ' ';
 		do {
 			int space = -1;
 			do {
 				int nextSpace = text.indexOf (' ',space + 1);
-				if (textState.getAdvance (getBytes (text.substring (0,nextSpace))) > maxWidth) {
+				if (textState.getAdvance (getBytes (text.substring (0,nextSpace),layoutFont)) > maxWidth) {
 					if (space == -1) // if a single word doesn't fit into the width, use it as a piece anyway
 						space = nextSpace;
 					break;
