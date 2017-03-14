@@ -17,6 +17,7 @@ import info.joriki.pdf.PDFInteger;
 import info.joriki.pdf.PDFName;
 import info.joriki.pdf.PDFNull;
 import info.joriki.pdf.PDFNumber;
+import info.joriki.pdf.PDFObject;
 import info.joriki.pdf.PDFReal;
 import info.joriki.pdf.PDFStream;
 import info.joriki.pdf.PDFString;
@@ -63,6 +64,7 @@ import com.emistoolbox.lib.pdf.layout.PDFLayoutObjectFit;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPDFElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPageLink;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutPlacement;
+import com.emistoolbox.lib.pdf.layout.PDFLayoutShadowStyle;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutSides;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTableElement;
 import com.emistoolbox.lib.pdf.layout.PDFLayoutTableFormat;
@@ -136,7 +138,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		PDFDictionary resources = resourceRenamer.getResources ();
 		fontLabeler.addResources (resources);
 		imageLabeler.addResources (resources);
-		alphaStateLabeler.addResources (resources);
+		graphicsStateLabeler.addResources (resources);
+		shadingLabeler.addResources (resources);
 		currentPage.putIndirect ("Resources",resources);
 		document.addPage (currentPage);
 		layoutMap.put (layout,currentPage);
@@ -231,11 +234,8 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private void setColor (Color color,boolean stroke) {
-		if (color.getAlpha () != 0xff) {
-			ps.print ('/');
-			ps.print (alphaStateLabeler.getLabel (color.getAlpha () / (double) 0xff));
-			ps.print (" gs\n");
-		}
+		if (color.getAlpha () != 0xff)
+			setAlpha (color.getAlpha () / (double) 0xff,stroke);
 		String command;
 		float [] components;
 		if (color instanceof CMYKColor) {
@@ -676,8 +676,44 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			draw (getPointList (paddedPoints,0,3,false));
 			coordinateCommand ("f*");
 		}
+		
 		popGraphicsState ();
 
+		PDFLayoutShadowStyle shadowStyle = element.getShadowStyle ();
+		if (shadowStyle != null) {
+			double shiftX = shadowStyle.getShiftX ();
+			double shiftY = shadowStyle.getShiftY ();
+			Transformation shift = Transformation.translationBy (shiftX,-shiftY);
+			Transformation boxMatch = Transformation.matchBoxes (new Rectangle (0,0,1,1),paddedElementBox);
+			double d = new Point (shiftX,shiftY).transformedBy (boxMatch.linearPart ().inverse ()).distanceFrom (new Point ());
+
+			PDFDictionary shadingDictionary = new PDFDictionary ();
+			shadingDictionary.put ("ShadingType",3);
+			shadingDictionary.put ("ColorSpace","DeviceGray");
+			shadingDictionary.put ("Coords",new PDFArray (new double [] {0.5,0.5,0,0.5,0.5,0.5}));
+
+			PDFDictionary functionDictionary = new PDFDictionary ();
+			functionDictionary.put ("FunctionType",2);
+			functionDictionary.put ("Domain",new PDFArray (new double [] {0,1}));
+			functionDictionary.put ("C0",new PDFArray (new PDFReal (1 - shadowStyle.getStrength () * 0.5 / d)));
+			functionDictionary.put ("N",1);
+			shadingDictionary.put ("Function",functionDictionary);
+
+			pushGraphicsState ();
+			
+			setBlendMode ("Multiply");
+			
+			PDFDictionary patternDictionary = new PDFDictionary ("Pattern");
+			patternDictionary.put ("PatternType",2);
+			patternDictionary.put ("Shading",shadingDictionary);
+			patternDictionary.put ("Matrix",new PDFArray (new Transformation (boxMatch,shift).matrix));
+			coordinateCommand ("/Pattern cs /" + shadingLabeler.getLabel (patternDictionary) + " scn");
+			
+			fillRectangle (new Rectangle (paddedElementBox).transformBy (shift));
+			
+			popGraphicsState ();
+		}
+		
 		transform (Transformation.rotationThroughRightAngles (element.getRotation ()));
 
 		boolean isLeaf = !(element instanceof PDFLayoutFrameElement);
@@ -828,7 +864,6 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 		return contentRectangles;
 	}
 
-	
 	public double getTextAlignmentFactor (PDFLayoutTextElement textElement) {
 		PDFLayoutHorizontalPlacement horizontalPlacement = textElement.getPlacement ().getHorizontalPlacement ();
 		if (!(horizontalPlacement instanceof PDFLayoutHorizontalAlignment))
@@ -965,13 +1000,33 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 			return dictionary;
 		}
 	};
-
-	private ResourceLabeler<Double> alphaStateLabeler = new ResourceLabeler<Double> ("AGS","ExtGState") {
-		PDFDictionary getResource (Double alpha) {
+	
+	private void setAlpha (double alpha,boolean stroke) {
+		setGraphicsState (stroke ? "CA" : "ca",new PDFReal (alpha));
+	}
+	
+	private void setBlendMode (String blendMode) {
+		setGraphicsState ("BM",new PDFName (blendMode));
+	}
+	
+	private void setGraphicsState (String key,PDFObject value) {
+		ps.print ('/');
+		ps.print (graphicsStateLabeler.getLabel (Collections.singletonMap (key,value)));
+		ps.print (" gs\n");
+	}
+	
+	private ResourceLabeler<Map<String,PDFObject>> graphicsStateLabeler = new ResourceLabeler<Map<String,PDFObject>> ("AGS","ExtGState") {
+		PDFDictionary getResource (Map<String,PDFObject> entries) {
 			PDFDictionary dictionary = new PDFDictionary ("ExtGState");
-			dictionary.put ("CA",new PDFReal (alpha));
-			dictionary.put ("ca",new PDFReal (alpha));
+			for (Map.Entry<String,? extends PDFObject> entry : entries.entrySet ())
+				dictionary.put (entry.getKey (),entry.getValue ());
 			return dictionary;
+		}
+	};
+	
+	private ResourceLabeler<PDFDictionary> shadingLabeler = new ResourceLabeler<PDFDictionary> ("P","Pattern") {
+		PDFDictionary getResource (PDFDictionary shadingDictionary) {
+			return shadingDictionary;
 		}
 	};
 

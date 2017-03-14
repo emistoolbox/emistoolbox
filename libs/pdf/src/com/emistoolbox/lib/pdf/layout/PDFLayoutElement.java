@@ -14,6 +14,7 @@ abstract public class PDFLayoutElement implements Serializable {
 	private Color backgroundColor;
 	private PDFLayoutLink link;
 	private int rotation; // in multiples of 90 degrees
+	private PDFLayoutShadowStyle shadowStyle;
 
 	public PDFLayoutObjectFit getObjectFit () {
 		return objectFit;
@@ -69,6 +70,14 @@ abstract public class PDFLayoutElement implements Serializable {
 
 	public void setRotation (int rotation) {
 		this.rotation = rotation;
+	}
+
+	public PDFLayoutShadowStyle getShadowStyle () {
+		return shadowStyle;
+	}
+
+	public void setShadowStyle (PDFLayoutShadowStyle shadowStyle) {
+		this.shadowStyle = shadowStyle;
 	}
 
 	public PDFLayoutElement pad (double padding)
