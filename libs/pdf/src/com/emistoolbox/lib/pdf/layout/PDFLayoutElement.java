@@ -123,7 +123,11 @@ abstract public class PDFLayoutElement implements Serializable {
 	}
 
 	public PDFLayoutElement align (PDFLayoutHorizontalPlacement horizontalPlacement,PDFLayoutVerticalPlacement verticalPlacement) {
-		setPlacement (new PDFLayoutPlacement (horizontalPlacement,verticalPlacement));
+		return place (new PDFLayoutPlacement (horizontalPlacement,verticalPlacement));
+	}
+	
+	public PDFLayoutElement place (PDFLayoutPlacement placement) {
+		setPlacement (placement);
 		return this;
 	}
 
