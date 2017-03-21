@@ -1155,7 +1155,7 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 				for (String piece : pieces)
 					width = Math.max (width,textState.getAdvance (getBytes (piece,layoutFont)));
 				double textAlignmentFactor = getTextAlignmentFactor (textElement);
-				return new Rectangle (-textAlignmentFactor * width,descent - fontSize * layoutFont.getLineSpacing () * (pieces.size () - 1),(1 - textAlignmentFactor) * width,ascent);
+				return new Rectangle (-textAlignmentFactor * width,descent - fontSize * layoutFont.getLineSpacing () * Math.max (0,pieces.size () - 1),(1 - textAlignmentFactor) * width,ascent);
 			}
 			
 			public Rectangle visit (PDFLayoutTableElement tableElement) throws IOException {
@@ -1388,6 +1388,9 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	}
 
 	private byte [] getBytes (String string,PDFLayoutFont layoutFont) {
+		if (string == null)
+			return null;
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream ();
 		outer:
 		for (char c : string.toCharArray ())
@@ -1439,23 +1442,27 @@ public class PDFLayoutRenderer implements PDFLayoutVisitor<Void> {
 	// TODO: proper handling of multiple spaces
 	private List<String> wrap (PDFLayoutTextElement element,double maxWidth) {
 		List<String> pieces = new ArrayList<String> ();
-		PDFLayoutFont layoutFont = element.getFont ();
-		TextState textState = getTextState (layoutFont);
-		String text = element.getText ().trim () + ' ';
-		do {
-			int space = -1;
+
+		String text = element.getText ();
+		if (text != null) {
+			text = text.trim () + ' ';
+			PDFLayoutFont layoutFont = element.getFont ();
+			TextState textState = getTextState (layoutFont);
 			do {
-				int nextSpace = text.indexOf (' ',space + 1);
-				if (textState.getAdvance (getBytes (text.substring (0,nextSpace),layoutFont)) > maxWidth) {
-					if (space == -1) // if a single word doesn't fit into the width, use it as a piece anyway
-						space = nextSpace;
-					break;
-				}
-				space = nextSpace;
-			} while (space != text.length () - 1);
-			pieces.add (text.substring (0,space));
-			text = text.substring (space + 1);
-		} while (text.length () > 0);
+				int space = -1;
+				do {
+					int nextSpace = text.indexOf (' ',space + 1);
+					if (textState.getAdvance (getBytes (text.substring (0,nextSpace),layoutFont)) > maxWidth) {
+						if (space == -1) // if a single word doesn't fit into the width, use it as a piece anyway
+							space = nextSpace;
+						break;
+					}
+					space = nextSpace;
+				} while (space != text.length () - 1);
+				pieces.add (text.substring (0,space));
+				text = text.substring (space + 1);
+			} while (text.length () > 0);
+		}
 
 		pieceMap.put (element,pieces); // for use in rendering
 
