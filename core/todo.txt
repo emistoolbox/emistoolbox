@@ -1,18 +1,19 @@
 == TESTING == 
 - Report name changes after running report? 
+
 - ValueChange on Page Propertes changes to Frame. 
 
 - No initial {content_title} for priority list. 
 - No {content_title} for priority list in text variable picker. 
 
+- Delete frame not shown. 
+
 == CURRENT == 
 
 == BUGS == 
 - Title - add variable doesn't trigger update. 
-- Delete frame not shown. 
-
-- PDF Report: Chart gender for Province, then try to add Districts of Province. 
 - Default frame background: white. 
+- PDF Report: Chart gender for Province, then try to add Districts of Province. 
 
 == NEXT TODO == 
 !- Frame Widget: adapt height of content

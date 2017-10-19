@@ -1005,6 +1005,7 @@ public class XmlReader
 	{
 		if (tag == null)
 			return null; 
+		
 		ChartColor col = getAttrAsColour(tag, "fontColour", COLOR_BLACK); 
 		ChartFont font = new ChartFont(getAttr(tag, "font", "Helvetica"), getAttrAsInt(tag, "fontStyle", 0), getAttrAsInt(tag, "fontSize", 12));
 		font.setColor(col);
@@ -1178,8 +1179,11 @@ public class XmlReader
 
 	public EmisTableStyle getTableStyle(Element tag)
 	{
+		if (tag == null)
+			return null; 
+		
 		String type = tag.getAttribute("style");
-		if (type.equals("simple"))
+		if (type != null && type.equals("simple"))
 		{
 			SimpleTableStyle result = new SimpleTableStyle(); 
 

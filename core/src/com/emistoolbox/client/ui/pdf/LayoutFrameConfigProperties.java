@@ -329,7 +329,6 @@ public class LayoutFrameConfigProperties extends LayoutProperties<LayoutFrameCon
 		});
 	}
 	
-	
 	public void updatePageIndex(int index, int total)
-	{ getRowFormatter().setVisible(moveRow, total > 1); }
+	{ getRowFormatter().setVisible(moveRow, true); }
 }
