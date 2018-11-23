@@ -10,3 +10,9 @@ public class Parameter extends CoordinateSystemObject {
 		this.value = ((Double) components.get(1)).doubleValue();
 	}
 }
+
+/*
+ * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
+ * Qualified Name: shapefile.coordinates.Parameter JD-Core
+ * Version: 0.6.0
+ */

@@ -7,3 +7,9 @@ public class Projection extends CoordinateSystemObject {
 		super(components, 1);
 	}
 }
+
+/*
+ * Location: D:\work\emistoolbox\source\core\resources\WEB-INF\classes\
+ * Qualified Name: shapefile.coordinates.Projection JD-Core
+ * Version: 0.6.0
+ */
