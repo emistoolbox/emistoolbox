@@ -16,6 +16,12 @@ public abstract class CoordinateSystemObject
 
     public static CoordinateSystemObject construct(WellKnownTextObject wellKnownTextObject)
     {
+        if (wellKnownTextObject.label.equals("PARAMETER"))
+            return new Parameter(wellKnownTextObject.components);
+        if (wellKnownTextObject.label.equals("PROJCS"))
+            return new ProjectedCoordinateSystem(wellKnownTextObject.components);
+        if (wellKnownTextObject.label.equals("PROJECTION"))
+            return new Projection(wellKnownTextObject.components);
         if (wellKnownTextObject.label.equals("GEOGCS"))
             return new GeographicCoordinateSystem(wellKnownTextObject.components);
         if (wellKnownTextObject.label.equals("DATUM"))
