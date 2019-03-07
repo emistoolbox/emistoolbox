@@ -523,29 +523,28 @@ public class XmlReader
 		if (type.equals("JDBC")) {
 			DbDataSourceConfigJdbc result = new DbDataSourceConfigJdbc();
 			result.setHost(getAttr(tag, "host"));
-			try {
-				result.setPort(getAttrAsInt(tag, "port").intValue());
-			} catch (Throwable err) {
-			}
+			try 
+			{ result.setPort(getAttrAsInt(tag, "port").intValue()); } 
+			catch (Throwable err) {}
 
 			result.setDbName(getAttr(tag, "db"));
 			result.setUserId(getAttr(tag, "uid"));
 			result.setPassword(getAttr(tag, "pwd"));
-			try {
-				result.setDriverType(DbDataSourceConfigJdbc.JdbcDriver
-						.valueOf(getAttr(tag, "driverType")));
-			} catch (Throwable err) {
-			}
+			try { result.setDriverType(DbDataSourceConfigJdbc.JdbcDriver.valueOf(getAttr(tag, "driverType"))); } 
+			catch (Throwable err) 
+			{}
 
 			getQueries(tag, result);
 			return result;
 		}
 
-		if (type.equals("MULTIPLE")) {
+		if (type.equals("MULTIPLE")) 
+		{
 			DbDataSourceConfigMultiple result = new DbDataSourceConfigMultiple();
 			List<DbDataSourceConfig> configs = new ArrayList<DbDataSourceConfig>();
 			for (Element configTag : getElements(tag, null, "config"))
 				add(configs, getDbDataSourceConfig(configTag, dataset));
+
 			result.setConfigs(configs);
 
 			getQueries(tag, result);
@@ -904,8 +903,8 @@ public class XmlReader
 		return result;
 	}
 
-	public synchronized EmisReportConfig getEmisReportConfig(Element tag,
-			EmisMeta meta) {
+	public synchronized EmisReportConfig getEmisReportConfig(Element tag, EmisMeta meta) 
+	{
 		this.meta = meta;
 		verifyTagName(tag, "emisReportModule");
 
@@ -921,29 +920,45 @@ public class XmlReader
 
 		List<EmisIndicator> indicators = new ArrayList<EmisIndicator>();
 		for (Element indicatorTag : getElements(tag, null, "indicator"))
+		{
+			log(indicatorTag);
 			add(indicators, getEmisIndicator(indicatorTag));
+		}
 		result.setIndicators(indicators);
 
 		List<EmisPdfReportConfig> pdfReports = new ArrayList<EmisPdfReportConfig>();
 		for (Element reportTag : getElements(tag, null, "pdfReport"))
+		{
+			log(reportTag);
 			add(pdfReports, getPdfReportConfig(reportTag, indicators));
+		}
 		result.setPdfReports(pdfReports);
 
 		List<PriorityReportConfig> priorityReports = new ArrayList<PriorityReportConfig>(); 
 		for (Element prioTag : getElements(tag, null, "priorityReport"))
+		{
+			log(prioTag);
 			add(priorityReports, getPriorityReport(prioTag, indicators)); 
+		}
 		result.setPriorityReports(priorityReports);
 		
 		List<ExcelReportConfig> excelReports = new ArrayList<ExcelReportConfig>();
-		for (Element reportTag : getElements(tag, null,
-				ExcelReportConfigSerializer.TAG_EXCEL_REPORT))
-			add(excelReports, ExcelReportConfigSerializer.getExcelReport(meta,
-					reportTag, indicators));
+		for (Element reportTag : getElements(tag, null, ExcelReportConfigSerializer.TAG_EXCEL_REPORT))
+		{
+			log(reportTag); 
+			add(excelReports, ExcelReportConfigSerializer.getExcelReport(meta, reportTag, indicators));
+		}
 
 		result.setExcelReports(excelReports);
 
 		return result;
 	}
+	
+	private void log(Element tag)
+	{ log(tag, "name"); }
+	
+	private void log(Element tag, String attr)
+	{ System.out.println(tag.getTagName() + " " + tag.getAttribute(attr)); }
 
 	private PriorityReportConfig getPriorityReport(Element tag, List<EmisIndicator> indicators)
 	{
@@ -1097,8 +1112,11 @@ public class XmlReader
 
 		List<PdfContentConfig> contents = new ArrayList<PdfContentConfig>();
 		for (Element contentTag : getElements(tag, null, "pdfContent"))
+		{
+			log(contentTag, "type");
 			contents.add(getPdfContentConfig(contentTag, indicators));
-
+		}
+		
 		config.setContentConfigs(contents);
 		return config;
 	}
@@ -1306,10 +1324,8 @@ public class XmlReader
 
 	private void updateMetaResultDimensionEntity(Element tag, MetaResultDimensionEntity result) 
 	{
-		result.setHierarchy((EmisMetaHierarchy) find(tag, "hierarchy",
-				this.meta.getHierarchies()));
-		result.setEntityType((EmisMetaEntity) find(tag, "entityType",
-				this.meta.getEntities()));
+		result.setHierarchy((EmisMetaHierarchy) find(tag, "hierarchy", this.meta.getHierarchies()));
+		result.setEntityType((EmisMetaEntity) find(tag, "entityType", this.meta.getEntities()));
 
 		List<Integer> ids = new ArrayList<Integer>();
 		List<String> names = new ArrayList<String>();
@@ -1323,12 +1339,12 @@ public class XmlReader
 		String[] namesArray = (String[]) names.toArray(new String[0]);
 		Integer dateIndex = getAttrAsInt(tag, "dateIndex");
 		if (dateIndex != null)
-			result.setPath(ArrayUtils.toPrimitive(idsArray), namesArray,
-					dateIndex.intValue());
+			result.setPath(ArrayUtils.toPrimitive(idsArray), namesArray, dateIndex.intValue());
 	}
 
 	public GisMetaResult getGisMetaResult(Element tag,
-			List<EmisIndicator> indicators) {
+		List<EmisIndicator> indicators) 
+	{
 		GisMetaResult result = new GisMetaResultImpl();
 		updateMetaResult(result, tag, indicators);
 		return result;

@@ -7,7 +7,7 @@ public class ProjectedCoordinateSystem extends CoordinateSystemObject implements
 {
 	GeographicCoordinateSystem geographicCoordinateSystem;
 	Projection projection;
-	List<Parameter> parameters = new ArrayList<> ();
+	List<Parameter> parameters = new ArrayList<Parameter>();
 	Unit linearUnit;
 	
 	public ProjectedCoordinateSystem(List<Object> components) {

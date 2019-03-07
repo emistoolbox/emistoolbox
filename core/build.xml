@@ -174,4 +174,21 @@
       </classpath>
     </java>
   </target>
+  
+    <target name="load" depends="javac,jar">
+    <java fork="yes" classname="com.emistoolbox.server.EmisCLI">
+      <arg value="load"/>
+      <arg value="report"/>
+      <arg value="default"/>
+<!--
+      <jvmarg value="-Xmx256M"/>
+      <jvmarg value="-Xdebug"/>
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y"/>
+-->
+      <classpath>
+        <path refid="testPath"/>
+      </classpath>
+    </java>
+  </target>
+
 </project>
