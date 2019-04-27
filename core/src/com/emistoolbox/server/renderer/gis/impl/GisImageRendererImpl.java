@@ -90,7 +90,10 @@ public class GisImageRendererImpl extends GisRendererImpl
         }
 
         for (int f = 0; f < feature.getCount(); f++)
+        {
+        	System.out.println(feature.getTitle(f) + " " + feature.getBoundary(feature.getFeature(f))); 
             draw(feature.getFeature(f), colourScheme, feature.getValue(f), feature.getTitle(f), showLabels, selected ? htmlMap : null);
+        }
     }
     
     protected void renderLabel(String text, double x, double y)

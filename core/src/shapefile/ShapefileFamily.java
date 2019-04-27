@@ -87,7 +87,7 @@ public class ShapefileFamily {
 		
 		public DbResultSet query(String query) {
 			return new DbResultSetBase (fieldNames) {
-				int index = 0;
+				int index = -1;
 				
 				public boolean next () throws IOException {
 					index++;

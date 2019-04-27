@@ -33,11 +33,11 @@ public class ExcelTableWriter implements TableWriter
         {
             out = new FileOutputStream(this.output);
             this.wb.write(out);
+            out.flush();
             out.close();
         }
         catch (IOException ex)
-        {
-        }
+        { ex.printStackTrace(); }
     }
 
     public void nextCell(String content)

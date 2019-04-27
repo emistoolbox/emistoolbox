@@ -57,9 +57,7 @@ public class TableMetaResultEditor extends MetaResultEditor<TableMetaResult>
 
         this.uiChartType.addValueChangeHandler(new ValueChangeHandler<Integer>() {
             public void onValueChange(ValueChangeEvent<Integer> event)
-            {
-                ValueChangeEvent.fire(TableMetaResultEditor.this, TableMetaResultEditor.this.get());
-            }
+            { ValueChangeEvent.fire(TableMetaResultEditor.this, TableMetaResultEditor.this.get()); }
         });
 
         this.uiSortOrder.addItem(Message.messageAdmin().mreSortNone(), "0");
@@ -193,6 +191,10 @@ public class TableMetaResultEditor extends MetaResultEditor<TableMetaResult>
         links.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasHorizontalAlignment.ALIGN_RIGHT);
         links.setWidget(0, 2, uiChartTypeEdit);
 
+        String currentChartType = null; 
+        if (uiChartType.getSelectedIndex() != -1)
+        	currentChartType = uiChartType.getValue(uiChartType.getSelectedIndex()); 
+        
         this.uiChartType.clear();
         this.uiChartType.addItem(Message.messageAdmin().mreHtmlBarGraphs(), "0");
         if (addableResult && this.currentYAxis != null)
@@ -207,7 +209,10 @@ public class TableMetaResultEditor extends MetaResultEditor<TableMetaResult>
             this.uiChartType.addItem(Message.messageAdmin().mreHtmlPieChart(), "2");
 
         this.uiChartType.setVisible(true);
-        this.uiChartType.setSelectedIndex(0);
+        int index = uiChartType.setSelectedValue(currentChartType);
+        if (index == -1)
+        	this.uiChartType.setSelectedIndex(0);
+        
         this.uiChartTypeEdit.setVisible(true);
 
         return true; 

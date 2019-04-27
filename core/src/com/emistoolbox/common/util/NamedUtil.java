@@ -44,18 +44,16 @@ public class NamedUtil
     public static <T extends Named> int findIndex(T item, List<T> items)
     {
         if (item == null)
-        {
             return -1;
-        }
+
         return findIndex(item.getName(), items);
     }
 
     public static <T extends Named> int findIndex(String name, List<T> items)
     {
         if (name == null)
-        {
             return -1;
-        }
+
         int index = 0;
         for (Named item : items)
         {

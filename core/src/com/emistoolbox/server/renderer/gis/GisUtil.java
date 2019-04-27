@@ -5,6 +5,8 @@ import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.GisContext;
 import com.emistoolbox.common.renderer.ChartConfig;
 import com.emistoolbox.common.renderer.ChartConfigImpl;
+import com.emistoolbox.common.renderer.pdfreport.PdfGisContentConfig;
+import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
 import com.emistoolbox.common.results.GisMetaResult;
 import com.emistoolbox.server.ServerUtil;
 import com.emistoolbox.server.model.EmisDataSet;
@@ -36,6 +38,8 @@ public class GisUtil
     	PdfGisContent result = new PdfGisContentImpl(); 
     	    	
         List<GisFeatureSet> features = getGisResults(metaResult, dataSet);
+        result.setFeatures(features);
+        
         ChartConfig chartConfig = new ChartConfigImpl();
 
         ChartUtil.setMetaResultValueConfiguration(metaResult.getMetaResultValue(0), chartConfig);
@@ -71,6 +75,10 @@ public class GisUtil
         result.setChartConfig(chartConfig); 
     	result.setGisContext(dataSet.getMetaDataSet().getGisContext()); 
         
+    	PdfGisContentConfig config = new PdfGisContentConfigImpl(); 
+    	config.setMetaResult(metaResult);
+    	result.setConfig(config);
+    	
         return result; 
     }
     

@@ -958,7 +958,9 @@ public class XmlReader
 	{ log(tag, "name"); }
 	
 	private void log(Element tag, String attr)
-	{ System.out.println(tag.getTagName() + " " + tag.getAttribute(attr)); }
+	{
+		// System.out.println(tag.getTagName() + " " + tag.getAttribute(attr));
+	}
 
 	private PriorityReportConfig getPriorityReport(Element tag, List<EmisIndicator> indicators)
 	{

@@ -203,7 +203,10 @@ public class DbDataSourceJdbc extends DbDataSourceBase implements DbDataSource
         catch (SQLException ex)
         { throw DbDataSourceBase.getIOException("Failed to retrieve field names names for " + getConnectionString(), ex); }
         finally
-        { rsr.close(); }
+        { 
+        	if (rsr != null)
+        		rsr.close(); 
+        }
         
         return result;
     }
@@ -437,7 +440,7 @@ public class DbDataSourceJdbc extends DbDataSourceBase implements DbDataSource
             return "net.sourceforge.jtds.jdbc.Driver";
 
         if (driver == DbDataSourceConfigJdbc.JdbcDriver.MYSQL)
-            return "com.mysql.jdbc.Driver";
+            return "com.mysql.cj.jdbc.Driver";
 
         if (driver == DbDataSourceConfigJdbc.JdbcDriver.POSTGRESQL)
         	return "org.postgresql.Driver"; 

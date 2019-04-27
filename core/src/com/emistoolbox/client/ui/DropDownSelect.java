@@ -69,12 +69,12 @@ public class DropDownSelect extends SimplePanel implements HasValueChangeHandler
         return this.selectedIndex;
     }
 
-    public void setSelectedValue(String value)
+    public int setSelectedValue(String value)
     {
         if (value == null)
         {
             setSelectedIndex(-1); 
-            return; 
+            return -1; 
         }
         
         for (int i = 0; i < values.size(); i++) 
@@ -82,11 +82,12 @@ public class DropDownSelect extends SimplePanel implements HasValueChangeHandler
             if (value.equals(values.get(i)))
             {
                 setSelectedIndex(i); 
-                return; 
+                return i; 
             }
         }
         
         setSelectedIndex(-1); 
+        return -1; 
     }
     
     public void setSelectedIndex(int index)

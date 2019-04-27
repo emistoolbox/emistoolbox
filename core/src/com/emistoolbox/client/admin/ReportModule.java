@@ -137,13 +137,13 @@ public class ReportModule
             { showCharts(); }
         }));
         
-        menuItems.add(EmisToolbox.getMenuItem(Message.messageReport().btnIndicators(), new ClickHandler() {
-        	public void onClick(ClickEvent event)
-            { showIndicators(); }
-        }));
-            
         if (access != AccessLevel.VIEWER)
         {
+            menuItems.add(EmisToolbox.getMenuItem(Message.messageReport().btnIndicators(), new ClickHandler() {
+            	public void onClick(ClickEvent event)
+                { showIndicators(); }
+            }));
+                
             menuItems.add(EmisToolbox.getMenuItem(Message.messageReport().btnReports(), new ClickHandler() {
                 public void onClick(ClickEvent event)
                 { showReports(null); }

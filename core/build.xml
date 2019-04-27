@@ -90,6 +90,8 @@
         <path refid="project.class.path"/>
       </classpath>
       <jvmarg value="-Xmx256M"/>
+      <jvmarg value="-Xdebug"/>
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"/>
       <arg value="-startupUrl"/>
       <arg value="EmisToolbox.html"/>
       <arg value="-logLevel"/>

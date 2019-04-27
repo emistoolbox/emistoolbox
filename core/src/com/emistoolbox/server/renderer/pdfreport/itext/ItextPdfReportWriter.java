@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -73,6 +74,11 @@ public class ItextPdfReportWriter implements PdfReportWriter
     @Override
 	public void setDateInfo(ReportMetaResult metaInfo) 
     {
+    	dateInfo = "";
+    	List<EmisEnumTupleValue> values = null; 
+    	if (metaInfo == null || metaInfo.getContext() == null || metaInfo.getContext().getDates() == null)
+    		return; 
+    		
     	for (EmisEnumTupleValue item : metaInfo.getContext().getDates())
     		dateInfo = StringUtils.join(item.getValue(), ", ");
     }

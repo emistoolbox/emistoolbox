@@ -60,7 +60,7 @@ public class MultipleContext extends ContextBase implements EmisContext, Seriali
         		
         		if (isMask(date))
         			overrides.add(date);
-        		else
+        		else if (results.size() == 0) // FIX2019 - else
         			results.add(date); 
         	}
         }

@@ -62,9 +62,7 @@ public class EmisMetaImpl implements EmisMeta, Serializable
             }
 
             if (dateType.getSize() < result.getSize())
-            {
                 result = dateType;
-            }
         }
         return result;
     }

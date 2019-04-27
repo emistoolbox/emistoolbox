@@ -148,7 +148,7 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
     	if (cachedPdfRenderer != null)
         	return cachedPdfRenderer; 
 
-    	String pdfRenderer = EmisConfig.get(EmisConfig.EMISTOOLBOX_RENDERER_PDF, EmisConfig.RENDERER_PDF_JORIKI);
+    	String pdfRenderer = EmisConfig.get(EmisConfig.EMISTOOLBOX_RENDERER_PDF, EmisConfig.RENDERER_PDF_ITEXT);
     	if (EmisConfig.RENDERER_PDF_ITEXT.equals(pdfRenderer))
         	cachedPdfRenderer = new ItextPdfReportWriter();    	
     	else if (EmisConfig.RENDERER_PDF_JORIKI.equals(pdfRenderer))
@@ -804,7 +804,19 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
 
     public static String getRenderedReportResultInternal(String dataset, ReportMetaResult metaResult) 
             throws IOException
-    { return getRenderedReportResultInternal(dataset, metaResult, getPdfRenderer()); }
+    {
+    	try { return getRenderedReportResultInternal(dataset, metaResult, getPdfRenderer()); }
+    	catch (IOException ex)
+    	{ 
+    		ex.printStackTrace(); 
+    		throw ex; 
+    	} 
+    	catch (Throwable ex)
+    	{ 
+    		ex.printStackTrace(); 
+        	throw new IOException(ex); 
+    	} 
+    }
     
     public static String getRenderedReportResultInternal(String dataset, ReportMetaResult metaResult, PdfReportWriter writer) 
         throws IOException

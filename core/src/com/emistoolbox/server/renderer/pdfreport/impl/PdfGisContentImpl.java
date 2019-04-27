@@ -56,7 +56,7 @@ public class PdfGisContentImpl extends PdfContentBase<PdfGisContentConfig> imple
 
 	@Override
 	public void setLegendColourScheme(ColourScheme colourScheme) 
-	{ this.legendColourScheme = legendColourScheme; }
+	{ this.legendColourScheme = colourScheme; }
 
 	@Override
 	public String getFormat() 
@@ -72,7 +72,7 @@ public class PdfGisContentImpl extends PdfContentBase<PdfGisContentConfig> imple
 
 	@Override
 	public void setChartConfig(ChartConfig config) 
-	{ this.chartConfig = chartConfig; }
+	{ this.chartConfig = config; }
 
 	@Override
 	public GisContext getGisContext() 
