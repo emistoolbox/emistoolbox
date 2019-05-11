@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<users md5="783f1c403aa55ad0900a539ce41b3873">
+    <user level="VIEWER" pwd="4384ae612864f060ef19cde8e76d046c" uid="viewer"/>
+    <user level="SYSTEM_ADMIN" pwd="35b1ebb3f3af2d34e310c8af167e75e3" uid="admin"/>
+    <user level="REPORT_ADMIN" pwd="e44f3a111d2af1d713245f1beec31df7" uid="report"/>
+</users>

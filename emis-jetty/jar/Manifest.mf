@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Created-By: Jorg Bauer
+Class-Path: lib/jetty-all-9.4.17.v20190418-uber.jar
+Main-Class: com.emistoolbox.jetty.EmisToolboxJetty
