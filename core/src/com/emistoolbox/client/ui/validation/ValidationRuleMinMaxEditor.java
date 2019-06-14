@@ -25,7 +25,6 @@ public class ValidationRuleMinMaxEditor<T extends EmisValidationMinMaxRule> exte
 			@Override
 			public void onKeyPress(KeyPressEvent event) 
 			{
-				EmisUtils.log("> " + ((int) event.getCharCode())); 
 				for (int code : acceptedChars)
 				{
 					if (event.getCharCode() == code)

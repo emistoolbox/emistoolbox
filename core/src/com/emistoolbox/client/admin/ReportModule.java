@@ -51,6 +51,7 @@ import com.emistoolbox.common.results.impl.ValidationMetaResultImpl;
 import com.emistoolbox.common.user.EmisUser;
 import com.emistoolbox.common.user.EmisUser.AccessLevel;
 import com.emistoolbox.common.util.NamedUtil;
+import com.emistoolbox.server.EmisConfig;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -825,7 +826,7 @@ public class ReportModule
 
     private void appendGisHtml(StringBuffer html, String[] result, String format)
     {
-        if (GisMetaResultEditor.MAP_TYPE_INTERACTIVE.equals(format))
+        if (GisMetaResultEditor.MAP_TYPE_INTERACTIVE.equals(format) && EmisConfig.ADVANCED_MAPS)
             appendGisShapeHtml(html, result); 
         else
             appendGisImageHtml(html, result); 

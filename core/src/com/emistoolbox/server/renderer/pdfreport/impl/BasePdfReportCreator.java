@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -316,7 +317,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
     protected void adapt(EmisContext context)
     {
         EmisContext newContext = metaResult.getContext();
-        if (context.getDateType() != null)
+        if (context.getDateType() != null && newContext.getDateType() != null)
         {
         	if (context.getDateType().getDimensions() > newContext.getDateType().getDimensions())
         	{
@@ -382,7 +383,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 			if (result.getDateEnumFilter(filter.getEnum().getName()) == null)
 				result.addDateEnumFilter(filter);
    		}
-    		
+		
 		if (context1.getEnumFilters() != null)
 			for (EmisEnumSet filter : context1.getEnumFilters().values())
 				result.addEnumFilter(merge(filter, context2.getDateEnumFilter(filter.getEnum().getName())));
@@ -401,7 +402,7 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 				EmisMetaData field = NamedUtil.find(fieldName, entity.getData()); 
 				Set<Byte> values = merge(context1.getEntityFilterValues(field), context2.getEntityFilterValues(field));  
 				if (values != null)
-					result.addEnumEntityFilter(field, new EnumSetImpl(field.getEnumType(), values)); 
+					result.addEntityFilter(field, toBytes(values)); 
 			}
 			
 			for (String fieldName : context2.getEntityFilterNames(entity))
@@ -411,11 +412,23 @@ public abstract class BasePdfReportCreator<T extends EmisPdfReportConfig> implem
 				{
 					byte[] values =  context2.getEntityFilterValues(field); 
 					if (values != null)
-						result.addEnumEntityFilter(field, new EnumSetImpl(field.getEnumType(), values)); 
+						result.addEntityFilter(field, values); 
+					
 				}
 			}
 		}
 		
+    	return result; 
+    }
+    
+    private byte[] toBytes(Set<Byte> values)
+    {
+    	byte[] result = new byte[values.size()]; 
+    	int index = 0; 
+    	Iterator<Byte> iter = values.iterator(); 
+    	while (iter.hasNext())
+    		result[index++] = iter.next(); 
+
     	return result; 
     }
 

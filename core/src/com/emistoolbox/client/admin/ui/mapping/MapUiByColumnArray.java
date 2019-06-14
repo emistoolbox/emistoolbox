@@ -154,10 +154,10 @@ public class MapUiByColumnArray extends MapUiWidgetBase implements ValueChangeHa
         
         List<String> fields = dbMetaInfo == null ? null : dbMetaInfo.get(getDbContext().getQuery());
         if (fields == null)
-            uiNewColumn.addItem(Message.messageAdmin().mapuifInfoWaitingForFieldNames(), null);
+            uiNewColumn.addItem(Message.messageAdmin().mapuifInfoWaitingForFieldNames(), (String) null);
         else
         {
-            uiNewColumn.addItem("(add value field)", null); 
+            uiNewColumn.addItem("(add value field)", (String) null); 
             for (String field : fields)
                 uiNewColumn.addItem(field);
         }

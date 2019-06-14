@@ -53,7 +53,8 @@ public class ModelHierarchyEditor extends FlexTable
                 {
                     return;
                 }
-                TreeItem item = new TreeItem(name);
+                TreeItem item = new TreeItem(); 
+                item.setText(name);
                 EmisMetaHierarchy hierarchy = new MetaHierarchy();
                 hierarchy.setName(name);
                 item.setUserObject(hierarchy);
@@ -86,7 +87,8 @@ public class ModelHierarchyEditor extends FlexTable
                 popup.addValueChangeHandler(new ValueChangeHandler<EmisMetaEntity>() {
                     public void onValueChange(ValueChangeEvent<EmisMetaEntity> event)
                     {
-                        TreeItem item = new TreeItem(((EmisMetaEntity) event.getValue()).getName());
+                        TreeItem item = new TreeItem();
+                        item.setText(((EmisMetaEntity) event.getValue()).getName());
                         item.setUserObject(event.getValue());
                         hierarchyItem.addItem(item);
                         ModelHierarchyEditor.this.uiTree.setSelectedItem(item);
@@ -220,13 +222,15 @@ public class ModelHierarchyEditor extends FlexTable
         this.uiTree.clear();
         for (EmisMetaHierarchy hierarchy : hierarchies)
         {
-            TreeItem newItem = new TreeItem(hierarchy.getName());
+            TreeItem newItem = new TreeItem(); 
+            newItem.setText(hierarchy.getName());
             newItem.setUserObject(hierarchy);
             this.uiTree.addItem(newItem);
 
             for (EmisMetaEntity entity : hierarchy.getEntityOrder())
             {
-                TreeItem newEntity = new TreeItem(entity.getName());
+                TreeItem newEntity = new TreeItem(); 
+                newItem.setText(entity.getName());
                 newEntity.setUserObject(entity);
                 newItem.addItem(newEntity);
             }

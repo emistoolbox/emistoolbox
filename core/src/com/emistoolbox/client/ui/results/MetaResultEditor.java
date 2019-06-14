@@ -32,6 +32,7 @@ import com.emistoolbox.common.results.impl.MetaResultUtil;
 import com.emistoolbox.common.user.EmisUser.AccessLevel;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedUtil;
+import com.emistoolbox.server.EmisConfig;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -535,7 +536,8 @@ public abstract class MetaResultEditor<T extends MetaResult> extends FlexTable i
 
         final ListBoxWithUserObjects<EmisPdfReportConfig> uiReports = new ListBoxWithUserObjects<EmisPdfReportConfig>();
         uiReports.add("(new report)", null);
-        uiReports.add("(new advanced report)", null);
+        if (EmisConfig.ADVANCED_REPORTS)
+        	uiReports.add("(new advanced report)", null);
 
         PdfContentConfig contentConfig = getContentConfig(0);
         for (EmisPdfReportConfig report : reports)

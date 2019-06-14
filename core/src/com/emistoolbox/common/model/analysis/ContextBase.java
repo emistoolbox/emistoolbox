@@ -138,4 +138,8 @@ public abstract class ContextBase implements EmisContext, Serializable
     {
         return null;
     }
+
+	@Override
+	public void addEntityFilter(EmisMetaData paramEmisMetaData, byte[] values) 
+	{}
 }

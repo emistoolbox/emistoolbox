@@ -2,7 +2,6 @@
 <!DOCTYPE web-app
     PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
     "http://java.sun.com/dtd/web-app_2_3.dtd">
-
 <web-app>
   
   <!-- Servlets -->
@@ -54,6 +53,11 @@
   <servlet>
     <servlet-name>ApiPdfServlet</servlet-name>
     <servlet-class>com.emistoolbox.server.servlet.ApiPdfServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>TestServlet</servlet-name>
+    <servlet-class>com.emistoolbox.server.servlet.TestServlet</servlet-class>
   </servlet>
 
   <servlet>
@@ -137,6 +141,11 @@
   <servlet-mapping>
     <servlet-name>ApiPdfServlet</servlet-name>
     <url-pattern>/api/pdf</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>TestServlet</servlet-name>
+    <url-pattern>/test</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

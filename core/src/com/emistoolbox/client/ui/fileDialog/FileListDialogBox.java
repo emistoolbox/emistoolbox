@@ -3,6 +3,7 @@ package com.emistoolbox.client.ui.fileDialog;
 import com.emistoolbox.client.EmisToolboxServiceAsync;
 import com.emistoolbox.client.Message;
 import com.emistoolbox.client.admin.ui.EmisUtils;
+import com.emistoolbox.client.admin.ui.GwtUtils;
 import com.emistoolbox.common.fileDialog.*; 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -243,7 +244,8 @@ public class FileListDialogBox extends PopupPanel implements HasValueChangeHandl
     private void load(final String path)
     {
     	dirTree.clear(); 
-    	TreeItem item = dirTree.addItem(path.equals("") ? "/" : "");  
+    	TreeItem item = GwtUtils.getTreeItem(path.equals("") ? "/" : ""); 
+    	dirTree.addItem(item);   
     	loadChildren(item); 
     }
     
@@ -309,7 +311,7 @@ public class FileListDialogBox extends PopupPanel implements HasValueChangeHandl
     		if (parent.getChild(i).getText().equals(name))
     			return; 
     	
-    	parent.addItem(name); 
+    	parent.addItem(GwtUtils.getTreeItem(name)); 
     }
     
 	public String getFilter()

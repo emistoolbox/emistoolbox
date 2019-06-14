@@ -187,5 +187,12 @@ public class GwtUtils
     
     public static void setTextBox(TextBox tb, String value)
     { tb.setText(value == null ? "" : value); }
+    
+    public static TreeItem getTreeItem(String text)
+    {
+    	TreeItem result = new TreeItem(); 
+    	result.setText(text);
+    	return result;
+    }
 }
 

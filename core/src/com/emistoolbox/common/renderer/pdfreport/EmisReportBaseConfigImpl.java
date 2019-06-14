@@ -2,6 +2,7 @@ package com.emistoolbox.common.renderer.pdfreport;
 
 import java.io.Serializable;
 
+import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
@@ -163,7 +164,7 @@ public abstract class EmisReportBaseConfigImpl extends TextSetImpl implements Em
             if ((contentHierarchy != null) && (!NamedUtil.sameName(contentHierarchy, currentHierarchy)))
                 return false;
         }
-        
+
         return contentConfigEntity != null && !contentConfigEntity.isChildOf(getEntityType(), metaResult.getHierarchy());
     }
 }

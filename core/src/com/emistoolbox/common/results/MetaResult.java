@@ -3,6 +3,7 @@ package com.emistoolbox.common.results;
 import com.emistoolbox.common.model.analysis.EmisContext;
 import com.emistoolbox.common.model.analysis.EmisIndicator;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
+import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 
 import java.util.List;
@@ -39,4 +40,6 @@ public abstract interface MetaResult
     public void setGlobalFilter(EmisContext globalFilter); 
     
     public Set<EmisMetaDateEnum> getUsedDateTypes(); 
+    
+    public EmisMetaEntity getSeniorEntity(); 
 }

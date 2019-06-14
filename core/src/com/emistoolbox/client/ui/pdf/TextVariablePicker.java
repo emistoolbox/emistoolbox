@@ -1,5 +1,6 @@
 package com.emistoolbox.client.ui.pdf;
 
+import com.emistoolbox.client.admin.ui.GwtUtils;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig;
@@ -60,7 +61,7 @@ public class TextVariablePicker extends Tree implements HasValueChangeHandlers<S
 	
 	private TreeItem createHierarchyItems(EmisMetaHierarchy hierarchy, EmisMetaEntity entityType)
 	{
-		TreeItem result = new TreeItem("Hierarchy"); 
+		TreeItem result = GwtUtils.getTreeItem("Hierarchy"); 
 
 		NamedIndexList<EmisMetaEntity> entities = hierarchy.getEntityOrder(); 
 		int index = NamedUtil.findIndex(entityType, entities); 
@@ -68,7 +69,7 @@ public class TextVariablePicker extends Tree implements HasValueChangeHandlers<S
 		{
 			String level = entities.get(i).getName(); 
 			
-			TreeItem levelItem = new TreeItem(level); 
+			TreeItem levelItem = GwtUtils.getTreeItem(level); 
 			levelItem.addItem(createItem("ID", "hierarchy_" + level + "_id"));  
 			levelItem.addItem(createItem("Name", "hierarchy_" + level + "_name")); 
 			result.addItem(levelItem); 
@@ -82,7 +83,7 @@ public class TextVariablePicker extends Tree implements HasValueChangeHandlers<S
 	
 	private TreeItem createItem(String name, String[] children, String[] keys)
 	{
-		TreeItem result = new TreeItem(name); 
+		TreeItem result = GwtUtils.getTreeItem(name); 
 		for (int i = 0; i < children.length; i++)
 		{
 			TreeItem child = createItem(children[i], keys[i]);  
@@ -94,7 +95,7 @@ public class TextVariablePicker extends Tree implements HasValueChangeHandlers<S
 	
 	private TreeItem createItem(String name, String value)
 	{
-		TreeItem result = new TreeItem(name); 
+		TreeItem result = GwtUtils.getTreeItem(name); 
 		result.setUserObject(value);
 		
 		return result; 

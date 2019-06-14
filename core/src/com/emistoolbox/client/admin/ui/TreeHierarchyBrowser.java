@@ -129,11 +129,11 @@ public class TreeHierarchyBrowser extends HierarchyBrowserBase implements IHiera
     	// TODO - sort items - by type, then name.
     	for (EmisEntity entity : getRootEntities())
     	{
-    		TreeItem item = new TreeItem(entity.getEntityType().getName() + ": " + entity.getName());
+    		TreeItem item = GwtUtils.getTreeItem(entity.getEntityType().getName() + ": " + entity.getName());
     		item.setUserObject(entity);
     		this.ui.addItem(item); 
     		if (hasChildEntries(entity.getEntityType()))
-    			item.addItem(new TreeItem("")); 
+    			item.addItem(GwtUtils.getTreeItem("")); 
     	}
     }
     
@@ -158,13 +158,13 @@ public class TreeHierarchyBrowser extends HierarchyBrowserBase implements IHiera
         
         for (EmisEntity entity : entities)
         {
-            TreeItem item = new TreeItem(entity.getName());
+            TreeItem item = GwtUtils.getTreeItem(entity.getName());
             if (firstItem == null)
                 firstItem = item; 
             
             item.setUserObject(entity);
             if (hasChildEntries(entity.getEntityType()))
-                item.addItem(new TreeItem(""));
+            	item.addItem(GwtUtils.getTreeItem(""));
 
             if (parent == null)
                 this.ui.addItem(item);
@@ -202,7 +202,7 @@ public class TreeHierarchyBrowser extends HierarchyBrowserBase implements IHiera
         TreeItem item = (TreeItem) event.getTarget();
         item.removeItems();
         if (getEntityTypeIndex(getEntityType(item)) + 1 < getSize())
-            item.addItem(new TreeItem(""));
+            item.addItem(GwtUtils.getTreeItem(""));
     }
 
     public void onOpen(OpenEvent<TreeItem> event)

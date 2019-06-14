@@ -256,7 +256,8 @@ public class ModelEntityEditor extends FlexTable
 
     public TreeItem addUi(EmisMetaEntity entity)
     {
-        TreeItem item = new TreeItem(entity.getName());
+        TreeItem item = new TreeItem();
+        item.setText(entity.getName());
         item.setUserObject(entity);
 
         if (entity.getData() != null)
@@ -272,7 +273,8 @@ public class ModelEntityEditor extends FlexTable
 
     public TreeItem addUi(EmisMetaData data, TreeItem parent)
     {
-        TreeItem item = new TreeItem(data.getName());
+        TreeItem item = new TreeItem(); 
+        item.setText(data.getName());
         item.setUserObject(data);
         parent.addItem(item);
         return item;

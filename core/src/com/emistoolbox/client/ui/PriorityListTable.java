@@ -94,7 +94,7 @@ public class PriorityListTable extends FlexTable implements Comparator<PriorityL
         this.sortOrder = new int[this.values.size()];
         for (int i = 0; i < this.sortOrder.length; i++)
         {
-            this.sortOrder[i] = 1;
+            this.sortOrder[i] = -1;
         }
         Collections.sort(prioList, this);
         updateUi();
@@ -113,9 +113,8 @@ public class PriorityListTable extends FlexTable implements Comparator<PriorityL
             if (Double.isNaN(values1[index]))
                 return -1 * this.sortOrder[index];
             if (Double.isNaN(values2[index]))
-            {
                 return this.sortOrder[index];
-            }
+
             int result = this.sortOrder[index] * Double.compare(values1[index], values2[index]);
             if (result != 0)
             {

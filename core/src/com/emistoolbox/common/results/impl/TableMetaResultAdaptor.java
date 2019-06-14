@@ -3,6 +3,7 @@ package com.emistoolbox.common.results.impl;
 import java.util.Set;
 
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
+import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.results.MetaResultDimension;
 import com.emistoolbox.common.results.TableMetaResult;
 
@@ -30,7 +31,11 @@ public abstract class TableMetaResultAdaptor extends MetaResultAdaptor implement
     public int getSortOrder()
     { return this.tableMetaResult.getSortOrder(); }
 
-    public void setSortOrder(int order)
+    @Override
+	public EmisMetaEntity getSeniorEntity() 
+    { return this.tableMetaResult.getSeniorEntity(); }
+
+	public void setSortOrder(int order)
     { throw new IllegalArgumentException("Adaptor doesn't support set*"); }
 
 	@Override

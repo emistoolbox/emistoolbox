@@ -89,11 +89,9 @@ public class GisImageRendererImpl extends GisRendererImpl
             colourScheme.setRange(min, max);
         }
 
+        
         for (int f = 0; f < feature.getCount(); f++)
-        {
-        	System.out.println(feature.getTitle(f) + " " + feature.getBoundary(feature.getFeature(f))); 
-            draw(feature.getFeature(f), colourScheme, feature.getValue(f), feature.getTitle(f), showLabels, selected ? htmlMap : null);
-        }
+        	draw(feature.getFeature(f), colourScheme, feature.getValue(f), feature.getTitle(f), showLabels, selected ? htmlMap : null);
     }
     
     protected void renderLabel(String text, double x, double y)

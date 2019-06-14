@@ -56,5 +56,7 @@ public abstract interface EmisContext
 
     public abstract void addEnumEntityFilter(EmisMetaData paramEmisMetaData, EmisEnumSet paramEmisEnumSet);
 
+    public abstract void addEntityFilter(EmisMetaData paramEmisMetaData, byte[] values);
+
     public abstract byte[] getEntityFilterValues(EmisMetaData paramEmisMetaData);
 }

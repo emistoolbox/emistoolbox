@@ -427,7 +427,7 @@ public abstract class ApiBaseServlet extends HttpServlet
 
     protected boolean setMetaResult(MetaResult metaResult, HttpServletRequest req, HttpServletResponse resp, EmisDataSet emis)
             throws IOException
-    { return setMetaResult(metaResult, req.getParameterMap(), emis); }
+    { return setMetaResult(metaResult, flatten(req.getParameterMap()), emis); }
     
     protected static boolean setMetaResult(MetaResult metaResult, Map<String, String> params, EmisDataSet emis)
         throws IOException
@@ -471,12 +471,29 @@ public abstract class ApiBaseServlet extends HttpServlet
 
     protected static boolean hasParameters(HttpServletRequest req, HttpServletResponse resp, List<String> hieraries, List<String> indicators, List<String> xaxis, List<String> splitBy) throws IOException
     {
-    	String error = hasParameters((Map<String, String>) req.getParameterMap(), hieraries, indicators, xaxis, splitBy); 
+    	String error = hasParameters(flatten(req.getParameterMap()), hieraries, indicators, xaxis, splitBy); 
     	if (error == null)
     		return true; 
     	
         error(resp, 400, error, asJson(req)); 
     	return false; 
+    }
+    
+    protected static Map<String, String> flatten(Map<String, String[]> values)
+    {
+    	Map<String, String> result = new HashMap<String, String>(); 
+    	for (Map.Entry<String, String[]> entry : values.entrySet())
+    		result.put(entry.getKey(), flatten(entry.getValue()));
+    	
+    	return result; 
+    }
+    
+    private static String flatten(String[] values)
+    {
+    	if (values == null)
+    		return null; 
+    	
+    	return StringUtils.join(values);
     }
     
     public static String hasParameters(Map<String, String> params, List<String> hieraries, List<String> indicators, List<String> xaxis, List<String> splitBy) throws IOException

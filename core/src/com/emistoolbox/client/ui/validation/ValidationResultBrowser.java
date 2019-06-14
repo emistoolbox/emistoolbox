@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.emistoolbox.client.admin.EmisToolbox;
+import com.emistoolbox.client.admin.ui.GwtUtils;
 import com.emistoolbox.client.ui.DownloadPanel;
 import com.emistoolbox.common.model.EmisEntity;
 import com.emistoolbox.common.model.meta.EmisMetaData;
@@ -176,7 +177,11 @@ public class ValidationResultBrowser extends FlexTable
 			}); 
 			
 			for (EmisEntity entity : entities)
-				item.addItem(entity.getName()).setUserObject(entity); 
+			{
+				TreeItem tmp= GwtUtils.getTreeItem(entity.getName());
+				item.addItem(tmp); 
+				tmp.setUserObject(entity); 
+			}
 		}
 		
 		if (depth > 1)
@@ -377,7 +382,11 @@ public class ValidationResultBrowser extends FlexTable
 
 		uiTree.clear(); 
 		for (EmisEntity entity : validationResult.getChildren(null))
-			uiTree.addItem(entity.getName()).setUserObject(entity);
+		{
+			TreeItem tmp = GwtUtils.getTreeItem(entity.getName());
+			uiTree.addItem(tmp); 
+			tmp.setUserObject(entity);
+		}
 		
 		if (uiTree.getItemCount() > 0)
 			selectItem(uiTree.getItem(0), true); 

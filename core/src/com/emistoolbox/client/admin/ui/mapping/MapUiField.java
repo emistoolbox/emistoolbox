@@ -145,7 +145,7 @@ public class MapUiField extends MapUiWidgetBase implements HasValueChangeHandler
         this.fieldValue = GwtUtils.getListValue(this.uiFieldList);
 
         this.uiFieldList.clear();
-        this.uiFieldList.addItem(Message.messageAdmin().mapuifInfoWaitingForFieldNames(), null);
+        this.uiFieldList.addItem(Message.messageAdmin().mapuifInfoWaitingForFieldNames(), (String) null);
     }
 
     private void displayUi()
@@ -297,7 +297,7 @@ public class MapUiField extends MapUiWidgetBase implements HasValueChangeHandler
 
         List<String> fields = dbMetaInfo == null ? null : dbMetaInfo.get(getDbContext().getQuery());
         if (fields == null)
-            this.uiFieldList.addItem(Message.messageAdmin().mapuifInfoWaitingForFieldNames(), null);
+            this.uiFieldList.addItem(Message.messageAdmin().mapuifInfoWaitingForFieldNames(), (String) null);
         else
         {
             for (String field : fields)

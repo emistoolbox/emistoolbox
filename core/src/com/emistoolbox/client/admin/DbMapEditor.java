@@ -109,8 +109,8 @@ public class DbMapEditor extends FlexTable implements EmisEditor<EmisDbMap>
 				hp.add(EmisUtils.init(new PushButton(Message.messageAdmin()
 						.dbmapBtnAddDataSource(), new ClickHandler() {
 					public void onClick(ClickEvent event) {
-						TreeItem newItem = new TreeItem(Message.messageAdmin()
-								.dbmapNewDataSource());
+						TreeItem newItem = new TreeItem(); 
+						newItem.setText(Message.messageAdmin().dbmapNewDataSource());
 						item.addItem(newItem);
 						DbMapEditor.this.mapTree.setSelectedItem(newItem);
 						DbMapEditor.this.mapTree.ensureSelectedItemVisible();
@@ -214,9 +214,9 @@ public class DbMapEditor extends FlexTable implements EmisEditor<EmisDbMap>
 
 		this.mapTree.clear();
 
-		TreeItem section = this.mapTree.addItem(Message.messageAdmin().dbmapDataSources());
+		TreeItem section = this.mapTree.addTextItem(Message.messageAdmin().dbmapDataSources());
 		for (DbDataSourceConfig config : dbMap.getDataSources()) {
-			TreeItem dataSourceItem = section.addItem(config.getName());
+			TreeItem dataSourceItem = section.addTextItem(config.getName());
 			dataSourceItem.setUserObject(config);
 			loadDataSourceInfo(config);
 		}
@@ -228,7 +228,7 @@ public class DbMapEditor extends FlexTable implements EmisEditor<EmisDbMap>
 				continue; 
 		
 			if (section == null)
-				section = mapTree.addItem(Message.messageAdmin().dbmapDateInit());
+				section = mapTree.addTextItem(Message.messageAdmin().dbmapDateInit());
 			
 			EmisDateInitDbMap map = dbMap.findDateInit(dateType);
 			if (map == null) 
@@ -237,24 +237,22 @@ public class DbMapEditor extends FlexTable implements EmisEditor<EmisDbMap>
 				map.setDateType(dateType);
 			}
 
-			TreeItem item = section.addItem(dateType.getName());
+			TreeItem item = section.addTextItem(dateType.getName());
 			item.setUserObject(map);
 		}
 
-		section = this.mapTree.addItem(Message.messageAdmin().dbmapLocations());
+		section = this.mapTree.addTextItem(Message.messageAdmin().dbmapLocations());
 		for (Iterator i$ = dbMap.getMetaData().getEntities().iterator(); i$.hasNext();) {
 			EmisMetaEntity entity = (EmisMetaEntity) i$.next();
-			TreeItem entityItem = section.addItem(entity.getName());
+			TreeItem entityItem = section.addTextItem(entity.getName());
 			entityItem.setUserObject(entity);
 
 			if (entity.getGisType() != EmisMetaEntity.EmisGisType.NONE) {
-				TreeItem item = entityItem
-						.addItem(Message.messageAdmin().meTabGis()
+				TreeItem item = entityItem.addTextItem(Message.messageAdmin().meTabGis()
 								+ " "
 								+ (entity.getGisType() == EmisMetaEntity.EmisGisType.COORDINATE ? Message
 										.messageAdmin().gisTypeCoordinate()
-										: Message.messageAdmin()
-												.gisTypePolygon()));
+										: Message.messageAdmin().gisTypePolygon()));
 				GisEntityDbMap map = dbMap.findGisMap(entity);
 				if (map == null) {
 					map = new GisEntityDbMapImpl();
@@ -268,7 +266,7 @@ public class DbMapEditor extends FlexTable implements EmisEditor<EmisDbMap>
 			for (EmisMetaDateEnum dateType : dbMap.findDateTypes(entity)) {
 				boolean anyEntries = false;
 				for (EmisEntityDbMap map : dbMap.find(entity, dateType)) {
-					TreeItem item = entityItem.addItem("");
+					TreeItem item = entityItem.addTextItem("");
 					item.setHTML(dateType.getName() + " - "
 							+ getNameSummary(map.getFieldAccess()));
 					item.setUserObject(map);
@@ -280,16 +278,16 @@ public class DbMapEditor extends FlexTable implements EmisEditor<EmisDbMap>
 					entityMap.setEmisMetaEntity(entity);
 					entityMap.setDateEnum(dateType);
 
-					TreeItem item = entityItem.addItem(dateType.getName());
+					TreeItem item = entityItem.addTextItem(dateType.getName());
 					item.setUserObject(entityMap);
 				}
 			}
 		}
 		
-		section = this.mapTree.addItem(Message.messageAdmin().dbmapHeirarchies());
+		section = this.mapTree.addTextItem(Message.messageAdmin().dbmapHeirarchies());
 		for (Iterator i$ = dbMap.getMetaData().getHierarchies().iterator(); i$.hasNext();) {
 			EmisMetaHierarchy hierarchy = (EmisMetaHierarchy) i$.next();
-			TreeItem hierarchyItem = section.addItem(hierarchy.getName());
+			TreeItem hierarchyItem = section.addTextItem(hierarchy.getName());
 			EmisHierarchyDbMap hierarchyMap = dbMap.find(hierarchy);
 			if (hierarchyMap == null) {
 				hierarchyMap = new EmisHierarchyDbMapImpl();
@@ -304,7 +302,7 @@ public class DbMapEditor extends FlexTable implements EmisEditor<EmisDbMap>
 						parentEntity = entity;
 						continue;
 					}
-					TreeItem map = hierarchyItem.addItem(entity.getName()
+					TreeItem map = hierarchyItem.addTextItem(entity.getName()
 							+ " > " + parentEntity.getName());
 
 					EmisHierarchyDbMapEntry entry = dbMap.find(hierarchy,
@@ -392,7 +390,7 @@ public class DbMapEditor extends FlexTable implements EmisEditor<EmisDbMap>
 					result.setEmisMetaEntity(entity);
 					result.setDateEnum(dateType);
 					
-					TreeItem newItem = item.addItem(dateType.getName());
+					TreeItem newItem = item.addTextItem(dateType.getName());
 					newItem.setUserObject(result);
 					item.getTree().setSelectedItem(newItem);
 					item.getTree().ensureSelectedItemVisible();

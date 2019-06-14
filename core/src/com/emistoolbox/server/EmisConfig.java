@@ -2,6 +2,9 @@ package com.emistoolbox.server;
 
 public class EmisConfig
 {
+	public static final boolean ADVANCED_REPORTS = false; 
+	public static final boolean ADVANCED_MAPS = false; 
+	
 	public static final String EMISTOOLBOX_PATH = "emistoolbox.path"; 
 	public static final String EMISTOOLBOX_PATH_WRITABLE = "emistoolbox.path.writable";
 

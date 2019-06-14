@@ -1,6 +1,8 @@
 package com.emistoolbox.common.results.impl;
 
+import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
+import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.results.MetaResultDimension;
 import com.emistoolbox.common.results.TableMetaResult;
 
@@ -33,6 +35,20 @@ public class TableMetaResultImpl extends MetaResultImpl implements TableMetaResu
 
     public Set<EmisMetaDateEnum> getUsedDateTypes(boolean withoutAxis)
     { return MetaResultUtil.getUsedDateTypes(getMetaResultValues(), withoutAxis ? dimensions : null); }
+
+	@Override
+	public EmisMetaEntity getSeniorEntity() 
+	{
+		EmisMetaEntity result= super.getSeniorEntity();
+
+		for (MetaResultDimension dim : dimensions)
+		{
+			if (dim instanceof MetaResultDimensionEntity)
+				result = EmisUtils.getSeniorEntity(((MetaResultDimensionEntity) dim).getEntityType(), result, getHierarchy());  
+		}
+
+		return result; 
+	}
 
 	@Override
 	public TableMetaResult createCopy() 

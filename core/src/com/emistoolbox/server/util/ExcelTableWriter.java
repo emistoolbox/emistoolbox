@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -42,8 +44,25 @@ public class ExcelTableWriter implements TableWriter
 
     public void nextCell(String content)
     {
-        this.currentRow.createCell(this.colCount).setCellValue(content);
-        this.colCount = (short) (this.colCount + 1);
+    	content = content.replaceAll(",", ""); 
+    	HSSFCell cell = null; 
+    	try { 
+    		Integer value = new Integer(content);
+    		currentRow.createCell(colCount++, HSSFCell.CELL_TYPE_NUMERIC).setCellValue(value); 
+    		return; 
+    	}
+    	catch (Throwable err)
+    	{}
+    	
+    	try { 
+    		Double value = new Double(content); 
+    		currentRow.createCell(colCount++, HSSFCell.CELL_TYPE_NUMERIC).setCellValue(value); 
+    		return; 
+    	}
+    	catch (Throwable err)
+    	{}
+    		
+        this.currentRow.createCell(this.colCount++).setCellValue(content);
     }
 
     public void nextRow()

@@ -1,6 +1,10 @@
 package com.emistoolbox.client.admin.ui;
 
 import com.emistoolbox.client.Message;
+import com.emistoolbox.common.model.EmisEntity;
+import com.emistoolbox.common.model.analysis.EmisContext;
+import com.emistoolbox.common.model.meta.EmisMetaEntity;
+import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.renderer.pdfreport.EmisPdfReportConfig.PageOrientation;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedIndexList;
@@ -178,8 +182,44 @@ public class EmisUtils
 
         return NumberFormat.getFormat(format).format(value);
     }
-    
-    native public static void log(String message) /*-{
+
+
+    public static EmisMetaEntity getSeniorEntity(EmisContext context, EmisMetaHierarchy hierarchy)
+    {
+        if (context.getEntityType() != null)
+            return context.getEntityType();
+
+        if (context.getEntities() == null)
+            return null;
+
+        EmisMetaEntity result = null;
+        for (EmisEntity entity : context.getEntities())
+        {
+            EmisMetaEntity entityType = entity.getEntityType();
+            if (entityType == null)
+                continue;
+
+            if (result == null)
+                result = entityType;
+            else if (result.isChildOf(entityType, hierarchy))
+                result = entityType;
+        }
+
+        return result;
+    }
+
+    public static EmisMetaEntity getSeniorEntity(EmisMetaEntity entity1, EmisMetaEntity entity2, EmisMetaHierarchy hierarchy)
+    {
+    	if (entity1 == null)
+    		return entity2; 
+    	
+    	if (entity2 == null)
+    		return entity1; 
+
+    	return entity1.isChildOf(entity2, hierarchy) ? entity2 : entity1;
+    }
+
+    native public static void log(Object message) /*-{
     	if (console)
     		console.log(message); 
     }-*/;

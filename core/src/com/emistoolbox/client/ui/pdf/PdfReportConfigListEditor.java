@@ -15,6 +15,7 @@ import com.emistoolbox.common.renderer.pdfreport.layout.LayoutPdfReportConfig;
 import com.emistoolbox.common.renderer.pdfreport.layout.impl.LayoutPdfReportConfigImpl;
 import com.emistoolbox.common.util.Named;
 import com.emistoolbox.common.util.NamedUtil;
+import com.emistoolbox.server.EmisConfig;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -49,7 +50,8 @@ public class PdfReportConfigListEditor extends FlexTable implements EmisEditor<L
         EmisUtils.init(this.uiAddReportButton, 60);
         buttons.add(this.uiAddReportButton);
         EmisUtils.init(this.uiAddAdvancedReportButton, 60);
-        buttons.add(this.uiAddAdvancedReportButton);
+        if (EmisConfig.ADVANCED_REPORTS)
+        	buttons.add(this.uiAddAdvancedReportButton);
         EmisUtils.init(this.uiDelReportButton, 60);
         buttons.add(this.uiDelReportButton);
         EmisUtils.init(this.uiViewReportButton, 60);

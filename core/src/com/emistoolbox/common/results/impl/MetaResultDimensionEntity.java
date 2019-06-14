@@ -1,11 +1,13 @@
 package com.emistoolbox.common.results.impl;
 
+import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.results.EntityAwareDimension;
 import com.emistoolbox.common.results.MetaResultDimension;
 import com.emistoolbox.common.util.NamedUtil;
 import com.emistoolbox.common.util.impl.NamedImpl;
+import com.gargoylesoftware.htmlunit.javascript.host.Console;
 
 public abstract class MetaResultDimensionEntity extends NamedImpl implements MetaResultDimension, EntityAwareDimension
 {
@@ -48,7 +50,7 @@ public abstract class MetaResultDimensionEntity extends NamedImpl implements Met
 
         if (this.entityType != null)
         {
-            int entityIndex = NamedUtil.findIndex(this.entityType, this.hierarchy.getEntityOrder());
+        	int entityIndex = NamedUtil.findIndex(this.entityType, this.hierarchy.getEntityOrder());
             if (entityIds.length != entityIndex + 1)
                 throw new IllegalArgumentException("Expected " + (entityIndex + 1) + " ids, not " + entityIds.length);
             if (entityNames.length != entityIndex + 1)

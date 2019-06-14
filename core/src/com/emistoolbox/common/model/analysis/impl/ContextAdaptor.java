@@ -22,7 +22,12 @@ public class ContextAdaptor implements EmisContext
     protected EmisContext getAdaptedContext()
     { return this.context; }
 
-    public void addBooleanEntityFilter(EmisMetaData field, Boolean selectTrue)
+    
+    @Override
+	public void addEntityFilter(EmisMetaData field, byte[] values) 
+    { this.context.addEntityFilter(field, values); }
+
+	public void addBooleanEntityFilter(EmisMetaData field, Boolean selectTrue)
     { this.context.addBooleanEntityFilter(field, selectTrue); }
 
     public void addEnumEntityFilter(EmisMetaData field, EmisEnumSet values)

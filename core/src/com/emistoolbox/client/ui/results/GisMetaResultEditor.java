@@ -15,6 +15,7 @@ import com.emistoolbox.common.model.meta.EmisMetaEntity.EmisGisType;
 import com.emistoolbox.common.renderer.pdfreport.PdfContentConfig;
 import com.emistoolbox.common.renderer.pdfreport.impl.PdfGisContentConfigImpl;
 import com.emistoolbox.common.results.GisMetaResult;
+import com.emistoolbox.server.EmisConfig;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -82,7 +83,7 @@ public class GisMetaResultEditor extends MetaResultEditor<GisMetaResult>
         uiMapType.clear();
         
         EmisEntity entity = getCurrentEntity();
-        boolean allowInteractive = entity == null || entity.getEntityType().getGisType() != EmisGisType.COORDINATE; 
+        boolean allowInteractive = (entity == null || entity.getEntityType().getGisType() != EmisGisType.COORDINATE) && EmisConfig.ADVANCED_MAPS; 
         
         uiMapType.addItem("Static Map", MAP_TYPE_STATIC); 
         if (allowInteractive)

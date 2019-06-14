@@ -807,7 +807,7 @@ public class EmisToolboxServiceImpl extends RemoteServiceServlet implements Emis
     {
     	try { return getRenderedReportResultInternal(dataset, metaResult, getPdfRenderer()); }
     	catch (IOException ex)
-    	{ 
+    	{
     		ex.printStackTrace(); 
     		throw ex; 
     	} 

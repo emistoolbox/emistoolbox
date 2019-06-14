@@ -133,7 +133,7 @@ public class ValidationListEditor extends FlexTable implements EmisEditor<List<E
             @Override
             public void onClick(ClickEvent event)
             {
-                TreeItem item = new TreeItem("(new)"); 
+                TreeItem item = GwtUtils.getTreeItem("(new)"); 
                 item.setUserObject(new ValidationImpl()); 
                 uiValidations.addItem(item); 
                 uiValidations.setSelectedItem(item); 
@@ -211,7 +211,7 @@ public class ValidationListEditor extends FlexTable implements EmisEditor<List<E
         if (validationItem == null)
             return; 
        
-        TreeItem item = new TreeItem(rule.getRuleName()); 
+        TreeItem item = GwtUtils.getTreeItem(rule.getRuleName()); 
         item.setUserObject(rule); 
         validationItem.addItem(item); 
         uiValidations.setSelectedItem(item); 
@@ -268,7 +268,8 @@ public class ValidationListEditor extends FlexTable implements EmisEditor<List<E
         
         for (EmisValidation validation : validations)
         {
-            TreeItem item = uiValidations.addItem(validation.getName());
+            TreeItem item = GwtUtils.getTreeItem(validation.getName()); 
+            uiValidations.addItem(item);
             item.setUserObject(validation); 
             
             for (EmisValidationRule rule : validation.getRules())
@@ -279,7 +280,8 @@ public class ValidationListEditor extends FlexTable implements EmisEditor<List<E
             	else
             		name = rule.getRuleName() + ":" + name;
             	
-                TreeItem ruleItem = item.addItem(name);
+                TreeItem ruleItem = GwtUtils.getTreeItem(name);
+                item.addItem(ruleItem);
                 ruleItem.setUserObject(rule);
             }
         }

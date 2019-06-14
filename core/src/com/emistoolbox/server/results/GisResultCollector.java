@@ -67,6 +67,7 @@ public class GisResultCollector extends ResultCollector
                 featureSet = new GisFeatureSetImpl(tmpEntityType, getMetaResult().getIndicator());
             else
                 featureSet = new GisFeatureSetImpl(tmpEntityType);
+            
             for (EmisEntity entity : context.getEntities())
             {
                 List children = getHierarchy().getDescendants(context.getHierarchyDateIndex(), entity.getEntityType(), entity.getId(), tmpEntityType);
@@ -110,7 +111,7 @@ public class GisResultCollector extends ResultCollector
 
     private EmisContext getContext(EmisEntity entity)
     {
-        EmisContext metaResultContext = getMetaResult().getContext();
+        EmisContext metaResultContext = getMetaResult().getContextWithGlobalFilter();
         return new MultipleContext(new EmisContext[] { new ContextConstEntity(entity, metaResultContext.getHierarchyDateIndex()), metaResultContext }, metaResultContext.getDateType());
     }
 }

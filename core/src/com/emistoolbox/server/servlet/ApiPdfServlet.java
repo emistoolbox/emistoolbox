@@ -52,9 +52,8 @@ public class ApiPdfServlet extends ApiBaseServlet
         if (!hasParameters(req, resp, hierarchyList, null, null, null))
             return; 
 
-        
         ObjectRef<String> outError = new ObjectRef<String>(); 
-        ReportMetaResult metaResult = getReportMetaResult((Map<String, String>) req.getParameterMap(), outError, emis); 
+        ReportMetaResult metaResult = getReportMetaResult(flatten(req.getParameterMap()), outError, emis); 
         if (outError.get() != null)
         {
         	error(resp, 400, outError.get(), asJson(req)); 

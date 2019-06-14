@@ -5,6 +5,7 @@ import com.emistoolbox.common.model.EmisEnumSet;
 import com.emistoolbox.common.model.EmisEnumTupleValue;
 import com.emistoolbox.common.model.analysis.ContextBase;
 import com.emistoolbox.common.model.analysis.EmisContext;
+import com.emistoolbox.common.model.impl.EnumSetImpl;
 import com.emistoolbox.common.model.meta.EmisMetaData;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
 import com.emistoolbox.common.model.meta.EmisMetaEntity;
@@ -87,8 +88,17 @@ public class Context extends ContextBase implements EmisContext, Serializable
 
     public void setEnumFilters(Map<String, EmisEnumSet> enums)
     { this.enumFilters = enums; }
+    
+    @Override
+	public void addEntityFilter(EmisMetaData field, byte[] values) 
+    {
+    	if (field.getEnumType() != null)
+    		addEnumEntityFilter(field, new EnumSetImpl(field.getEnumType(), values));
+    	else
+    		entityFilters.put(getKey(field), values); 
+	}
 
-    public void addBooleanEntityFilter(EmisMetaData field, Boolean selectTrue)
+	public void addBooleanEntityFilter(EmisMetaData field, Boolean selectTrue)
     { this.entityFilters.put(getKey(field), new byte[] { (byte) (selectTrue.booleanValue() ? 1 : 0) }); }
 
     public void addEnumEntityFilter(EmisMetaData field, EmisEnumSet values)

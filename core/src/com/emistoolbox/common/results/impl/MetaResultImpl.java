@@ -1,10 +1,12 @@
 package com.emistoolbox.common.results.impl;
 
+import com.emistoolbox.client.admin.ui.EmisUtils;
 import com.emistoolbox.common.model.analysis.EmisContext;
 import com.emistoolbox.common.model.analysis.EmisIndicator;
 import com.emistoolbox.common.model.analysis.impl.Context;
 import com.emistoolbox.common.model.analysis.impl.MultipleContext;
 import com.emistoolbox.common.model.meta.EmisMetaDateEnum;
+import com.emistoolbox.common.model.meta.EmisMetaEntity;
 import com.emistoolbox.common.model.meta.EmisMetaHierarchy;
 import com.emistoolbox.common.results.MetaResult;
 import com.emistoolbox.common.results.MetaResultValue;
@@ -38,7 +40,21 @@ public class MetaResultImpl implements Serializable, MetaResult
     	}
     }
     
-    public EmisContext getContext()
+    @Override
+	public EmisMetaEntity getSeniorEntity() 
+    {
+        EmisMetaHierarchy hierarchy = getHierarchy();
+        if (hierarchy == null)
+            return null;
+    
+        EmisMetaEntity result = null; 
+        for (MetaResultValue mrValue : getMetaResultValues())
+        	result = EmisUtils.getSeniorEntity(result, mrValue.getSeniorEntity(hierarchy), hierarchy);  
+                
+        return EmisUtils.getSeniorEntity(result, EmisUtils.getSeniorEntity(getContext(), hierarchy), hierarchy); 
+	}
+
+	public EmisContext getContext()
     { return this.context; }
 
     @Override
